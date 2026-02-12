@@ -4,11 +4,15 @@ import org.example.Location
 import org.example.nodomain.`7dip`.provinces.Province
 
 sealed interface Piece {
-    fun holds(): Order = Order(this, Holds)
+    val holds: Order
+        get() = Order(this, Holds)
 
     operator fun minus(to: Space): Order = Order(this, Moves(to))
 
-    infix fun S(supporting: () -> Order): Order = Order(this, Supports(supporting()))
+    infix fun S(supporting: () -> Order): Order {
+        val order = supporting()
+        return Order(this, Supports(if (order.action is Supports) order.piece.holds else order))
+    }
 }
 
 data class Space(val province: Province, val board: Location);
