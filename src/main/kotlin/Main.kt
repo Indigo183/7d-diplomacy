@@ -10,6 +10,8 @@ class Board(var location: Location?, val parent: Location? = null) {
     override fun toString(): String {
         return "Board {\n    location: $location\n}" // JSON notation
     }
+    var isActive = true
+        private set
 }
 
 fun main() {
