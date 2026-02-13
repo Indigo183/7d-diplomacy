@@ -4,7 +4,13 @@ data class ComplexNumber(val real: Int, val imaginary: Int)
 data class Location(val boardIndex: ComplexNumber, val timeplane: Int = 0)
 
 // TODO: move fields to constructor
-class Game(private val _timeplanes: MutableList<Timeplane>, private val _limbo: MutableSet<Board>) {
+class Game() {
+    private val _timeplanes: MutableList<Timeplane> = mutableListOf(
+        mutableMapOf(
+            ComplexNumber(0, 0) to
+                    Board(Location(ComplexNumber(0, 0)))
+        ))
+    private val _limbo: MutableSet<Board> = mutableSetOf()
     val timeplanes: List<Timeplane>
         get() = _timeplanes
     val limbo: Set<Board>
@@ -21,8 +27,12 @@ class Board(var location: Location?, val parent: Location? = null) {
 }
 
 fun main() {
-    val board = Board(Location(ComplexNumber(0, 0)))
-    testBoard(board)
+    val game = Game()
+    for (timeplane in game.timeplanes) {
+        for (board in timeplane.values) {
+            testBoard(board)
+        }
+    }
 }
 
 fun testBoard(board: Board) {
