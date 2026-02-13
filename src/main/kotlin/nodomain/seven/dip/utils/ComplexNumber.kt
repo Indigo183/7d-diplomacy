@@ -1,0 +1,13 @@
+package nodomain.seven.dip.utils
+
+val i = ComplexNumber(0, 1)
+
+data class ComplexNumber(val real: Int, val imaginary: Int) {
+    operator fun plus(other: ComplexNumber) =
+        ComplexNumber(this.real + other.real, this.imaginary + other.imaginary)
+}
+
+operator fun Int.plus(complexNumber: ComplexNumber) =
+    ComplexNumber(this + complexNumber.real, complexNumber.imaginary)
+operator fun Int.times(complexNumber: ComplexNumber) =
+    ComplexNumber(this * complexNumber.real, this * complexNumber.imaginary)

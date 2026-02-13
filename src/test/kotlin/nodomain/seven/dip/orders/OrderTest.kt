@@ -1,10 +1,10 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.ComplexNumber
+import nodomain.seven.dip.utils.ComplexNumber.*
 import nodomain.seven.dip.Location
 import nodomain.seven.dip.provinces.Romans.*
 
-val T0_0 = Location(ComplexNumber(0, 0), 0)
+val T0_0 = Location(0 + 0*i, 0)
 
 fun main() { // manual testing for now; at some point we should probably adapt some testing framework. Junit combined with AssertJ works well for Java
     listOf(

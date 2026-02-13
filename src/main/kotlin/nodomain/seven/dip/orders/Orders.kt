@@ -1,6 +1,6 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.ComplexNumber
+import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.Location
 import nodomain.seven.dip.provinces.Province
 import kotlin.enums.enumEntries
@@ -20,7 +20,7 @@ sealed interface Piece {
     }
 }
 
-data class Space(val province: Province, val board: Location);
+data class Space(val province: Province, val board: Location)
 operator fun Location.get(province: Province): Space = Space(province, this)
 
 @JvmInline

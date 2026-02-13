@@ -1,6 +1,7 @@
 package nodomain.seven.dip
 
-data class ComplexNumber(val real: Int, val imaginary: Int)
+import nodomain.seven.dip.utils.ComplexNumber
+
 data class Location(val boardIndex: ComplexNumber, val timeplane: Int = 0)
 
 class Game() {
@@ -19,7 +20,7 @@ typealias Timeplane = MutableMap<ComplexNumber, Board>
 fun Timeplane.boards() = values
 class Board(var location: Location?, val parent: Location? = null) {
     override fun toString(): String {
-        return "nodomain.7dip.Board {\n    location: $location\n}" // JSON notation
+        return "Board {\n    location: $location\n}" // JSON notation
     }
     var isActive = true
         private set
