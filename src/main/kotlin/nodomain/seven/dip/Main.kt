@@ -35,7 +35,12 @@ class Board(var location: Location?, val parent: Board? = null) {
         private set
 
     override fun toString(): String {
-        return "Board {\n    location: $location\n}" // JSON notation
+        return """
+            |Board {
+            |    isActive: $isActive
+            |    location: $location
+            |    parent: ${parent.toString().prependIndent("    ").drop(4)}
+            |}""".trimMargin() // JSON notation
     }
 }
 
