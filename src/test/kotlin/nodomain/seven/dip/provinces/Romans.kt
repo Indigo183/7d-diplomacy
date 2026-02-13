@@ -1,6 +1,4 @@
-package nodomain.`7dip`.provinces
-
-import org.example.nodomain.`7dip`.provinces.Province
+package nodomain.seven.dip.provinces
 
 enum class Romans: Province {
     CAT{ override val adjacency: Set<Romans> by lazy { setOf(CAE, BRU) } },

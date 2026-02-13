@@ -1,8 +1,8 @@
-package org.example.nodomain.`7dip`.orders
+package nodomain.seven.dip.orders
 
-import org.example.ComplexNumber
-import org.example.Location
-import org.example.nodomain.`7dip`.provinces.Province
+import nodomain.seven.dip.ComplexNumber
+import nodomain.seven.dip.Location
+import nodomain.seven.dip.provinces.Province
 import kotlin.enums.enumEntries
 
 sealed interface Piece {
@@ -30,6 +30,10 @@ value class Army(val space: Space): Piece {
 infix fun Location.A(province: Province): Army = Army(Space(province, this))
 
 data class Order(val piece: Piece, val action: Action, var flare: TimeFlare? = null) {
+    init {
+        if (action !is Moves) flare = null;
+    }
+
     infix fun i(timeFlare: Int): Order {
         if (action is Moves) flare = enumEntries<TimeFlare>()[timeFlare % 4]
         return this

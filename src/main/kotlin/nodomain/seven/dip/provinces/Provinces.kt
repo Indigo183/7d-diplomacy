@@ -1,4 +1,4 @@
-package org.example.nodomain.`7dip`.provinces
+package nodomain.seven.dip.provinces
 
 interface Province {
     infix fun isAdjencentTo(other: Province): Boolean;

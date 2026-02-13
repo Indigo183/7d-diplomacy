@@ -1,9 +1,8 @@
-package nodomain.`7dip`.orders
+package nodomain.seven.dip.orders
 
-import org.example.ComplexNumber
-import org.example.Location
-import nodomain.`7dip`.provinces.Romans.*
-import org.example.nodomain.`7dip`.orders.*
+import nodomain.seven.dip.ComplexNumber
+import nodomain.seven.dip.Location
+import nodomain.seven.dip.provinces.Romans.*
 
 val T0_0 = Location(ComplexNumber(0, 0), 0)
 
