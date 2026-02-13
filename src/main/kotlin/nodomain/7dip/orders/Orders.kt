@@ -1,5 +1,6 @@
 package org.example.nodomain.`7dip`.orders
 
+import org.example.ComplexNumber
 import org.example.Location
 import org.example.nodomain.`7dip`.provinces.Province
 import kotlin.enums.enumEntries
@@ -28,8 +29,11 @@ data class Order(val piece: Piece, val action: Action, val flare: TimeFlare? = n
         if (action is Moves) Order(piece, action, enumEntries<TimeFlare>()[timeFlare % 4]) else this
 }
 
-enum class TimeFlare {
-    RIGHT, UP, LEFT, DOWN
+enum class TimeFlare(val direction: ComplexNumber) {
+    RIGHT   (ComplexNumber( 1, 0)),
+    UP      (ComplexNumber( 0, 1)),
+    LEFT    (ComplexNumber(-1, 0)),
+    DOWN    (ComplexNumber( 0,-1));
 }
 
 sealed interface Action {}
