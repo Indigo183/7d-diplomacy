@@ -3,7 +3,6 @@ package nodomain.seven.dip
 data class ComplexNumber(val real: Int, val imaginary: Int)
 data class Location(val boardIndex: ComplexNumber, val timeplane: Int = 0)
 
-// TODO: move fields to constructor
 class Game() {
     private val _timeplanes: MutableList<Timeplane> = mutableListOf(
         mutableMapOf(
