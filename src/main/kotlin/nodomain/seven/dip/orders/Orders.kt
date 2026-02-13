@@ -15,8 +15,8 @@ sealed interface Piece {
     infix fun M(to: Province): Order = M(Space(to, board))
 
     infix fun S(supporting: () -> Order): Order {
-        val order = supporting()
-        return Order(this, Supports(if (order.action is Supports) order.piece.holds else order))
+        val order = supporting();
+        return Order(this, Supports(if (order.action is Supports) order.piece.holds else order));
     }
 }
 
@@ -35,16 +35,16 @@ data class Order(val piece: Piece, val action: Action, var flare: TimeFlare? = n
     }
 
     infix fun i(timeFlare: Int): Order {
-        if (action is Moves) flare = enumEntries<TimeFlare>()[timeFlare % 4]
-        return this
+        if (action is Moves) flare = enumEntries<TimeFlare>()[timeFlare % 4];
+        return this;
     }
 }
 
 enum class TimeFlare(val direction: ComplexNumber) {
-    RIGHT   (ComplexNumber( 1, 0)),
-    UP      (ComplexNumber( 0, 1)),
-    LEFT    (ComplexNumber(-1, 0)),
-    DOWN    (ComplexNumber( 0,-1));
+    RIGHT(ComplexNumber( 1, 0)),
+    UP   (ComplexNumber( 0, 1)),
+    LEFT (ComplexNumber(-1, 0)),
+    DOWN (ComplexNumber( 0,-1));
 }
 
 sealed interface Action {}
