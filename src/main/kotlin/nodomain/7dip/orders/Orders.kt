@@ -19,6 +19,8 @@ data class Space(val province: Province, val board: Location);
 
 @JvmInline
 value class Army(val space: Space): Piece
+infix fun Location.A(province: Province): Army = Army(Space(province, this))
+
 
 sealed interface Action {}
 
