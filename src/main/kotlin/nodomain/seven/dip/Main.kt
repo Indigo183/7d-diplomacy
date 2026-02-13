@@ -9,7 +9,7 @@ class Game() {
     private val _timeplanes: MutableList<Timeplane> = mutableListOf(
         mutableMapOf(
             ComplexNumber(0, 0) to
-                    Board(Location(ComplexNumber(0, 0)))
+                    Board(Location(0*i))
         ))
     private val _limbo: MutableSet<Board> = mutableSetOf()
     val timeplanes: List<Timeplane>
@@ -17,9 +17,11 @@ class Game() {
     val limbo: Set<Board>
         get() = _limbo
 
-    fun Board.addChild(location: Location?) {
-        val child = Board(location, this)
-        this.children.add(child)
+    fun getBoard(location: Location) = timeplanes[location.timeplane][location.boardIndex]!!
+
+    fun addChild(board: Board, location: Location?) {
+        val child = Board(location, board)
+        board.children.add(child)
         if (location !== null) {
             _timeplanes[location.timeplane][location.boardIndex] = child
         }
@@ -39,11 +41,10 @@ class Board(var location: Location?, val parent: Board? = null) {
 
 fun main() {
     val game = Game()
+    game.addChild(game.getBoard(Location(0*i)), Location(1 + 0*i))
     for (timeplane in game.timeplanes) {
         for (board in timeplane.values) {
             testBoard(board)
-            val act: Game.(Board) -> Unit = {it.addChild(Location(1 + 0*i))}
-            game.act(board)
         }
     }
 }
