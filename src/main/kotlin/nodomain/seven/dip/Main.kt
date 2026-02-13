@@ -1,6 +1,7 @@
 package nodomain.seven.dip
 
 import nodomain.seven.dip.utils.ComplexNumber
+import nodomain.seven.dip.utils.ComplexNumber.*
 
 data class Location(val boardIndex: ComplexNumber, val timeplane: Int = 0)
 
@@ -41,7 +42,8 @@ fun main() {
     for (timeplane in game.timeplanes) {
         for (board in timeplane.values) {
             testBoard(board)
-                // board.addChild(Location(ComplexNumber(1, 0)))
+            val act: Game.(Board) -> Unit = {it.addChild(Location(1 + 0*i))}
+            game.act(board)
         }
     }
 }
