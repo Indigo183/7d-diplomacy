@@ -1,6 +1,5 @@
 package org.example.nodomain.`7dip`.orders
 
-import org.example.Board
 import org.example.ComplexNumber
 import org.example.Location
 import org.example.nodomain.`7dip`.provinces.Province
