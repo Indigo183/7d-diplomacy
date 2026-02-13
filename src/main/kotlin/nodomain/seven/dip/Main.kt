@@ -27,8 +27,10 @@ class Game() {
         }
     }
 }
+
 typealias Timeplane = MutableMap<ComplexNumber, Board>
 fun Timeplane.boards() = values
+
 class Board(var location: Location?, val parent: Board? = null) {
     val children = mutableListOf<Board>()
     var isActive = true
@@ -47,6 +49,7 @@ class Board(var location: Location?, val parent: Board? = null) {
 fun main() {
     val game = Game()
     game.addChild(game.getBoard(Location(0*i)), Location(1 + 0*i))
+
     for (timeplane in game.timeplanes) {
         for (board in timeplane.values) {
             testBoard(board)
