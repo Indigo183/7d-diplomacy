@@ -15,15 +15,25 @@ class Game() {
         get() = _timeplanes
     val limbo: Set<Board>
         get() = _limbo
+
+    fun Board.addChild(location: Location?) {
+        val child = Board(location, this)
+        this.children.add(child)
+        if (location !== null) {
+            _timeplanes[location.timeplane][location.boardIndex] = child
+        }
+    }
 }
 typealias Timeplane = MutableMap<ComplexNumber, Board>
 fun Timeplane.boards() = values
-class Board(var location: Location?, val parent: Location? = null) {
+class Board(var location: Location?, val parent: Board? = null) {
+    val children = mutableListOf<Board>()
+    var isActive = true
+        private set
+
     override fun toString(): String {
         return "Board {\n    location: $location\n}" // JSON notation
     }
-    var isActive = true
-        private set
 }
 
 fun main() {
@@ -31,10 +41,11 @@ fun main() {
     for (timeplane in game.timeplanes) {
         for (board in timeplane.values) {
             testBoard(board)
+                // board.addChild(Location(ComplexNumber(1, 0)))
         }
     }
 }
 
 fun testBoard(board: Board) {
-    println("This is, in fact, a Board!\n\n$board")
+    println("This is, in fact, a Board!\n$board\n\n")
 }
