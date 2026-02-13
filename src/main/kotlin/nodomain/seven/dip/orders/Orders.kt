@@ -21,6 +21,7 @@ sealed interface Piece {
 }
 
 data class Space(val province: Province, val board: Location)
+
 operator fun Location.get(province: Province): Space = Space(province, this)
 
 @JvmInline
