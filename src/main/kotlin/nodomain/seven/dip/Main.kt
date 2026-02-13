@@ -11,6 +11,7 @@ class Game(private val _timeplanes: MutableList<Timeplane>, private val _limbo: 
         get() = _limbo
 }
 typealias Timeplane = MutableMap<ComplexNumber, Board>
+fun Timeplane.boards() = values
 class Board(var location: Location?, val parent: Location? = null) {
     override fun toString(): String {
         return "nodomain.7dip.Board {\n    location: $location\n}" // JSON notation
@@ -25,5 +26,5 @@ fun main() {
 }
 
 fun testBoard(board: Board) {
-    println("This is, in fact, a nodomain.7dip.Board!\n\n$board")
+    println("This is, in fact, a Board!\n\n$board")
 }
