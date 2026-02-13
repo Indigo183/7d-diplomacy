@@ -9,5 +9,5 @@ enum class Romans: Province {
     BRU{ override val adjacency: Set<Romans> by lazy { setOf(CAE, CAT, POM) } };
 
     abstract val adjacency: Set<Romans>
-    override fun isAdjencentTo(other: Province): Boolean = adjacency.contains(other)
+    override fun isAdjencentTo(other: Province): Boolean = other in adjacency
 }
