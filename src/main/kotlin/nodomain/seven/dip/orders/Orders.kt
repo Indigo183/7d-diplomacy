@@ -32,16 +32,7 @@ value class Army(val at: Space): Piece {
 }
 infix fun Location.A(province: Province): Army = Army(Space(province, this))
 
-abstract class Order(val piece: Piece, val action: Action, val symbol: String, var flare: TimeFlare? = null) {
-    init {
-        if (action !is Moves) flare = null;
-    }
-
-    infix fun i(timeFlare: Int): Order {
-        if (action is Moves) flare = enumEntries<TimeFlare>()[timeFlare % 4];
-        return this;
-    }
-
+abstract class Order(val piece: Piece, val action: Action, val symbol: String) {
     override fun toString(): String =  "$piece$symbol$action"
 }
 
@@ -59,7 +50,12 @@ class HoldOrder(piece: Piece): Order(piece, Holds, " ")
 
 @JvmInline
 value class Moves(val to: Space): Action
-class MoveOrder(piece: Piece, action: Moves): Order(piece, action, " - ")
+class MoveOrder(piece: Piece, action: Moves, var flare: TimeFlare? = null): Order(piece, action, " - ") {
+    infix fun i(timeFlare: Int): Order {
+        if (action is Moves) flare = enumEntries<TimeFlare>()[timeFlare % 4];
+        return this;
+    }
+}
 
 @JvmInline
 value class Supports(val order: Order): Action
