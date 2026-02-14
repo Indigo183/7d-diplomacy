@@ -1,7 +1,9 @@
 package nodomain.seven.dip.utils
 
+// Used in ComplexNumber shorthand notation, e.g. `1 + 2*i`
 val i = ComplexNumber(0, 1)
 
+// Used to indicate the location of a board on a timeplane
 data class ComplexNumber(val real: Int, val imaginary: Int) {
     operator fun plus(other: ComplexNumber) =
         ComplexNumber(this.real + other.real, this.imaginary + other.imaginary)
@@ -16,6 +18,7 @@ data class ComplexNumber(val real: Int, val imaginary: Int) {
     override fun toString(): String = "$real + ${imaginary}i"
 }
 
+// Used for ComplexNumber shorthand notation, e.g. `1 + 2*i`
 operator fun Int.plus(complexNumber: ComplexNumber) =
     ComplexNumber(this + complexNumber.real, complexNumber.imaginary)
 operator fun Int.minus(complexNumber: ComplexNumber) =
