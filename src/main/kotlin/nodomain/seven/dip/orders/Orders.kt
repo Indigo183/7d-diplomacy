@@ -8,15 +8,15 @@ import kotlin.enums.enumEntries
 sealed interface Piece {
     val board: Location
 
-    val holds: Order
-        get() = Order(this, Holds)
+    val holds: HoldOrder
+        get() = HoldOrder(this)
 
-    infix fun M(to: Space): Order = Order(this, Moves(to))
-    infix fun M(to: Province): Order = M(Space(to, board))
+    infix fun M(to: Space): MoveOrder = MoveOrder(this, Moves(to))
+    infix fun M(to: Province): MoveOrder = M(Space(to, board))
 
-    infix fun S(supporting: () -> Order): Order {
+    infix fun S(supporting: () -> Order): SupportOrder {
         val order = supporting();
-        return Order(this, Supports(if (order.action is Supports) order.piece.holds else order));
+        return SupportOrder(this, Supports(if (order.action is Supports) order.piece.holds else order));
     }
 }
 
@@ -27,12 +27,12 @@ fun T(boardIndex: ComplexNumber, timeplane: Int): Location  = Location(boardInde
 operator fun Location.get(province: Province): Space = Space(province, this)
 
 @JvmInline
-value class Army(val space: Space): Piece {
-    override val board get() = space.board
+value class Army(val at: Space): Piece {
+    override val board get() = at.board
 }
 infix fun Location.A(province: Province): Army = Army(Space(province, this))
 
-data class Order(val piece: Piece, val action: Action, var flare: TimeFlare? = null) {
+abstract class Order(val piece: Piece, val action: Action, val symbol: String, var flare: TimeFlare? = null) {
     init {
         if (action !is Moves) flare = null;
     }
@@ -41,6 +41,8 @@ data class Order(val piece: Piece, val action: Action, var flare: TimeFlare? = n
         if (action is Moves) flare = enumEntries<TimeFlare>()[timeFlare % 4];
         return this;
     }
+
+    override fun toString(): String =  "$piece$symbol$action"
 }
 
 enum class TimeFlare(val direction: ComplexNumber) {
@@ -53,7 +55,12 @@ enum class TimeFlare(val direction: ComplexNumber) {
 sealed interface Action {}
 
 data object Holds: Action
+class HoldOrder(piece: Piece): Order(piece, Holds, " ")
+
 @JvmInline
-value class Moves(val space: Space): Action
+value class Moves(val to: Space): Action
+class MoveOrder(piece: Piece, action: Moves): Order(piece, action, " - ")
+
 @JvmInline
 value class Supports(val order: Order): Action
+class SupportOrder(piece: Piece, action: Supports): Order(piece, action, " S ")
