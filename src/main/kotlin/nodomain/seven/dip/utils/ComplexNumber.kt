@@ -12,6 +12,8 @@ data class ComplexNumber(val real: Int, val imaginary: Int) {
         ComplexNumber(-this.real, -this.imaginary)
     operator fun minus(other: ComplexNumber) =
         ComplexNumber(this.real - other.real,  this.imaginary - other.imaginary)
+
+    override fun toString(): String = "$real + ${imaginary}i"
 }
 
 operator fun Int.plus(complexNumber: ComplexNumber) =

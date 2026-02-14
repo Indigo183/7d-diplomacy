@@ -3,7 +3,9 @@ package nodomain.seven.dip
 import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.utils.ComplexNumber.*
 
-data class Location(val boardIndex: ComplexNumber, val timeplane: Int = 0)
+data class Location(val boardIndex: ComplexNumber, val timeplane: Int = 0) {
+    override fun toString(): String = "($boardIndex, T$timeplane)"
+}
 
 class Game() {
     private val _timeplanes: MutableList<Timeplane> = mutableListOf(
