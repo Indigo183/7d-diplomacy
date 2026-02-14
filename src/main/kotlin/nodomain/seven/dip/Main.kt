@@ -21,7 +21,7 @@ class Game() {
 
     fun addChild(board: Board, location: Location?) {
         val child = Board(location, board)
-        board.children.add(child)
+        board.children += child
         if (location !== null) {
             _timeplanes[location.timeplane][location.boardIndex] = child
         }
