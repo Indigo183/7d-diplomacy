@@ -5,6 +5,8 @@ val i = ComplexNumber(0, 1)
 data class ComplexNumber(val real: Int, val imaginary: Int) {
     operator fun plus(other: ComplexNumber) =
         ComplexNumber(this.real + other.real, this.imaginary + other.imaginary)
+    operator fun times(other: ComplexNumber) =
+        ComplexNumber(real*other.real - imaginary*other.imaginary, real*other.imaginary + other.real*imaginary)
 }
 
 operator fun Int.plus(complexNumber: ComplexNumber) =
