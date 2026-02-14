@@ -9,3 +9,8 @@ enum class Romans: Province {
     abstract val adjacency: Set<Romans>
     override fun isAdjacentTo(other: Province): Boolean = other in adjacency
 }
+
+enum class RomanPlayers: Player {
+    Cato,
+    Pompey
+}

@@ -1,7 +1,15 @@
 package nodomain.seven.dip
 
+import nodomain.seven.dip.orders.Army
 import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.utils.ComplexNumber.*
+
+import nodomain.seven.dip.orders.Piece
+import nodomain.seven.dip.orders.Location
+import nodomain.seven.dip.provinces.Player
+import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.RomanPlayers.*
+import nodomain.seven.dip.provinces.Romans.*
 
 data class BoardIndex(val boardIndex: ComplexNumber, val timeplane: Int = 0) {
     override fun toString(): String = "($boardIndex, T$timeplane)"
@@ -33,7 +41,13 @@ class Game() {
 typealias Timeplane = MutableMap<ComplexNumber, Board>
 fun Timeplane.boards() = values
 
-class Board(var boardIndex: BoardIndex?, val parent: Board? = null) {
+class Board(
+    var boardIndex: BoardIndex?,
+    val parent: Board? = null,
+    val pieces: Map<Player, List<Piece>> = mapOf(
+        Cato to listOf(Army(Location(CAT, BoardIndex(0*i)))),
+        Pompey to listOf(Army(Location(POM, BoardIndex(0*i))))
+    )) {
     val children = mutableListOf<Board>()
     var isActive = true
         private set
@@ -44,6 +58,7 @@ class Board(var boardIndex: BoardIndex?, val parent: Board? = null) {
             |    isActive: $isActive
             |    boardIndex: $boardIndex
             |    parent: ${parent.toString().prependIndent("    ").drop(4)}
+            |    pieces: $pieces
             |}""".trimMargin() // JSON notation
     }
 }
