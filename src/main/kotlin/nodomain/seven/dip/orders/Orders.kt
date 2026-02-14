@@ -1,18 +1,18 @@
 package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.utils.ComplexNumber
-import nodomain.seven.dip.Location
+import nodomain.seven.dip.BoardIndex
 import nodomain.seven.dip.provinces.Province
 import kotlin.enums.enumEntries
 
 sealed interface Piece {
-    val at: Space
+    val at: Location
 
     val holds: HoldOrder
         get() = HoldOrder(this)
 
-    infix fun M(to: Space): MoveOrder = MoveOrder(this, Moves(to))
-    infix fun M(to: Province): MoveOrder = M(Space(to, at.board))
+    infix fun M(to: Location): MoveOrder = MoveOrder(this, Moves(to))
+    infix fun M(to: Province): MoveOrder = M(Location(to, at.board))
 
     infix fun S(supporting: () -> Order): SupportOrder {
         val order = supporting();
@@ -20,15 +20,15 @@ sealed interface Piece {
     }
 }
 
-data class Space(val province: Province, val board: Location)
+data class Location(val province: Province, val board: BoardIndex)
 
-fun T(boardIndex: ComplexNumber, timeplane: Int): Location  = Location(boardIndex, timeplane)
+fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex  = BoardIndex(boardIndex, timeplane)
 
-operator fun Location.get(province: Province): Space = Space(province, this)
+operator fun BoardIndex.get(province: Province): Location = Location(province, this)
 
 @JvmInline
-value class Army(override val at: Space): Piece
-infix fun Location.A(province: Province): Army = Army(Space(province, this))
+value class Army(override val at: Location): Piece
+infix fun BoardIndex.A(province: Province): Army = Army(Location(province, this))
 
 abstract class Order(val piece: Piece, val symbol: String) {
     abstract val action: Action
@@ -51,7 +51,7 @@ class HoldOrder(piece: Piece): Order(piece, " ") {
 }
 
 @JvmInline
-value class Moves(val to: Space): Action
+value class Moves(val to: Location): Action
 class MoveOrder(piece: Piece, override val action: Moves, var flare: TimeFlare? = null): Order(piece, " - ") {
     infix fun i(timeFlare: Int): Order {
         flare = enumEntries<TimeFlare>()[timeFlare % 4];
