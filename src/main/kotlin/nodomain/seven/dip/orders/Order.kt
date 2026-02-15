@@ -1,11 +1,10 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.BoardIndex
-import nodomain.seven.dip.utils.ComplexNumber
+import nodomain.seven.dip.utils.*
 import kotlin.enums.enumEntries
 
 // The "action" being done, without a piece to order it
-sealed interface Action {}
+sealed interface Action
 
 // An action and the piece ordering it
 abstract class Order(val piece: Piece, val symbol: String) {

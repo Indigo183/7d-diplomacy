@@ -1,6 +1,7 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.BoardIndex
+import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.provinces.Province
 
 sealed interface Piece {
@@ -18,8 +19,6 @@ sealed interface Piece {
         return SupportOrder(this, Supports(if (order.action is Supports) order.piece.holds else order));
     }
 }
-
-data class Location(val province: Province, val board: BoardIndex)
 
 // TODO: actually understand and properly comment this
 operator fun BoardIndex.get(province: Province): Location = Location(province, this)

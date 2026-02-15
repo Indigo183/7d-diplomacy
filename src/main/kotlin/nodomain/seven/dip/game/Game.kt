@@ -1,0 +1,64 @@
+package nodomain.seven.dip.game
+
+import nodomain.seven.dip.orders.Army
+import nodomain.seven.dip.utils.ComplexNumber
+import nodomain.seven.dip.utils.ComplexNumber.*
+
+import nodomain.seven.dip.orders.Piece
+import nodomain.seven.dip.provinces.Player
+import nodomain.seven.dip.provinces.RomanPlayers.*
+import nodomain.seven.dip.provinces.Romans.*
+import nodomain.seven.dip.utils.BoardIndex
+import nodomain.seven.dip.utils.Location
+
+class Game {
+    // Interior mutability
+    private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
+        mutableMapOf(
+            ComplexNumber(0, 0) to
+                    Board(BoardIndex(0 * i))
+        ))
+    private val _limbo: MutableSet<Board> = mutableSetOf() // Set of all boards currently in Limbo
+
+    // Public immutable interface
+    val timeplanes: List<Timeplane>
+        get() = _timeplanes
+    val limbo: Set<Board>
+        get() = _limbo
+
+    // TODO: make sure this returns null when a non-existent timeplane is given
+    fun getBoard(boardIndex: BoardIndex): Board? = timeplanes[boardIndex.timeplane][boardIndex.boardIndex]
+
+    fun addChild(board: Board, boardIndex: BoardIndex?) {
+        val child = Board(boardIndex, board)
+        board.children += child
+        if (boardIndex !== null) {
+            _timeplanes[boardIndex.timeplane][boardIndex.boardIndex] = child
+        }
+    }
+}
+
+typealias Timeplane = MutableMap<ComplexNumber, Board>
+fun Timeplane.boards() = values
+
+class Board(
+    var boardIndex: BoardIndex?, // null represents a board in Limbo
+    val parent: Board? = null, // null represents the origin board
+    val pieces: Map<Player, List<Piece>> = mapOf(
+        Cato to listOf(Army(Location(CAT, BoardIndex(0 * i)))),
+        Pompey to listOf(Army(Location(POM, BoardIndex(0 * i))))
+    )) {
+    val children = mutableListOf<Board>()
+    var isActive = true
+        private set
+
+    override fun toString(): String {
+        return """
+            |Board {
+            |    isActive: $isActive
+            |    boardIndex: $boardIndex
+            |    parent: ${parent.toString().prependIndent("    ").drop(4)}
+            |    pieces: $pieces
+            |}""".trimMargin() // JSON notation
+    }
+}
