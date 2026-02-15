@@ -26,8 +26,7 @@ class Game {
     val limbo: Set<Board>
         get() = _limbo
 
-    // TODO: make sure this returns null when a non-existent timeplane is given
-    fun getBoard(boardIndex: BoardIndex): Board? = timeplanes[boardIndex.timeplane][boardIndex.boardIndex]
+    fun getBoard(boardIndex: BoardIndex): Board? = timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.boardIndex)
 
     fun addChild(board: Board, boardIndex: BoardIndex?) {
         val child = Board(boardIndex, board)

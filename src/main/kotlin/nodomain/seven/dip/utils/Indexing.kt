@@ -9,5 +9,5 @@ data class BoardIndex(val boardIndex: ComplexNumber, val timeplane: Int = 0) {
 }
 
 // Location of a unit/province
-// TODO: decide whether `Location.board` should be nullable to represent boards in Limbo
+// A null Location represents that a board is in Limbo
 data class Location(val province: Province, val board: BoardIndex)

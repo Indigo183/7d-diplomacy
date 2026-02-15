@@ -20,7 +20,7 @@ sealed interface Piece {
     }
 }
 
-// TODO: actually understand and properly comment this
+// Support square bracket notation for creating a `Location` out of its components
 operator fun BoardIndex.get(province: Province): Location = Location(province, this)
 
 @JvmInline
