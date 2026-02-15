@@ -7,7 +7,6 @@ import nodomain.seven.dip.utils.ComplexNumber.*
 import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.orders.Location
 import nodomain.seven.dip.provinces.Player
-import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.RomanPlayers.*
 import nodomain.seven.dip.provinces.Romans.*
 
