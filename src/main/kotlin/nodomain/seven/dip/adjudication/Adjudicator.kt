@@ -1,13 +1,12 @@
 package nodomain.seven.dip.adjudication
 
+import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.orders.TemporalFlare
 
-fun sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder>>, List<SupportOrder>> {
-    val moves: MutableList<MoveOrder> = mutableListOf()
-    val supports: MutableList<SupportOrder> = mutableListOf()
+fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder>>, List<SupportOrder>> {
     for (order in orders) when (order) {
         is MoveOrder -> moves += order
         is SupportOrder -> supports += order

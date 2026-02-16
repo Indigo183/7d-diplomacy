@@ -1,10 +1,12 @@
 package nodomain.seven.dip.game
 
 import nodomain.seven.dip.orders.Army
+import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.utils.ComplexNumber.*
 
 import nodomain.seven.dip.orders.Piece
+import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers.*
 import nodomain.seven.dip.provinces.Romans.*
@@ -12,6 +14,9 @@ import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.Location
 
 class Game {
+    val supports: MutableList<SupportOrder> = mutableListOf()
+    val moves: MutableList<MoveOrder> = mutableListOf()
+
     // Interior mutability
     private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
         mutableMapOf(
