@@ -8,6 +8,7 @@ import nodomain.seven.dip.utils.ComplexNumber.*
 import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.provinces.Player
+import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.RomanPlayers.*
 import nodomain.seven.dip.provinces.Romans.*
 import nodomain.seven.dip.utils.BoardIndex
@@ -48,9 +49,9 @@ fun Timeplane.boards() = values
 class Board(
     var boardIndex: BoardIndex?, // null represents a board in Limbo
     val parent: Board? = null, // null represents the origin board
-    val pieces: Map<Player, List<Piece>> = mapOf(
-        Cato to listOf(Army(Location(CAT, BoardIndex(0 * i)))),
-        Pompey to listOf(Army(Location(POM, BoardIndex(0 * i))))
+    val pieces: Map<Player, List<Province>> = mapOf(
+        Cato to listOf(CAT),
+        Pompey to listOf(POM)
     )) {
     val children = mutableListOf<Board>()
     var isActive = true
