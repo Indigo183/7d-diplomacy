@@ -3,7 +3,6 @@ package nodomain.seven.dip.orders
 import nodomain.seven.dip.adjudication.isAdjacentTo
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.Player
-import java.io.InvalidClassException
 
 // Checks that:
 // 1. the ordered unit exists
@@ -15,11 +14,11 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     // 1
     val board = getBoard(order.piece.location.boardIndex) ?: return false
     // 1 & 2
-    if (!if (player !== null) {
-        board.pieces[player]?.contains(order.piece.location.province) ?: false
-    } else {
-        board.pieces.any { (_, countryPieces) -> order.piece.location.province in countryPieces }
-    }) return false
+    val unitExistsAndOwned = when(player) {
+        null -> board.pieces.any { (_, countryPieces) -> order.piece.location.province in countryPieces }
+        else -> board.pieces[player]?.contains(order.piece.location.province) ?: false
+    }
+    if (!unitExistsAndOwned) return false
     // 4
     val destination = when(order) {
         is SupportOrder if order.action.order is MoveOrder -> order.action.order.action.to
