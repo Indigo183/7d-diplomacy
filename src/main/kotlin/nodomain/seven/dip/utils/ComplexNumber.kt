@@ -3,6 +3,9 @@ package nodomain.seven.dip.utils
 // Used in ComplexNumber shorthand notation, e.g. `1 + 2*i`
 val i = ComplexNumber(0, 1)
 
+// Used in Int to ComplexNumber conversion, e.g. `1.c`
+val Int.c get() = ComplexNumber(this, 0)
+
 // Used to indicate the location of a board on a timeplane
 data class ComplexNumber(val real: Int, val imaginary: Int) {
     operator fun plus(other: ComplexNumber) =
@@ -26,4 +29,3 @@ operator fun Int.minus(complexNumber: ComplexNumber) =
 operator fun Int.times(complexNumber: ComplexNumber) =
     ComplexNumber(this * complexNumber.real, this * complexNumber.imaginary)
 
-val Int.c get() = ComplexNumber(this, 0)

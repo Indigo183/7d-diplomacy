@@ -32,12 +32,18 @@ class Game {
     val limbo: Set<Board>
         get() = _limbo
 
-    fun getBoard(boardIndex: BoardIndex): Board? = timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.coordinate)
+    fun getBoard(boardIndex: BoardIndex): Board? {
+        return if (boardIndex.timeplane !== null) {
+            timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.coordinate)
+        } else {
+            limbo.singleOrNull { board -> board.boardIndex.coordinate == boardIndex.coordinate }
+        }
+    }
 
-    fun addChild(board: Board, boardIndex: BoardIndex?) {
+    fun addChild(board: Board, boardIndex: BoardIndex) {
         val child = Board(boardIndex, board)
         board.children += child
-        if (boardIndex !== null) {
+        if (boardIndex.timeplane !== null) {
             _timeplanes[boardIndex.timeplane][boardIndex.coordinate] = child
         }
     }
@@ -47,7 +53,7 @@ typealias Timeplane = MutableMap<ComplexNumber, Board>
 fun Timeplane.boards() = values
 
 class Board(
-    var boardIndex: BoardIndex?, // null represents a board in Limbo
+    var boardIndex: BoardIndex,
     val parent: Board? = null, // null represents the origin board
     val pieces: Map<Player, List<Province>> = mapOf(
         Cato to listOf(CAT),
