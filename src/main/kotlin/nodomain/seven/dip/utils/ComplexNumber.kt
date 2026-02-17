@@ -25,3 +25,5 @@ operator fun Int.minus(complexNumber: ComplexNumber) =
     ComplexNumber(this - complexNumber.real, -complexNumber.imaginary)
 operator fun Int.times(complexNumber: ComplexNumber) =
     ComplexNumber(this * complexNumber.real, this * complexNumber.imaginary)
+
+val Int.c get() = ComplexNumber(this, 0)

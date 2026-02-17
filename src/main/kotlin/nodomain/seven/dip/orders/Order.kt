@@ -14,10 +14,10 @@ sealed class Order(val piece: Piece, val symbol: String) {
 
 // The temporal direction in which a move occurs
 enum class TemporalFlare(val direction: ComplexNumber) {
-    RIGHT(ComplexNumber( 1, 0)),
-    UP   (ComplexNumber( 0, 1)),
-    LEFT (ComplexNumber(-1, 0)),
-    DOWN (ComplexNumber( 0,-1));
+    RIGHT(1.c),
+    UP   (i),
+    LEFT ((-1).c),
+    DOWN (-i);
 }
 
 data object Holds: Action
