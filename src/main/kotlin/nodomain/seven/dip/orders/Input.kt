@@ -25,17 +25,13 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
         return false
     }
     // 4
-    if (order !is HoldOrder) {
-        val destination = if (order is SupportOrder) {
-            if (order.action.order is MoveOrder) order.action.order.action.to else order.action.order.piece.location
-        } else if (order is MoveOrder) order.action.to
-        else throw InvalidClassException("order should either be a `SupportOrder` or a `MoveOrder`")
-
-        return order.piece.location isAdjacentTo destination
+    val destination = when(order) {
+        is SupportOrder if order.action.order is MoveOrder -> order.action.order.action.to
+        is SupportOrder -> order.action.order.piece.location
+        is MoveOrder  -> order.action.to
+        is HoldOrder -> return true //hold orders do not have a destination
     }
-
-    // Every test passed
-    return true
+    return order.piece.location isAdjacentTo destination
 }
 
 fun input(player: Player, orders: List<Order>) = println()

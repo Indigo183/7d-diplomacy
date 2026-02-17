@@ -7,7 +7,7 @@ import kotlin.enums.enumEntries
 sealed interface Action
 
 // An action and the piece ordering it
-abstract class Order(val piece: Piece, val symbol: String) {
+sealed class Order(val piece: Piece, val symbol: String) {
     abstract val action: Action
     override fun toString(): String =  "$piece$symbol$action"
 }
