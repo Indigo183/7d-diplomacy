@@ -1,6 +1,6 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.utils.ComplexNumber.*
+import nodomain.seven.dip.utils.*
 import nodomain.seven.dip.provinces.Romans.*
 
 fun main() { // manual testing for now; at some point we should probably adapt some testing framework. Junit combined with AssertJ works well for Java

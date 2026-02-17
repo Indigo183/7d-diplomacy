@@ -26,7 +26,7 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
         is SupportOrder -> order.action.order.piece.location
         is HoldOrder -> return true //hold orders do not have a destination, thus 4 is trivial
     }
-    return order.piece.location isAdjacentTo destination // 4
+    return order.piece.location.isAdjacentTo(destination) // 4
 }
 
 fun input(player: Player, orders: List<Order>) = println()

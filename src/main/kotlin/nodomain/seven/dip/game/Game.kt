@@ -2,8 +2,7 @@ package nodomain.seven.dip.game
 
 import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.utils.ComplexNumber
-import nodomain.seven.dip.utils.ComplexNumber.*
+import nodomain.seven.dip.utils.*
 
 import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.provinces.Player
