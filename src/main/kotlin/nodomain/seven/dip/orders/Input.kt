@@ -20,15 +20,14 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     } else {
         board.pieces.any { (_, countryPieces) -> order.piece.location.province in countryPieces }
     }) return false
-    // 3
-    if (order is MoveOrder && getBoard(order.action.to.boardIndex) === null) {
-        return false
-    }
     // 4
     val destination = when(order) {
         is SupportOrder if order.action.order is MoveOrder -> order.action.order.action.to
         is SupportOrder -> order.action.order.piece.location
-        is MoveOrder  -> order.action.to
+        is MoveOrder  -> {
+            getBoard(order.action.to.boardIndex)?: return false // 3
+            order.action.to
+        }
         is HoldOrder -> return true //hold orders do not have a destination
     }
     return order.piece.location isAdjacentTo destination
