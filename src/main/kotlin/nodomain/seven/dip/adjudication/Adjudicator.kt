@@ -18,6 +18,7 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
     for (order in orders) when (order) {
         is MoveOrder -> moves += order
         is SupportOrder -> supports += order
+        else -> {}
     }
     return Pair(moves.groupBy { it.flare !! }, supports)
 }
