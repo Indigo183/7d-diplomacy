@@ -18,7 +18,7 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     if (!if (player !== null) {
         board.pieces[player]?.contains(order.piece.location.province) ?: false
     } else {
-        board.pieces.any { x -> x.equals(order.piece.location.province) }
+        board.pieces.any { (_, countryPieces) -> order.piece.location.province in countryPieces }
     }) return false
     // 3
     if (order is MoveOrder && getBoard(order.action.to.boardIndex) === null) {
