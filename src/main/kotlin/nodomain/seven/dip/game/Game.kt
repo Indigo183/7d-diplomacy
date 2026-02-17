@@ -1,22 +1,23 @@
 package nodomain.seven.dip.game
 
-import nodomain.seven.dip.orders.Army
 import nodomain.seven.dip.orders.MoveOrder
+import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.utils.ComplexNumber.*
 
-import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.RomanPlayers.*
 import nodomain.seven.dip.provinces.Romans.*
 import nodomain.seven.dip.utils.BoardIndex
-import nodomain.seven.dip.utils.Location
 
 class Game {
     val supports: MutableList<SupportOrder> = mutableListOf()
     val moves: MutableList<MoveOrder> = mutableListOf()
+
+    // For future optimisation of adjudication
+    var currentOrders: List<Order> = listOf()
 
     // Interior mutability
     private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
@@ -32,13 +33,13 @@ class Game {
     val limbo: Set<Board>
         get() = _limbo
 
-    fun getBoard(boardIndex: BoardIndex): Board? = timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.boardIndex)
+    fun getBoard(boardIndex: BoardIndex): Board? = timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.coordinate)
 
     fun addChild(board: Board, boardIndex: BoardIndex?) {
         val child = Board(boardIndex, board)
         board.children += child
         if (boardIndex !== null) {
-            _timeplanes[boardIndex.timeplane][boardIndex.boardIndex] = child
+            _timeplanes[boardIndex.timeplane][boardIndex.coordinate] = child
         }
     }
 }

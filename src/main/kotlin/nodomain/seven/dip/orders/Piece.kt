@@ -12,7 +12,7 @@ sealed interface Piece {
 
     // Accepts both local and non-local moves
     infix fun M(destination: Location): MoveOrder = MoveOrder(this, Moves(destination))
-    infix fun M(destination: Province): MoveOrder = M(Location(destination, location.board))
+    infix fun M(destination: Province): MoveOrder = M(Location(destination, location.boardIndex))
 
     infix fun S(supporting: () -> Order): SupportOrder {
         val order = supporting();
