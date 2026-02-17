@@ -45,6 +45,8 @@ class Game {
         board.children += child
         if (boardIndex.timeplane !== null) {
             _timeplanes[boardIndex.timeplane][boardIndex.coordinate] = child
+        } else {
+            _limbo += child
         }
     }
 }
