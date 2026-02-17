@@ -6,7 +6,7 @@ import nodomain.seven.dip.utils.BoardIndex
 
 fun main() {
     val game = Game()
-    game.addChild(game.getBoard(BoardIndex(0 * i))!!, BoardIndex(1 + 0 * i))
+    game.addChild(game.getBoard(BoardIndex(0.c))!!, BoardIndex(1.c))
 
     for (timeplane in game.timeplanes) {
         for (board in timeplane.values) {
