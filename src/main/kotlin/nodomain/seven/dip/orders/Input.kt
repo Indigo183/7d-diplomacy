@@ -31,7 +31,7 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
         } else if (order is MoveOrder) order.action.to
         else throw InvalidClassException("order should either be a `SupportOrder` or a `MoveOrder`")
 
-        return order.piece.location.isAdjacentTo(destination)
+        return order.piece.location isAdjacentTo destination
     }
 
     // Every test passed

@@ -32,11 +32,11 @@ fun BoardIndex.isAdjacentTo(other: BoardIndex): Boolean {
     } else false
 }
 
-fun Location.isAdjacentTo(other: Location): Boolean {
+infix fun Location.isAdjacentTo(other: Location): Boolean {
     return if (boardIndex == other.boardIndex) { // adjacency is local
-        province == other.province
+        province isAdjacentTo other.province
     } else { // adjacency is non-local
         boardIndex.isAdjacentTo(other.boardIndex) &&
-                (province.isAdjacentTo(other.province) || province == other.province)
+                (province isAdjacentTo other.province || province == other.province)
     }
 }
