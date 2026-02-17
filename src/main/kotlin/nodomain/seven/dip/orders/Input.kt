@@ -7,7 +7,7 @@ import nodomain.seven.dip.provinces.Player
 /** Checks that:
  * 1. the ordered unit exists
  * 2. if a player is passed, the player owns the unit
- * 3. if the order is a move, the destination exists
+ * 3. if the order is a move, the destination exists, and a flare is present
  * 4. the origin and destination are adjacent and ignores the possibility of convoys*/
 fun Game.isValid(order: Order, player: Player? = null): Boolean {
     val board = getBoard(order.piece.location.boardIndex) ?: return false // 1 (partly)
@@ -17,12 +17,13 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     }
     if (!unitExistsAndOwned) return false // 1 & 2
     val destination = when(order) {
-        is SupportOrder if order.action.order is MoveOrder -> order.action.order.action.to
-        is SupportOrder -> order.action.order.piece.location
         is MoveOrder  -> {
             getBoard(order.action.to.boardIndex)?: return false // 3
+            order.flare?: return false // 3
             order.action.to
         }
+        is SupportOrder if order.action.order is MoveOrder -> order.action.order.action.to
+        is SupportOrder -> order.action.order.piece.location
         is HoldOrder -> return true //hold orders do not have a destination, thus 4 is trivial
     }
     return order.piece.location isAdjacentTo destination // 4
