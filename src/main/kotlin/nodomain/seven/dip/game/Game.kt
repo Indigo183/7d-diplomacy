@@ -11,6 +11,12 @@ import nodomain.seven.dip.provinces.RomanPlayers.*
 import nodomain.seven.dip.provinces.Romans.*
 import nodomain.seven.dip.utils.BoardIndex
 
+enum class GameState {
+    MOVES,
+    RETREATS,
+    BUILDS,
+}
+
 class Game {
     val supports: MutableList<SupportOrder> = mutableListOf()
     val moves: MutableList<MoveOrder> = mutableListOf()
@@ -32,6 +38,9 @@ class Game {
     val limbo: Set<Board>
         get() = _limbo
 
+    var gameState: GameState = GameState.MOVES
+        private set
+
     fun getBoard(boardIndex: BoardIndex): Board? {
         return if (boardIndex.timeplane !== null) {
             timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.coordinate)
@@ -40,13 +49,34 @@ class Game {
         }
     }
 
-    fun addChild(board: Board, boardIndex: BoardIndex) {
-        val child = Board(boardIndex, board)
-        board.children += child
+    // Create child from component parts
+    fun addChild(parent: Board, boardIndex: BoardIndex, pieces: Map<Province, Player>, centres: Map<Province, Player>) {
+        val child = Board(boardIndex, parent, pieces, centres)
+        parent.children += child
         if (boardIndex.timeplane !== null) {
             _timeplanes[boardIndex.timeplane][boardIndex.coordinate] = child
         } else {
             _limbo += child
+        }
+    }
+
+    // Add child directly
+    fun addChild(parent: Board, child: Board) {
+        if (child.parent !== parent) throw IllegalArgumentException("`child.parent` is not equal to `parent`")
+        parent.children += child
+        if (child.boardIndex.timeplane !== null) {
+            _timeplanes[child.boardIndex.timeplane!!][child.boardIndex.coordinate] = child
+        } else {
+            _limbo += child
+        }
+    }
+
+    // TODO: implement actual rigorous logic
+    fun advanceState() {
+        gameState = when (gameState) {
+            GameState.MOVES -> GameState.RETREATS
+            GameState.RETREATS -> GameState.BUILDS
+            GameState.BUILDS -> GameState.MOVES
         }
     }
 }
@@ -57,13 +87,23 @@ fun Timeplane.boards() = values
 class Board(
     var boardIndex: BoardIndex,
     val parent: Board? = null, // null represents the origin board
-    val pieces: Map<Player, List<Province>> = mapOf(
-        Cato to listOf(CAT),
-        Pompey to listOf(POM)
+
+    val pieces: Map<Province, Player> = mapOf(
+        CAT to Cato,
+        POM to Pompey,
+    ),
+    val centres: Map<Province, Player> = mapOf(
+        CAT to Cato,
+        POM to Pompey,
     )) {
     val children = mutableListOf<Board>()
     var isActive = true
         private set
+
+    // set `isActive` to false
+    fun kill() {
+        if (isActive) isActive = false else println("WARN: called `Board.kill()` on an already dead board")
+    }
 
     override fun toString(): String {
         return """
