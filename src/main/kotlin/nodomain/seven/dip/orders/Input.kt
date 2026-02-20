@@ -14,11 +14,13 @@ import nodomain.seven.dip.provinces.Player
 fun Game.isValid(order: Order, player: Player? = null): Boolean {
     order.piece.location.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.piece.location.boardIndex) ?: return false // 1 (partly)
+    //
     val unitExistsAndOwned = when(player) {
         null -> board.pieces.any { (_, countryPieces) -> order.piece.location.province in countryPieces }
         else -> board.pieces[player]?.contains(order.piece.location.province) ?: false
     }
     if (!unitExistsAndOwned) return false // 1 & 2
+    // if(! player?.equals(board.pieces[order.piece.location.province]) ?: board.pieces[order.piece.location.province] !== null) return false
     val destination = when(order) {
         is MoveOrder  -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
