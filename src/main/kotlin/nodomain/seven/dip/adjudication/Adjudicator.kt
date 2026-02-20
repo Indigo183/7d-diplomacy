@@ -24,13 +24,16 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
 fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: Map<Location, Player>) {
     class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
     val analyse = moves.associateWith { MoveAnalyse(it) }
-    val nonCutSupports = supports.asSequence().filterNot(::isCut)
+    val byDestination: Map<Location, List<MoveAnalyse>> = analyse.values.groupBy { it.order.action.to }
+    val nonCutSupports = supports.asSequence().filterNot{support ->
+        byDestination[support.piece.location]?.asSequence()
+            ?.filter { if (support.action.order is MoveOrder) support.action.order.action.to == it.order.piece.location else true }
+            ?.any { pieces[it.order.piece.location] != pieces[support.piece.location] } ?: false
+    }
     nonCutSupports
         .filter { it.action.order is MoveOrder}
         .forEach { analyse[it.action.order]?.strength++ }
-    analyse.values
-        .groupBy { it.order.action.to }
-        .mapValues { (destination, orders) ->
+    byDestination.mapValues { (destination, orders) ->
             val topStrength = orders.maxOf { it.strength }
             val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
                 orders.maxBy { it.strength } else null
@@ -42,7 +45,3 @@ fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: M
         }
 }
 
-//TODO
-fun isCut(support: SupportOrder): Boolean {
-    return false
-}
