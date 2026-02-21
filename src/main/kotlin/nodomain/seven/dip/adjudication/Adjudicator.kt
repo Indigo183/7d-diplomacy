@@ -36,8 +36,8 @@ value class Bounce(val moveOrder: Location): MoveResult
 
 fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: Map<Location, Player>): List<MoveResult> {
     class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
-    val analyse = moves.associateWith { MoveAnalyse(it) }
-    val byDestination: Map<Location, List<MoveAnalyse>> = analyse.values.groupBy { it.order.action.to }
+    val byOrigin = moves.associateBy({ it.piece.location }, { MoveAnalyse(it) })
+    val byDestination = byOrigin.values.groupBy { it.order.action.to }
     val nonCutSupports = supports.asSequence().filterNot{support ->
         byDestination[support.piece.location]?.asSequence()
             ?.filter { if (support.action.order is MoveOrder) support.action.order.action.to == it.order.piece.location else true }
@@ -45,7 +45,7 @@ fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: M
     }
     nonCutSupports
         .filter { it.action.order is MoveOrder}
-        .forEach { analyse[it.action.order]?.strength++ }
+        .forEach { byOrigin[it.action.order.piece.location]?.strength++ }
     return byDestination.map { (destination, orders) ->
             val topStrength = orders.maxOf { it.strength }
             val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
@@ -53,7 +53,7 @@ fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: M
             when (pieces[destination]) {
                 null -> presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
                 pieces[presumptiveMove?.order?.piece?.location] ->
-                    presumptiveMove?.order?.(MoveResult.dependentIfMoving)(moves.find { it.piece.location == destination })
+                    presumptiveMove?.order?.(MoveResult.dependentIfMoving)(byOrigin[destination]?.order)
                 else -> null // dependence on destination, or bounce if holds at topStrength or better //TODO
             } ?: Bounce(destination)
         }
