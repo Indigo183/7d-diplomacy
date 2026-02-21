@@ -22,8 +22,19 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
     return Pair(moves.groupBy { it.flare !! }, supports)
 }
 
-//TODO
-fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: Map<Location, Player>) {
+sealed interface MoveResult {
+    companion object {
+        val succeedIfPresent: MoveOrder.() -> MoveResult = { SuccessfulMove(this) }
+        val dependentIfMoving: MoveOrder.(MoveOrder?) -> MoveResult? = { if (it is MoveOrder) DependantMove(this, it) else null }
+    }
+}
+@JvmInline
+value class SuccessfulMove(val moveOrder: MoveOrder): MoveResult
+data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): MoveResult
+@JvmInline
+value class Bounce(val moveOrder: Location): MoveResult
+
+fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: Map<Location, Player>): List<MoveResult> {
     class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
     val analyse = moves.associateWith { MoveAnalyse(it) }
     val byDestination: Map<Location, List<MoveAnalyse>> = analyse.values.groupBy { it.order.action.to }
@@ -35,15 +46,16 @@ fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: M
     nonCutSupports
         .filter { it.action.order is MoveOrder}
         .forEach { analyse[it.action.order]?.strength++ }
-    byDestination.mapValues { (destination, orders) ->
+    return byDestination.map { (destination, orders) ->
             val topStrength = orders.maxOf { it.strength }
             val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
                 orders.maxBy { it.strength } else null
             when (pieces[destination]) {
-                null -> presumptiveMove // ?: Bounce()
-                pieces[presumptiveMove?.order?.piece?.location] -> {} // dependence on destination (or bounce if holds)
-                else -> {} // dependence on destination, or bounce if holds at topStrength or better
-            }
+                null -> presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
+                pieces[presumptiveMove?.order?.piece?.location] ->
+                    presumptiveMove?.order?.(MoveResult.dependentIfMoving)(moves.find { it.piece.location == destination })
+                else -> null // dependence on destination, or bounce if holds at topStrength or better //TODO
+            } ?: Bounce(destination)
         }
 }
 
