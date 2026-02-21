@@ -23,44 +23,58 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
     return Pair(moves.groupBy { it.flare !! }, supports)
 }
 
-sealed interface MoveResult {
+sealed interface ComputableMoveResult
+sealed interface MoveResult: ComputableMoveResult {
     companion object {
-        val succeedIfPresent: MoveOrder.() -> MoveResult = { SuccessfulMove(this) }
-        val dependentIfMoving: MoveOrder.(MoveOrder?) -> MoveResult? = { if (it is MoveOrder) DependantMove(this, it) else null }
+        val succeed: MoveOrder.() -> MoveResult = { SuccessfulMove(this) }
+        val dependentIfMoving: MoveOrder.(MoveOrder?) -> ComputableMoveResult =
+            { if (it is MoveOrder) DependantMove(this, it) else Bounce(this.action.to) }
     }
 }
+typealias PreResult = List<ComputableMoveResult>
+
 @JvmInline
 value class SuccessfulMove(val moveOrder: MoveOrder): MoveResult
-data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): MoveResult
+data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult
 @JvmInline
 value class Bounce(val moveOrder: Location): MoveResult
 
-fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: Map<Location, Player>): List<MoveResult> {
+class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val pieces: Map<Location, Player>) {
     class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
+
     val byOrigin = moves.associateBy({ it.piece.location }, { MoveAnalyse(it) })
     val byDestination = byOrigin.values.groupBy { it.order.action.to }
-    val nonCutSupports = supports.asSequence().filterNot{support ->
+    val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.piece.location]?.asSequence()
             ?.filter { if (support.action.order is MoveOrder) support.action.order.action.to == it.order.piece.location else true }
             ?.any { pieces[it.order.piece.location] != pieces[support.piece.location] } ?: false
     }
-    nonCutSupports
-        .filter { it.action.order is MoveOrder}
-        .forEach { byOrigin[it.action.order.piece.location]?.strength++ }
-    return byDestination.map { (destination, orders) ->
-        val topStrength = orders.maxOf { it.strength }
-        val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
-            orders.maxBy { it.strength } else null
-        val dependentIfMoving = {presumptiveMove?.order?.(MoveResult.dependentIfMoving)(byOrigin[destination]?.order)}
-        when (pieces[destination]) {
-            null -> presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
-            pieces[presumptiveMove?.order?.piece?.location] -> dependentIfMoving()
-            else -> if (topStrength == 1) dependentIfMoving() else
-                if (byOrigin[destination] !== null && topStrength <= nonCutSupports.count { it.action.order is HoldOrder && it.action.order.piece.location == destination } + 1) null else
-                    presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
-        } ?: Bounce(destination)
-        // missing from this method is some way to take into account that a dislodged unit may not exert influence over the province its attacker came from
+
+    fun moveStrength(): PreResult {
+        nonCutSupports
+            .filter { it.action.order is MoveOrder }
+            .forEach { byOrigin[it.action.order.piece.location]?.strength++ }
+        return byDestination.map { (destination, orders) ->
+            val topStrength = orders.maxOf { it.strength }
+            val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
+                orders.maxBy { it.strength }.order else return@map Bounce(destination)
+            when (pieces[destination]) {
+                null -> presumptiveMove.(MoveResult.succeed)()
+                pieces[presumptiveMove.piece.location] -> presumptiveMove.dependOnDestination()
+                else if (topStrength == 1) -> presumptiveMove.dependOnDestination()
+                else if (byOrigin[destination] !== null && topStrength <= holdStrength(destination)) -> Bounce(destination)
+                else -> presumptiveMove.(MoveResult.succeed)()
+            }
+            // missing from this method is some way to take into account that a dislodged unit may not exert influence over the province its attacker came from
+        }
     }
+
+    fun holdStrength(destination: Location): Int =
+        nonCutSupports.count { it.action.order is HoldOrder && it.action.order.piece.location == destination } + 1
+
+    fun MoveOrder.dependOnDestination(): ComputableMoveResult =
+        (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order)
+
 }
 
 // Adjudicate board in a single direction
