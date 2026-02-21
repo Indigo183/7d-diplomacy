@@ -1,6 +1,7 @@
 package nodomain.seven.dip.adjudication
 
 import nodomain.seven.dip.game.*
+import nodomain.seven.dip.orders.HoldOrder
 import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.SupportOrder
@@ -47,16 +48,19 @@ fun moveStrength(moves: List<MoveOrder>, supports: List<SupportOrder>, pieces: M
         .filter { it.action.order is MoveOrder}
         .forEach { byOrigin[it.action.order.piece.location]?.strength++ }
     return byDestination.map { (destination, orders) ->
-            val topStrength = orders.maxOf { it.strength }
-            val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
-                orders.maxBy { it.strength } else null
-            when (pieces[destination]) {
-                null -> presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
-                pieces[presumptiveMove?.order?.piece?.location] ->
-                    presumptiveMove?.order?.(MoveResult.dependentIfMoving)(byOrigin[destination]?.order)
-                else -> null // dependence on destination, or bounce if holds at topStrength or better //TODO
-            } ?: Bounce(destination)
-        }
+        val topStrength = orders.maxOf { it.strength }
+        val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
+            orders.maxBy { it.strength } else null
+        val dependentIfMoving = {presumptiveMove?.order?.(MoveResult.dependentIfMoving)(byOrigin[destination]?.order)}
+        when (pieces[destination]) {
+            null -> presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
+            pieces[presumptiveMove?.order?.piece?.location] -> dependentIfMoving()
+            else -> if (topStrength == 1) dependentIfMoving() else
+                if (byOrigin[destination] !== null && topStrength <= nonCutSupports.count { it.action.order is HoldOrder && it.action.order.piece.location == destination } + 1) null else
+                    presumptiveMove?.order?.(MoveResult.succeedIfPresent)()
+        } ?: Bounce(destination)
+        // missing from this method is some way to take into account that a dislodged unit may not exert influence over the province its attacker came from
+    }
 }
 
 // Adjudicate board in a single direction
