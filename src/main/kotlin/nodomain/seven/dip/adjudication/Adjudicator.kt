@@ -27,8 +27,8 @@ sealed interface ComputableMoveResult
 sealed interface MoveResult: ComputableMoveResult {
     companion object {
         val succeed: MoveOrder.() -> MoveResult = { SuccessfulMove(this) }
-        val dependentIfMoving: MoveOrder.(MoveOrder?) -> ComputableMoveResult =
-            { if (it is MoveOrder) DependantMove(this, it) else Bounce(this.action.to) }
+        val dependentIfMoving: MoveOrder.(MoveOrder?) -> ComputableMoveResult? =
+            { if (it is MoveOrder) DependantMove(this, it) else null }
     }
 }
 typealias PreResult = List<ComputableMoveResult>
@@ -72,9 +72,8 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     fun holdStrength(destination: Location): Int =
         nonCutSupports.count { it.action.order is HoldOrder && it.action.order.piece.location == destination } + 1
 
-    fun MoveOrder.dependOnDestination(): ComputableMoveResult =
-        (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order)
-
+    fun MoveOrder.dependOnDestination(): ComputableMoveResult = // this method assumes the destination to be occupied
+        (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order) ?: Bounce(action.to)
 }
 
 // Adjudicate board in a single direction
