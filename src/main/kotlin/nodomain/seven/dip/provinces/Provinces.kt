@@ -5,4 +5,7 @@ interface Province {
     val isSupplyCenter: Boolean;
 }
 
-interface Player
+interface Player {
+	// TODO: shoul this be a List or a Set?
+	val homeCentres: List<Province>;
+}

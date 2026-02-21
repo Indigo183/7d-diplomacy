@@ -13,7 +13,7 @@ enum class Romans(override val isSupplyCenter: Boolean): Province {
     override fun isAdjacentTo(other: Province): Boolean = other in adjacency
 }
 
-enum class RomanPlayers: Player {
-    Cato,
-    Pompey
+enum class RomanPlayers(override val homeCentres: List<Romans>): Player {
+    Cato(listOf(Romans.CAT)),
+    Pompey(listOf(Romans.POM)),
 }
