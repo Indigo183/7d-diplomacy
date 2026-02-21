@@ -10,6 +10,7 @@ sealed interface Action
 sealed class Order(val piece: Piece, val symbol: String) {
     abstract val action: Action
     override fun toString(): String =  "$piece$symbol$action"
+    val from: Location = piece.location
 }
 
 // The temporal direction in which a move occurs

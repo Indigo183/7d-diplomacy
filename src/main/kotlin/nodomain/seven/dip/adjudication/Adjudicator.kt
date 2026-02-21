@@ -42,25 +42,25 @@ value class Bounce(val moveOrder: Location): MoveResult
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val pieces: Map<Location, Player>) {
     class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
 
-    val byOrigin = moves.associateBy({ it.piece.location }, { MoveAnalyse(it) })
+    val byOrigin = moves.associateBy({ it.from }, ::MoveAnalyse)
     val byDestination = byOrigin.values.groupBy { it.order.action.to }
     val nonCutSupports = supports.asSequence().filterNot { support ->
-        byDestination[support.piece.location]?.asSequence()
-            ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.piece.location}
-            ?.any { pieces[it.order.piece.location] != pieces[support.piece.location] } ?: false
+        byDestination[support.from]?.asSequence()
+            ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.from}
+            ?.any { pieces[it.order.from] != pieces[support.from] } ?: false
     }
 
     fun moveStrength(): PreResult {
         nonCutSupports
             .filter { it.action.order is MoveOrder }
-            .forEach { byOrigin[it.action.order.piece.location]?.strength++ }
+            .forEach { byOrigin[it.action.order.from]?.strength++ }
         return byDestination.map { (destination, orders) ->
             val topStrength = orders.maxOf { it.strength }
             val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
                 orders.maxBy { it.strength }.order else return@map Bounce(destination)
             when (pieces[destination]) {
                 null -> presumptiveMove.(MoveResult.succeed)()
-                pieces[presumptiveMove.piece.location] -> presumptiveMove.dependOnDestination()
+                pieces[presumptiveMove.from] -> presumptiveMove.dependOnDestination()
                 else if (topStrength == 1) -> presumptiveMove.dependOnDestination()
                 else if (byOrigin[destination] !== null && topStrength <= holdStrength(destination)) -> Bounce(destination)
                 else -> presumptiveMove.(MoveResult.succeed)()
@@ -70,7 +70,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     }
 
     fun holdStrength(destination: Location): Int =
-        nonCutSupports.count { it.action.order is HoldOrder && it.action.order.piece.location == destination } + 1
+        nonCutSupports.count { it.action.order is HoldOrder && it.action.order.from == destination } + 1
 
     fun MoveOrder.dependOnDestination(): ComputableMoveResult = // this method assumes the destination to be occupied
         (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order) ?: Bounce(action.to)

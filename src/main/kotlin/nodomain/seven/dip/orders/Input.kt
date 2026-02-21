@@ -12,10 +12,10 @@ import nodomain.seven.dip.provinces.Player
  * 5. no involved board indexes reference Limbo (i.e. boardIndex.timeplane is never null)
  */
 fun Game.isValid(order: Order, player: Player? = null): Boolean {
-    order.piece.location.boardIndex.timeplane ?: return false // 5
-    val board = getBoard(order.piece.location.boardIndex) ?: return false // 1 (partly)
-    if(! (player?.equals(board.pieces[order.piece.location.province])
-            ?: (board.pieces[order.piece.location.province] !== null))) return false
+    order.from.boardIndex.timeplane ?: return false // 5
+    val board = getBoard(order.from.boardIndex) ?: return false // 1 (partly)
+    if(! (player?.equals(board.pieces[order.from.province])
+            ?: (board.pieces[order.from.province] !== null))) return false
     val destination = when(order) {
         is MoveOrder  -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
@@ -24,12 +24,12 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
             order.action.to
         }
         is SupportOrder if order.action.order is MoveOrder -> {
-            order.action.order.piece.location.boardIndex.timeplane ?: return false // 5
+            order.action.order.from.boardIndex.timeplane ?: return false // 5
             order.action.order.action.to.boardIndex.timeplane ?: return false // 5
             order.action.order.action.to
         }
         is SupportOrder -> {
-            order.action.order.piece.location.boardIndex.timeplane ?: return false // 5
+            order.action.order.from.boardIndex.timeplane ?: return false // 5
             order.action.order.piece.location
         }
         is HoldOrder -> return true //hold orders do not have a destination, thus 4 is trivial
