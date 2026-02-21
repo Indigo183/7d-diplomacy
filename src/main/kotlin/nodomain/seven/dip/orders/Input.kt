@@ -10,10 +10,12 @@ import nodomain.seven.dip.provinces.Player
  * 3. if the order is a move, the destination exists, and a flare is present
  * 4. the origin and destination are adjacent and ignores the possibility of convoys
  * 5. no involved board indexes reference Limbo (i.e. boardIndex.timeplane is never null)
+ * 6. the ordered unit is on an active board
  */
 fun Game.isValid(order: Order, player: Player? = null): Boolean {
     order.from.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.from.boardIndex) ?: return false // 1 (partly)
+    if (!board.isActive) return false // 6
     if(! (player?.equals(board.pieces[order.from.province])
             ?: (board.pieces[order.from.province] !== null))) return false
     val destination = when(order) {
