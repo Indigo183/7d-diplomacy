@@ -14,11 +14,8 @@ import nodomain.seven.dip.provinces.Player
 fun Game.isValid(order: Order, player: Player? = null): Boolean {
     order.piece.location.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.piece.location.boardIndex) ?: return false // 1 (partly)
-    // TODO: remove non-null assertion?
-    if(! player?.equals(board.pieces[order.piece.location.province])!!
-        ?: board.pieces[order.piece.location.province] !== null) {
-        return false
-    }
+    if(! (player?.equals(board.pieces[order.piece.location.province])
+            ?: (board.pieces[order.piece.location.province] !== null))) return false
     val destination = when(order) {
         is MoveOrder  -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
