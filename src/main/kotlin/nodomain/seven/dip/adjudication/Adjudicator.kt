@@ -57,6 +57,12 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     }
     private val dislodgements: MutableList<MoveOrder> = mutableListOf()
 
+    /** Produces a list containing Bounces and SuccessfulMoves.
+     *  1. A SuccessfulMove will be produced for every MoveOrder in moves which succeeds in accordance with the rules of diplomacy
+     *  2. A Bounce will at least be produced provinces left empty by the end of the turn into which at least unit attempted to move
+     *
+     *  The list may contain additional bounces in occupied provinces
+     */
     val movesAndBounces by lazy { computeMovesAndBounces() }
 
     private fun computeMovesAndBounces(): List<MoveResult> {
