@@ -23,7 +23,9 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
     return Pair(moves.groupBy { it.flare !! }, supports)
 }
 
-sealed interface ComputableMoveResult
+sealed interface ComputableMoveResult {
+    val location: Location
+}
 sealed interface MoveResult: ComputableMoveResult {
     companion object {
         val succeed: MoveOrder.() -> MoveResult = { SuccessfulMove(this) }
@@ -31,41 +33,78 @@ sealed interface MoveResult: ComputableMoveResult {
             { if (it is MoveOrder) DependantMove(this, it) else null }
     }
 }
-typealias PreResult = List<ComputableMoveResult>
+typealias PreResult = MutableMap<Location, ComputableMoveResult>
 
 @JvmInline
-value class SuccessfulMove(val moveOrder: MoveOrder): MoveResult
-data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult
+value class SuccessfulMove(val moveOrder: MoveOrder): MoveResult {
+    override val location get() = moveOrder.action.to
+}
+data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult {
+    override val location get() = moveOrder.action.to
+}
 @JvmInline
-value class Bounce(val moveOrder: Location): MoveResult
+value class Bounce(override val location: Location): MoveResult
 
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val pieces: Map<Location, Player>) {
-    class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
+    private class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
 
-    val byOrigin = moves.associateBy({ it.from }, ::MoveAnalyse)
-    val byDestination = byOrigin.values.groupBy { it.order.action.to }
-    val nonCutSupports = supports.asSequence().filterNot { support ->
+    private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
+    private val byDestination = byOrigin.values.groupBy { it.order.action.to }
+    private val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.from]?.asSequence()
             ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.from}
             ?.any { pieces[it.order.from] != pieces[support.from] } ?: false
     }
+    private val dislodgements: MutableList<MoveOrder> = mutableListOf()
 
-    fun moveStrength(): PreResult {
+    val movesAndBounces by lazy { computeMovesAndBounces() }
+
+    private fun computeMovesAndBounces(): List<MoveResult> {
+        val withDependantMove = initialMoveResults().updateBouncesDueToDislodgement()
+        return withDependantMove.values.asSequence()
+            .filterNot { it is DependantMove && it.moveOrder.from == it.dependsOn.action.to }
+            .map {
+                when(it) {
+                    is DependantMove -> SuccessfulMove(it.moveOrder)
+                    is MoveResult -> it
+                }
+            }.toList()
+    }
+
+    private fun PreResult.updateBouncesDueToDislodgement(): PreResult {
+        for (dislodgement in dislodgements) {
+            val dislodgedMove = byOrigin[dislodgement.action.to]
+            if (dislodgedMove?.order?.action?.to != dislodgement.from || byDestination[dislodgement.from]!!.size <= 1) continue
+            dislodgedMove.strength = 0
+            val newResult = strongestMove(dislodgement.from, byDestination[dislodgement.from]!!)
+            if (newResult !is Bounce)
+                set(dislodgement.from, newResult)
+        }
+        return this
+    }
+
+    private fun initialMoveResults(): PreResult {
         nonCutSupports
             .filter { it.action.order is MoveOrder }
             .forEach { byOrigin[it.action.order.from]?.strength++ }
-        return byDestination.map { (destination, orders) ->
-            val topStrength = orders.maxOf { it.strength }
-            val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
-                orders.maxBy { it.strength }.order else return@map Bounce(destination)
-            when (pieces[destination]) {
-                null -> presumptiveMove.(MoveResult.succeed)()
-                pieces[presumptiveMove.from] -> presumptiveMove.dependOnDestination()
-                else if (topStrength == 1) -> presumptiveMove.dependOnDestination()
-                else if (byOrigin[destination] !== null && topStrength <= holdStrength(destination)) -> Bounce(destination)
-                else -> presumptiveMove.(MoveResult.succeed)()
+        return byDestination.asSequence()
+            .map { (destination, orders) -> destination to strongestMove(destination,  orders) }
+            .toMap(mutableMapOf())
+    }
+
+    private fun strongestMove(destination: Location, orders: List<MoveAnalyse>): ComputableMoveResult {
+        val topStrength = orders.maxOf { it.strength }
+        val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
+            orders.maxBy { it.strength }.order else return Bounce(destination)
+        return when (pieces[destination]) {
+            null -> presumptiveMove.(MoveResult.succeed)()
+            pieces[presumptiveMove.from] -> presumptiveMove.dependOnDestination()
+            else if (topStrength == 1) -> presumptiveMove.dependOnDestination()
+            else if (byOrigin[destination] !== null && topStrength <= holdStrength(destination)) -> Bounce(destination)
+            else -> {
+                dislodgements += presumptiveMove
+                presumptiveMove.(MoveResult.succeed)()
             }
-            // missing from this method is some way to take into account that a dislodged unit may not exert influence over the province its attacker came from
         }
     }
 
