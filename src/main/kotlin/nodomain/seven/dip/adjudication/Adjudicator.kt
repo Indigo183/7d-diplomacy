@@ -50,15 +50,24 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     val movesAndBounces by lazy { computeMovesAndBounces() }
 
     private fun computeMovesAndBounces(): List<MoveResult> {
-        val withDependantMove = initialMoveResults().updateBouncesDueToDislodgement()
-        return withDependantMove.values.asSequence()
-            .filterNot { it is DependantMove && it.moveOrder.from == it.dependsOn.action.to }
-            .map {
-                when(it) {
-                    is DependantMove -> SuccessfulMove(it.moveOrder)
-                    is MoveResult -> it
-                }
-            }.toList()
+        val withDependantMove = initialMoveResults()
+            .updateBouncesDueToDislodgement()
+        return withDependantMove.values.map {
+            when(it) {
+                is DependantMove -> withDependantMove.analyseDependency(it)
+                is MoveResult -> it
+            }
+        }.toList()
+    }
+
+    // no optimisation is done to avoid going down the same chain multiple times
+    private tailrec fun PreResult.analyseDependency(dependantMove: DependantMove): MoveResult {
+        if (dependantMove.moveOrder.from == dependantMove.dependsOn.action.to) return Bounce(dependantMove.moveOrder.action.to)
+        return when (val dependency = this[dependantMove.dependsOn.action.to]) {
+            is Bounce, null -> Bounce(dependantMove.moveOrder.action.to)
+            is SuccessfulMove -> dependantMove.moveOrder.(MoveResult.succeed)()
+            is DependantMove -> this.analyseDependency(dependency)
+        }
     }
 
     private fun PreResult.updateBouncesDueToDislodgement(): PreResult {
