@@ -1,6 +1,7 @@
 package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.adjudication.isAdjacentTo
+import nodomain.seven.dip.adjudication.sortOrders
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.Player
 
@@ -39,12 +40,11 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     return order.piece.location.isAdjacentTo(destination) // 4
 }
 
-fun input(player: Player, orders: List<Order>) = println()
-
-fun sandboxInput(orders: List<Order>) {
-    //for (order in orders) if (order == Something) {
-    //    do smth
-    //} else {
-    //    do smth else
-    //}
+fun Game.input(orders: List<Order>, player: Player? = null) {
+    sortOrders(orders.filter {
+        isValid(it, player) || run {
+            println("WARNING: invalid order:\n$it")
+            false
+        }
+    })
 }
