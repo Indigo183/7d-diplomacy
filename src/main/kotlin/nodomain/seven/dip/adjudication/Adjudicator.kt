@@ -29,7 +29,7 @@ data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): Co
 @JvmInline
 value class Bounce(override val location: Location): MoveResult
 
-class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val pieces: Map<Location, Player>) {
+class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Location, Player>) {
     private class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
 
     private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
@@ -37,7 +37,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     private val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.from]?.asSequence()
             ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.from}
-            ?.any { pieces[it.order.from] != pieces[support.from] } ?: false
+            ?.any { piecesIn[it.order.from] != piecesIn[support.from] } ?: false
     }
     private val dislodgements: MutableList<MoveOrder> = mutableListOf()
 
@@ -47,17 +47,38 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
      *
      *  The list may contain additional bounces in occupied provinces
      */
-    val movesAndBounces by lazy { computeMovesAndBounces() }
+    val movesAndBounces = computeMovesAndBounces()
+
+    val needsRetreats: MutableMap<Location, Player> = mutableMapOf()
+
+    val piecesOut: Map<Location, Player> = computePiecesOut()
+
+    private fun computePiecesOut(): Map<Location, Player> {
+        val piecesOut: MutableMap<Location, Player> = mutableMapOf()
+        val mayNeedRetreats: MutableMap<Location, Player> = mutableMapOf()
+        piecesIn.forEach { (location, occupant) ->
+            if (byOrigin[location]?.order?.(MoveResult.succeed)() in movesAndBounces)
+                piecesOut += byOrigin[location]!!.order.action.to to occupant
+            else
+                mayNeedRetreats += location to occupant
+        }
+        mayNeedRetreats.forEach { (location, occupant) ->
+            if (piecesOut.containsKey(location))
+                needsRetreats += location to occupant
+            else
+                piecesOut += location to occupant
+        }
+        return piecesOut
+    }
 
     private fun computeMovesAndBounces(): List<MoveResult> {
-        val withDependantMove = initialMoveResults()
-            .updateBouncesDueToDislodgement()
+        val withDependantMove = initialMoveResults().updateBouncesDueToDislodgement()
         return withDependantMove.values.map {
             when(it) {
                 is DependantMove -> withDependantMove.analyseDependency(it)
                 is MoveResult -> it
             }
-        }.toList()
+        }
     }
 
     // no optimisation is done to avoid going down the same chain multiple times
@@ -95,9 +116,9 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         val topStrength = orders.maxOf { it.strength }
         val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
             orders.maxBy { it.strength }.order else return Bounce(destination)
-        return when (pieces[destination]) {
+        return when (piecesIn[destination]) {
             null -> presumptiveMove.(MoveResult.succeed)()
-            pieces[presumptiveMove.from] -> presumptiveMove.dependOnDestination()
+            piecesIn[presumptiveMove.from] -> presumptiveMove.dependOnDestination()
             else if (topStrength == 1) -> presumptiveMove.dependOnDestination()
             else if (byOrigin[destination] !== null && topStrength <= holdStrength(destination)) -> Bounce(destination)
             else -> {
