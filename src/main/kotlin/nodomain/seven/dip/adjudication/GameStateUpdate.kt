@@ -8,6 +8,7 @@ import nodomain.seven.dip.orders.TemporalFlare
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.utils.BoardIndex
+import nodomain.seven.dip.utils.Location
 
 fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder>>, List<SupportOrder>> {
     // For future optimisation
@@ -21,6 +22,16 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
     return Pair(moves.groupBy { it.flare !! }, supports)
 }
 
+fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<Location, Player> {
+    val pieces: MutableMap<Location, Player> = mutableMapOf()
+    for (t in timeplanes) for (board in t.boards()) if (!onlyActive || board.isActive) for (piece in board.pieces) {
+        if (player !== null && piece.value == player) {
+            pieces[Location(piece.key, board.boardIndex)] = piece.value
+        }
+    }
+
+    return pieces
+}
 
 // Adjudicate board in a single direction
 fun Game.adjudicateBoard(board: Board, direction: TemporalFlare) {
@@ -45,19 +56,17 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare) {
 
 // Adjudicate board in all directions
 fun Game.fullAdjudicateBoard(board: Board) {
+    println("INFO: adjudicating board:\n```\n$board\n```")
     for (flare in TemporalFlare.entries) {
-        println("INFO: adjudicating board:\n```\n$board\n```")
+        println("INFO: adjudicating with direction $flare")
         adjudicateBoard(board, flare)
     }
     board.kill()
 }
 
 fun Game.adjudicateMoves() {
-    for (timeplane in timeplanes) {
-        for (board in timeplane.boards()) {
-            fullAdjudicateBoard(board)
-        }
-    }
+    val adjudicator = Adjudicator(moves, supports, getAllPieces())
+    println(adjudicator.movesAndBounces)
 }
 
 fun Game.adjudicateRetreats() {}
