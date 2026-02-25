@@ -1,11 +1,12 @@
 package nodomain.seven.dip
 
-import nodomain.seven.dip.game.*
+import nodomain.seven.dip.game.Game
+import nodomain.seven.dip.game.Board
 import nodomain.seven.dip.provinces.RomanPlayers.Cato
 import nodomain.seven.dip.provinces.RomanPlayers.Pompey
 import nodomain.seven.dip.provinces.Romans.CAT
 import nodomain.seven.dip.provinces.Romans.POM
-import nodomain.seven.dip.utils.ComplexNumber.*
+import nodomain.seven.dip.utils.*
 import nodomain.seven.dip.utils.BoardIndex
 
 fun main() {
