@@ -7,8 +7,8 @@ import nodomain.seven.dip.utils.*
 import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
-import nodomain.seven.dip.provinces.RomanPlayers.*
-import nodomain.seven.dip.provinces.Romans.*
+import nodomain.seven.dip.provinces.RomanPlayers
+import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.BoardIndex
 
 enum class GameState {
@@ -17,7 +17,7 @@ enum class GameState {
     BUILDS,
 }
 
-class Game {
+class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
     val supports: MutableList<SupportOrder> = mutableListOf()
     val moves: MutableList<MoveOrder> = mutableListOf()
 
@@ -27,8 +27,7 @@ class Game {
     // Interior mutability
     private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
         mutableMapOf(
-            ComplexNumber(0, 0) to
-                    Board(BoardIndex(0 * i))
+            0.c to Board(BoardIndex(0.c), pieces = setup)
         ))
     private val _limbo: MutableSet<Board> = mutableSetOf() // Set of all boards currently in Limbo
 
@@ -88,14 +87,9 @@ class Board(
     var boardIndex: BoardIndex,
     val parent: Board? = null, // null represents the origin board
 
-    val pieces: Map<Province, Player> = mapOf(
-        CAT to Cato,
-        POM to Pompey,
-    ),
-    val centres: Map<Province, Player> = mapOf(
-        CAT to Cato,
-        POM to Pompey,
-    )) {
+    val pieces: Map<Province, Player>,
+    val centres: Map<Province, Player> = pieces
+) {
     val children = mutableListOf<Board>()
     var isActive = true
         private set
