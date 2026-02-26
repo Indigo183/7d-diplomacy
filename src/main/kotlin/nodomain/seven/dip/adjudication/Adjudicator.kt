@@ -106,7 +106,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private fun initialMoveResults(): PreResult {
         nonCutSupports
-            .filter { it.action.order is MoveOrder }
+            .filter { it.action.order is MoveOrder && it.action.order == byOrigin[it.action.order.from] }
             .forEach { byOrigin[it.action.order.from]?.strength++ }
         return byDestination.asSequence()
             .map { (destination, orders) -> destination to strongestMove(destination,  orders) }

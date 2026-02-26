@@ -9,7 +9,12 @@ sealed interface Action
 // An action and the piece ordering it
 sealed class Order(val piece: Piece, val symbol: String) {
     abstract val action: Action
+
+    override fun equals(other: Any?): Boolean =
+        other is Order && other.from == from && other.action == action
+
     override fun toString(): String =  "$piece$symbol$action"
+
     val from: Location = piece.location
 }
 
