@@ -13,8 +13,8 @@ fun main() {
     val game = Game()
     
     game.input(listOf(
-        origin A CAT M CAE i 3,
-        origin A POM M BRU i 3
+        origin A CAT M BRU i 2,
+        origin A POM M BRU i 1,
     ))
     game.adjudicate()
 }
