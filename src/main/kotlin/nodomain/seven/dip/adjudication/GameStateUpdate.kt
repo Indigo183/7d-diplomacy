@@ -65,8 +65,13 @@ fun Game.fullAdjudicateBoard(board: Board) {
 }
 
 fun Game.adjudicateMoves() {
-    val adjudicator = Adjudicator(moves, supports, getAllPieces())
-    println(adjudicator.movesAndBounces)
+    val pieces = getAllPieces()
+    val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
+    for (flare in TemporalFlare.entries) {
+        println("INFO: adjudicating $flare")
+        adjudicators[flare] = Adjudicator(moves.filter { it.flare == flare }, supports, pieces)
+        println("INFO: with results: ${adjudicators[flare]!!.movesAndBounces}")
+    }
 }
 
 fun Game.adjudicateRetreats() {}
