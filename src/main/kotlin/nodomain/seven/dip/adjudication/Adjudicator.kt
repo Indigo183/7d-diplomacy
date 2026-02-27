@@ -47,7 +47,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
      *
      *  The list may contain additional bounces in occupied provinces
      */
-    val movesAndBounces = computeMovesAndBounces()
+    val moveResults = computeMovesAndBounces()
 
     val needsRetreats: MutableMap<Location, Player> = mutableMapOf()
 
@@ -57,7 +57,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         val piecesOut: MutableMap<Location, Player> = mutableMapOf()
         val mayNeedRetreats: MutableMap<Location, Player> = mutableMapOf()
         piecesIn.forEach { (location, occupant) ->
-            if (byOrigin[location]?.order?.(MoveResult.succeed)() in movesAndBounces)
+            if (byOrigin[location]?.order?.(MoveResult.succeed)() in moveResults)
                 piecesOut += byOrigin[location]!!.order.action.to to occupant
             else
                 mayNeedRetreats += location to occupant
