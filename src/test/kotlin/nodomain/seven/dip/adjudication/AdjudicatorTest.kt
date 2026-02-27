@@ -17,7 +17,7 @@ class AdjudicatorTest: WithAssertions {
             origin A POM M BRU i 3
         )
 
-        val results = Adjudicator(moves, listOf(), pieces).movesAndBounces
+        val results = Adjudicator(moves, listOf(), pieces).moveResults
 
         // println(results)
         assertThat(results).contains(Bounce(origin[BRU]))
@@ -32,7 +32,7 @@ class AdjudicatorTest: WithAssertions {
             origin A POM M BRU i 3
         )
 
-        val results = Adjudicator(moves, listOf(), pieces).movesAndBounces
+        val results = Adjudicator(moves, listOf(), pieces).moveResults
 
         // println(results)
         assertThat(results).containsAll(moves.map { SuccessfulMove(it) })
