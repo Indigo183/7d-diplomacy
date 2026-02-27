@@ -54,10 +54,7 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
         }
     }
 
-    // TODO:
-    //  //////////
-    //  ADJUDICATE
-    //  //////////
+    // Compare the new board with the last produced child
     val newChild = Board(
         BoardIndex(board.boardIndex.coordinate + direction.direction, board.boardIndex.timeplane),
         board,
@@ -70,18 +67,6 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
         addChild(board, newChild)
     }
 }
-
-// Adjudicate board in all directions
-/*
-fun Game.fullAdjudicateBoard(board: Board) {
-    println("INFO: adjudicating board:\n```\n$board\n```")
-    for (flare in TemporalFlare.entries) {
-        println("INFO: adjudicating with direction $flare")
-        adjudicateBoard(board, flare)
-    }
-    board.kill()
-}
- */
 
 fun Game.adjudicateMoves() {
     val pieces = getAllPieces()
