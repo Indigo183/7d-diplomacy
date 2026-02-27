@@ -13,4 +13,4 @@ interface Player {
 }
 
 inline fun <reified T> setup(): Map<Province, Player> where T : Player, T : Enum<T> =
-    enumEntries<T>().flatMap { player -> player.homeCentres.map { it to player } }.toMap()
+    enumEntries<T>().asSequence().flatMap { player -> player.homeCentres.map { it to player } }.toMap()
