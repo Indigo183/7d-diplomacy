@@ -10,12 +10,33 @@ import java.util.Queue
 import kotlin.enums.enumEntries
 
 inline fun <reified Pl, reified Pr> getParser(): Parser where Pl: Player, Pl : Enum<Pl>, Pr : Province, Pr : Enum<Pr> =
-    Parser(enumEntries<Pl>()) { enumValueOf<Pr>(it.trim().uppercase()) }
+    Parser(enumEntries<Pl>(), { enumValueOf<Pr>(it.trim().uppercase()) })
 
 class IncompatibleParserException() : RuntimeException()
 
-class Parser(val players: List<Player>, val asProvince: (String) -> Province){
-    private interface FormattedParser {
+interface Notation {
+    fun asBoardIndex(string: String): BoardIndex
+
+    fun asUnitType(string: String): (Location) ->  Piece
+
+    fun asAction(string: String): Char
+
+    fun asTemporalFlare(string: String): Int
+}
+
+class Parser(
+    val players: List<Player>,
+    val asProvince: (String) -> Province,
+    val notation: Notation = DefaultNotation
+){
+    enum class Format(val getFormatter: (Parser) -> FormattedParser) {
+        VERBOSE({it.Verbose()})
+    }
+
+    fun parseOrderSet(from: String, format: Format, separatedBy: String = "\n\n"): List<Order> =
+        from.split(separatedBy).flatMap(format.getFormatter(this)::parseOrders)
+
+    interface FormattedParser {
         fun Queue<String>.parseOrder(): Order
 
         fun parseOrder(asString: String): Order =
@@ -27,9 +48,6 @@ class Parser(val players: List<Player>, val asProvince: (String) -> Province){
 
         fun parseOrders(from: String, separatedBy: String = "\n"): List<Order> =
             from.split(separatedBy).asSequence().map(this::parseOrderOrNull).filterNotNull().toList()
-
-        fun parseOrderSet(from: String, separatedBy: String = "\n\n"): List<Order> =
-            from.split(separatedBy).flatMap(this::parseOrders)
     }
 
     private interface AnnouncedParser: FormattedParser {
@@ -54,19 +72,22 @@ class Parser(val players: List<Player>, val asProvince: (String) -> Province){
 
     inner class Verbose: FormattedParser {
         override fun Queue<String>.parseOrder(): Order {
-            return withFirst(::asBoardIndex)
-                .combiningNext(::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
+            return withFirst(notation::asBoardIndex)
+                .combiningNext(notation::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
                 .combiningNext(asProvince) { province, board  -> board(province)}
-                .combiningInto(::asAction) { action, piece -> when(action) {
+                .combiningInto(notation::asAction) { action, piece -> when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrder() }
-                    'M' -> piece M withFirst(::asBoardIndex).combiningInto(asProvince, ::Location) i asTemporalFlare(remove())
+                    'M' -> piece M withFirst(notation::asBoardIndex)
+                        .combiningInto(asProvince, ::Location) i notation.asTemporalFlare(remove())
                     else -> throw IllegalStateException()
                 } }
         }
     }
+}
 
-    fun asBoardIndex(string: String): BoardIndex {
+object DefaultNotation: Notation {
+    override fun asBoardIndex(string: String): BoardIndex {
         return BoardIndex(
             ComplexNumber(
                 string.substringBefore('+').trim().toInt(),
@@ -74,12 +95,13 @@ class Parser(val players: List<Player>, val asProvince: (String) -> Province){
             ), string.substringAfter('T').trim().toInt())
     }
 
-    fun asUnitType(string: String): (Location) ->  Piece = when (string.first()) {
+    override fun asUnitType(string: String): (Location) -> Piece = when (string.first()) {
         'A' -> ::Army
         else -> throw IncompatibleParserException()
     }
 
-    fun asAction(string: String): Char = string.first().uppercaseChar()
+    override fun asAction(string: String): Char = string.first().uppercaseChar()
 
-    fun asTemporalFlare(string: String): Int = string.last().toString().toInt()
+    override fun asTemporalFlare(string: String): Int = string.last().toString().toInt()
 }
+
