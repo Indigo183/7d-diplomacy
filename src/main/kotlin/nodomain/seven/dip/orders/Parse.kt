@@ -40,7 +40,6 @@ class Parser(
             .groupBy({(_, player) -> player },  {(order, _) -> order})
     }
 
-
     interface Formatted<T> {
         fun Queue<String>.parseOrderInPieces(): T
 
@@ -94,7 +93,8 @@ class Parser(
 
     inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
         override fun Queue<String>.parseOrderInPieces(): Pair<Order, Player> {
-            return withFirst(asPlayer).combiningInto( { basedOn.parseOrderInPieces(this) } , ::Pair)
+            val player = asPlayer(remove())
+            return Pair(basedOn.parseOrderInPieces(this), player)
         }
     }
 }
@@ -121,15 +121,10 @@ object DefaultNotation: Notation {
 enum class Format(val getFormatter: Parser.() -> Formatted<Order>): (Parser) -> Formatted<Order> {
     VERBOSE({Verbose()});
 
-    override fun invoke(parser: Parser): Formatted<Order> {
-        return parser.getFormatter()
-    }
+    override fun invoke(parser: Parser): Formatted<Order> = parser.getFormatter()
 }
 enum class NationalisedFormat(val getFormatter: Parser.() -> Formatted<OwnedOrder>): (Parser) -> Formatted<OwnedOrder> {
     VERBOSE_WITH_PLAYER({National(Verbose())});
 
-    override fun invoke(parser: Parser): Formatted<OwnedOrder> {
-        return parser.getFormatter()
-    }
+    override fun invoke(parser: Parser): Formatted<OwnedOrder> = parser.getFormatter()
 }
-
