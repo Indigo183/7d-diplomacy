@@ -34,7 +34,8 @@ fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<
 }
 
 // Adjudicate board in a single direction
-fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: List<MoveResult>): Pair<Board, Board>? {
+fun Game.adjudicateBoard(boardIndex: BoardIndex, direction: TemporalFlare, moveResults: List<MoveResult>): Pair<Board, Board>? {
+    val board = getBoard(boardIndex)!!
     println("killing board at ${board.boardIndex}")
     kill(board)
     // Do nothing if nothing relevant happened
@@ -75,7 +76,7 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
 
 fun Game.adjudicateMoves() {
     val pieces = getAllPieces()
-    val boards = timeplanes.flatMap { it.boards() } // to ensure the list of boards isn't updated
+    val boardIndexes = timeplanes.flatMap { it.keys } // to ensure the list of boards isn't updated
     val parentChildBoardPairs: MutableList<Pair<Board, Board>> = mutableListOf()
     val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
 
@@ -85,12 +86,12 @@ fun Game.adjudicateMoves() {
         val adjudicator = Adjudicator(moves.filter { it.flare == flare }, supports, pieces)
         adjudicators[flare] = adjudicator
         println("INFO: with results: ${adjudicator.moveResults}")
-        for (board in boards) {
-            println("INFO: adjudicating board at ${board.boardIndex}")
-            parentChildBoardPairs.add(adjudicateBoard(board, flare, adjudicator.moveResults.filter {
+        for (index in boardIndexes) {
+            println("INFO: adjudicating board at ${index}")
+            parentChildBoardPairs.add(adjudicateBoard(index, flare, adjudicator.moveResults.filter {
                 it !is SuccessfulMove || // "it is Bounce"
-                it.moveOrder.from.boardIndex == board.boardIndex ||
-                it.moveOrder.action.to.boardIndex == board.boardIndex
+                it.moveOrder.from.boardIndex == index ||
+                it.moveOrder.action.to.boardIndex == index
             }) ?: continue)
         }
     }
