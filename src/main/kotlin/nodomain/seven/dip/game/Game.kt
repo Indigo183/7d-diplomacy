@@ -2,6 +2,7 @@ package nodomain.seven.dip.game
 
 import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.orders.Order
+import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.utils.*
 
 import nodomain.seven.dip.orders.SupportOrder
@@ -20,6 +21,7 @@ enum class GameState {
 class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
     val supports: MutableList<SupportOrder> = mutableListOf()
     val moves: MutableList<MoveOrder> = mutableListOf()
+    val retreats: MutableList<Piece> = mutableListOf()
 
     // For future optimisation of adjudication
     var currentOrders: List<Order> = listOf()
@@ -48,29 +50,21 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
         }
     }
 
-    // Create child from component parts
-    fun addChild(parent: Board, boardIndex: BoardIndex, pieces: Map<Province, Player>, centres: Map<Province, Player>) {
-        val child = Board(boardIndex, parent, pieces, centres)
-        parent.children += child
-        if (boardIndex.timeplane !== null) {
-            _timeplanes[boardIndex.timeplane][boardIndex.coordinate] = child
-        } else {
-            _limbo += child
-        }
-    }
+    fun kill(board: Board) = getBoard(board.boardIndex)?.kill() ?: println("WARN: attempted to kill non-existent board")
 
     // Add child directly
     fun addChild(parent: Board, child: Board) {
         if (child.parent !== parent) throw IllegalArgumentException("`child.parent` is not equal to `parent`")
         parent.children += child
         if (child.boardIndex.timeplane !== null) {
+            if (timeplanes.getOrNull(child.boardIndex.timeplane!!) === null) // Create new timeplane
+                _timeplanes[child.boardIndex.timeplane!!] = mutableMapOf()
             _timeplanes[child.boardIndex.timeplane!!][child.boardIndex.coordinate] = child
         } else {
             _limbo += child
         }
     }
 
-    // TODO: implement actual rigorous logic
     fun advanceState() {
         gameState = when (gameState) {
             GameState.MOVES -> GameState.RETREATS
@@ -94,9 +88,9 @@ class Board(
     var isActive = true
         private set
 
-    // set `isActive` to false
+    // set `isActive` to false (very useful comment)
     fun kill() {
-        if (isActive) isActive = false else println("WARN: called `Board.kill()` on an already dead board")
+        isActive = false
     }
 
     override fun toString(): String {

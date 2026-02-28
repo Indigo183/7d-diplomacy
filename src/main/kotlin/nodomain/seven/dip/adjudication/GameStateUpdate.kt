@@ -34,19 +34,21 @@ fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<
 }
 
 // Adjudicate board in a single direction
-fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: List<MoveResult>) {
+fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: List<MoveResult>): Pair<Board, Board>? {
     println("killing board at ${board.boardIndex}")
-    board.kill()
+    kill(board)
     // Do nothing if nothing relevant happened
-    if (moveResults.isEmpty()) return
+    if (moveResults.isEmpty()) return null
 
     val pieces: MutableMap<Province, Player> = board.pieces.toMutableMap()
     val centres: MutableMap<Province, Player> = board.centres.toMutableMap()
 
     for (move in moveResults) if (move is SuccessfulMove) {
-        // Add pieces mkvkng to board
+        // Add pieces moving to board
         if (move.moveOrder.action.to.boardIndex == board.boardIndex) {
-            pieces[move.moveOrder.action.to.province] = getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province] ?: throw IllegalArgumentException("order not properly validated") // TODO: correct exception
+            pieces[move.moveOrder.action.to.province] =
+                getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province]
+                ?: throw IllegalStateException("order not properly validated")
         }
         // Remove pieces moving from board
         if (move.moveOrder.from.boardIndex == board.boardIndex) {
@@ -61,36 +63,64 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
         pieces,
         centres,
     )
-    val mostRecentChild = board.children.lastOrNull { limboBoard ->
+    val newestChild = board.children.lastOrNull { limboBoard ->
         limboBoard.boardIndex.coordinate - board.boardIndex.coordinate == direction.direction }
-    if (mostRecentChild === null || (newChild.pieces == mostRecentChild.pieces && newChild.centres == mostRecentChild.centres)) {
-        addChild(board, newChild)
-    }
+    return if (
+        newestChild === null ||
+        (newChild.pieces == newestChild.pieces && newChild.centres == newestChild.centres)
+    ) {
+        Pair(board, newChild)
+    } else null
 }
 
 fun Game.adjudicateMoves() {
     val pieces = getAllPieces()
-    val boards = timeplanes.flatMap { it.boards() } //  to ensure the list of boards isn't updated
+    val boards = timeplanes.flatMap { it.boards() } // to ensure the list of boards isn't updated
+    val parentChildBoardPairs: MutableList<Pair<Board, Board>> = mutableListOf()
     val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
+
+    // Generate children
     for (flare in TemporalFlare.entries) {
         println("INFO: adjudicating $flare")
         val adjudicator = Adjudicator(moves.filter { it.flare == flare }, supports, pieces)
         adjudicators[flare] = adjudicator
         println("INFO: with results: ${adjudicator.moveResults}")
         for (board in boards) {
-            println("INFO: ajudicating board at ${board.boardIndex}")
-            adjudicateBoard(board, flare, adjudicator.moveResults.filter {
+            println("INFO: adjudicating board at ${board.boardIndex}")
+            parentChildBoardPairs.add(adjudicateBoard(board, flare, adjudicator.moveResults.filter {
                 it !is SuccessfulMove || // "it is Bounce"
                 it.moveOrder.from.boardIndex == board.boardIndex ||
                 it.moveOrder.action.to.boardIndex == board.boardIndex
-                })
+            }) ?: continue)
         }
+    }
+
+    // Add children
+    for ((boardIndex, pairs) in parentChildBoardPairs.groupBy { (_, child) -> child.boardIndex }) {
+        if (pairs.size == 1) addChild(pairs[0].first, pairs[0].second)
+        // TODO: "else <check board bounce>"
+    }
+
+    //val boardDestinations: List<BoardIndex> = mutableListOf()
+    //for ((parent, child) in parentChildBoardPairs)
+
+    advanceState()
+    if (retreats.isEmpty()) adjudicateRetreats()
+}
+
+fun Game.adjudicateRetreats() {
+    retreats.clear()
+    advanceState()
+    if (timeplanes.flatMap { it.boards().filter { it.isActive && it.boardIndex.coordinate.isEven() } }.isEmpty()) {
+        adjudicateBuilds()
     }
 }
 
-fun Game.adjudicateRetreats() {}
-
-fun Game.adjudicateBuilds() {}
+fun Game.adjudicateBuilds() {
+    val boards = timeplanes.flatMap { it.boards().filter { it.isActive && it.boardIndex.coordinate.isEven() } }
+    for (board in boards); // TODO: adjudicate builds
+    advanceState()
+}
 
 fun Game.adjudicate() {
     when (gameState) {
@@ -98,5 +128,4 @@ fun Game.adjudicate() {
         GameState.RETREATS -> adjudicateRetreats()
         GameState.BUILDS -> adjudicateBuilds()
     }
-    advanceState()
 }
