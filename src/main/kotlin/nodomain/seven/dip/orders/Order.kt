@@ -14,6 +14,8 @@ sealed class Order(val piece: Piece, val symbol: String) {
         other is Order && other.from == from && other.action == action
 
     override fun toString(): String =  "$piece$symbol$action"
+    override fun hashCode(): Int = piece.hashCode() * 31 + action.hashCode()
+
 
     val from: Location = piece.location
 }
