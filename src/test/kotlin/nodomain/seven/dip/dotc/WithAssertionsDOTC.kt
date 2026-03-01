@@ -1,10 +1,10 @@
 package nodomain.seven.dip.dotc
 
 import nodomain.seven.dip.adjudication.adjudicate
-import nodomain.seven.dip.game.Board
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser
+import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Player
@@ -23,17 +23,23 @@ interface WithAssertionsDOTC: WithAssertions {
     fun String.parse(): Map<Player, List<Order>> =
         parser.parseOrderSet(this.trimMargin(), Parser.NationalisedFormat.DOTC)
 
-    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Map<Province, Player> = impliedSetup()): Board? {
+    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Map<Province, Player> = impliedSetup()): Game {
         val game = Game(setup)
         forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
-        return game.getBoard(BoardIndex(1.c))
+        return game
     }
 
     fun Map<Player, List<Order>>.impliedSetup(): Map<Province, Player> =
         asSequence().flatMap { (player, orders) -> orders.map { it.from.province to player } }.toMap()
 
-    fun Board?.andAssertThatNothingMoved() {
-        assertThat(this).isNull()
+    val Game.pieces: Map<Province, Player>? get() = getBoard(BoardIndex(1.c))?.pieces
+
+    fun Game.andAssertThatNothingMoved(): Game {
+        assertThat(pieces).satisfiesAnyOf(
+            {assertThat(it).isNull()},
+            {assertThat(it).isEqualTo(getBoard(T(0.c, 0))!!.pieces)}
+        )
+        return this
     }
 }
