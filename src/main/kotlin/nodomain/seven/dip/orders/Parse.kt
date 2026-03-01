@@ -5,11 +5,15 @@ import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.c
 import java.util.LinkedList
 import java.util.Queue
 
-inline fun <reified Pl, reified Pr> getParser(): Parser where Pl: Player, Pl : Enum<Pl>, Pr : Province, Pr : Enum<Pr> =
-    Parser({ enumValueOf<Pl>(it.trim()) }, { enumValueOf<Pr>(it.trim().uppercase()) })
+inline fun <reified Pl, reified Pr> getParser(
+    crossinline playerTrim: String.() -> String = String::trim,
+    crossinline provinceTrim: String.() -> String = String::trim
+): Parser where Pl: Player, Pl : Enum<Pl>, Pr : Province, Pr : Enum<Pr> =
+    Parser({ enumValueOf<Pl>(it.playerTrim()) }, { enumValueOf<Pr>(it.provinceTrim()) })
 
 class IncompatibleParserException() : RuntimeException()
 
@@ -36,7 +40,8 @@ class Parser(
         override fun invoke(parser: Parser): ParsingHelper<Order> = parser.getFormatter()
     }
     enum class NationalisedFormat(val getFormatter: Parser.() -> ParsingHelper<OwnedOrder>): (Parser) -> ParsingHelper<OwnedOrder> {
-        VERBOSE_WITH_PLAYER({National(Verbose())});
+        VERBOSE_WITH_PLAYER({National(Verbose())}),
+        DOTC({DOTC()});
 
         override fun invoke(parser: Parser): ParsingHelper<OwnedOrder> = parser.getFormatter()
     }
@@ -55,12 +60,10 @@ class Parser(
     }
 
     private interface Formatted<T>: ParsingHelper<T> {
-        fun Queue<String>.parseOrderInPieces(): T
-
-        fun parseOrderInPieces(queue: Queue<String>): T = queue.parseOrderInPieces()
+        fun parseOrderInPieces(queue: Queue<String>): T
 
         fun parseOrder(asString: String): T =
-            asString.split(" ").toCollection(LinkedList()).parseOrderInPieces()
+            parseOrderInPieces(asString.split(" ").toCollection(LinkedList()))
 
         fun parseOrderOrNull(asString: String): T? =
             try { parseOrder(asString) }
@@ -91,24 +94,43 @@ class Parser(
     }
 
     private inner class Verbose: Formatted<Order> {
-        override fun Queue<String>.parseOrderInPieces(): Order {
-            return withFirst(notation::asBoardIndex)
+        override fun parseOrderInPieces(queue: Queue<String>): Order {
+            return queue.withFirst(notation::asBoardIndex)
                 .combiningNext(notation::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
                 .combiningNext(asProvince) { province, board  -> board(province)}
                 .combiningInto(notation::asAction) { action, piece -> when(action) {
                     'H' -> piece.holds
-                    'S' -> piece S { parseOrderInPieces() }
-                    'M' -> piece M withFirst(notation::asBoardIndex)
-                        .combiningInto(asProvince, ::Location) i notation.asTemporalFlare(remove())
+                    'S' -> piece S { parseOrderInPieces(queue) }
+                    'M' -> piece M queue.withFirst(notation::asBoardIndex)
+                        .combiningInto(asProvince, ::Location) i notation.asTemporalFlare(queue.remove())
                     else -> throw IllegalStateException()
                 } }
         }
     }
 
+    private inner class DOTC: Announced<OwnedOrder> {
+        val origin = BoardIndex(0.c)
+        lateinit var owner: Player
+
+        override fun parseHeader(asString: String) {
+            owner = asPlayer(asString.substringBefore(':'))
+        }
+
+        override fun parseOrderInPieces(queue: Queue<String>): OwnedOrder {
+            return queue.withFirst(notation::asUnitType)
+                .combiningNext(asProvince) { province, unitType -> unitType(Location(province, origin))}
+                .combiningInto(notation::asAction) {action, piece -> Pair(when(action) {
+                    'H' -> piece.holds
+                    'S' -> piece S { parseOrderInPieces(queue).first }
+                    '-' -> piece M asProvince(queue.remove())
+                    else -> throw IllegalStateException()}, owner) }
+        }
+    }
+
     private inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
-        override fun Queue<String>.parseOrderInPieces(): Pair<Order, Player> {
-            val player = asPlayer(remove())
-            return Pair(basedOn.parseOrderInPieces(this), player)
+        override fun parseOrderInPieces(queue: Queue<String>): Pair<Order, Player> {
+            val player = asPlayer(queue.remove())
+            return Pair(basedOn.parseOrderInPieces(queue), player)
         }
     }
 }
