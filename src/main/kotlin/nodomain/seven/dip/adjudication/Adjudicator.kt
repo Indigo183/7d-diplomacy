@@ -49,28 +49,6 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
      */
     val moveResults = computeMovesAndBounces()
 
-    val needsRetreats: MutableMap<Location, Player> = mutableMapOf()
-
-    val piecesOut: Map<Location, Player> = computePiecesOut()
-
-    private fun computePiecesOut(): Map<Location, Player> {
-        val piecesOut: MutableMap<Location, Player> = mutableMapOf()
-        val mayNeedRetreats: MutableMap<Location, Player> = mutableMapOf()
-        piecesIn.forEach { (location, occupant) ->
-            if (byOrigin[location]?.order?.(MoveResult.succeed)() in moveResults)
-                piecesOut += byOrigin[location]!!.order.action.to to occupant
-            else
-                mayNeedRetreats += location to occupant
-        }
-        mayNeedRetreats.forEach { (location, occupant) ->
-            if (piecesOut.containsKey(location))
-                needsRetreats += location to occupant
-            else
-                piecesOut += location to occupant
-        }
-        return piecesOut
-    }
-
     private fun computeMovesAndBounces(): List<MoveResult> {
         val withDependantMove = initialMoveResults().updateBouncesDueToDislodgement()
         return withDependantMove.values.map {
