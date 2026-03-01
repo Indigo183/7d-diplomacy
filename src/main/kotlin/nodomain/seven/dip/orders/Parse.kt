@@ -63,7 +63,7 @@ class Parser(
         fun parseOrderInPieces(queue: Queue<String>): T
 
         fun parseOrder(asString: String): T =
-            parseOrderInPieces(asString.split(" ").toCollection(LinkedList()))
+            parseOrderInPieces(asString.trim().split(" ").toCollection(LinkedList()))
 
         fun parseOrderOrNull(asString: String): T? =
             try { parseOrder(asString) }
