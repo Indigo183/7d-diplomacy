@@ -12,6 +12,10 @@ class A: WithAssertionsDOTC {
 
     }
 
+    //6.A.2. TEST CASE, MOVE ARMY TO SEA
+
+    //6.A.3. TEST CASE, MOVE FLEET TO LAND
+
     @Test
     fun `6_A_4 TEST CASE, MOVE TO OWN SECTOR`() {
         """
@@ -19,6 +23,12 @@ class A: WithAssertionsDOTC {
         |F Kiel - Kiel
         |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
+
+    //6.A.5. TEST CASE, MOVE TO OWN SECTOR WITH CONVOY
+
+    //6.A.6. TEST CASE, ORDERING A UNIT OF ANOTHER COUNTRY
+
+    //6.A.7. TEST CASE, ONLY ARMIES CAN BE CONVOYED
 
     @Test
     fun `6_A_8 TEST CASE, SUPPORT TO HOLD YOURSELF IS NOT POSSIBLE`() {
@@ -33,4 +43,12 @@ class A: WithAssertionsDOTC {
 
         assertThat(result!!.pieces).containsEntry(TRI, Italy)
     }
+
+    //6.A.9. TEST CASE, FLEETS MUST FOLLOW COAST IF NOT ON SEA
+
+    //6.A.10. TEST CASE, SUPPORT ON UNREACHABLE DESTINATION NOT POSSIBLE
+
+    //6.A.11. TEST CASE, SIMPLE BOUNCE
+
+    //6.A.12. TEST CASE, BOUNCE OF THREE UNITS
 }
