@@ -18,4 +18,15 @@ class InputTest: WithAssertions {
 
         assertThat(result).isFalse
     }
+
+    @Test
+    fun inputTest() {
+        val game = Game(setup<StandardPlayer>())
+
+        val testOrder = A[NAP] S { A[APU] M VEN}
+
+        game.input(listOf(testOrder))
+
+        assertThat(game.supports).isEmpty()
+    }
 }
