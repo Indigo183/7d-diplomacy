@@ -60,17 +60,15 @@ class DOTC: WithAssertions {
 
     @Test
     fun `6_A_8 TEST CASE, SUPPORT TO HOLD YOURSELF IS NOT POSSIBLE`() {
-        val result = """Italy:
-        A Venice -Trieste
-        A Tyrolia Supports A Venice - Trieste
+        val result = """
+        |Italy:
+        |A Venice - Trieste
+        |A Tyrolia Supports A Venice - Trieste
+        |
+        |Austria:
+        |F Trieste Supports F Trieste
+        |""".parse().adjudicateAsDOTC()
 
-        Austria:
-        F Trieste Supports F Trieste
-        """.parse()
-
-        println(result)
-        /*.adjudicateAsDOTC()
-
-        assertThat(result!!.pieces).containsEntry(TRI, Italy)*/
+        assertThat(result!!.pieces).containsEntry(TRI, Italy)
     }
 }
