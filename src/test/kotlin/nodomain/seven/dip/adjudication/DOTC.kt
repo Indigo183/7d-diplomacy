@@ -4,7 +4,7 @@ import nodomain.seven.dip.game.Board
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.Parser
+import nodomain.seven.dip.orders.Parser.NationalisedFormat.DOTC
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Player
@@ -22,11 +22,10 @@ class DOTC: WithAssertions {
 
         @JvmStatic
         fun String.parse(): Map<Player, List<Order>> =
-            parser.parseOrderSet(this.trimMargin(), Parser.NationalisedFormat.DOTC)
+            parser.parseOrderSet(this.trimMargin(), DOTC)
 
         @JvmStatic
         fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Map<Province, Player> = impliedSetup()): Board? {
-            forEach { (_, orders) -> orders.forEach { if (it is MoveOrder) it i 0 } }
             val game = Game(setup)
             forEach { (player, orders) -> game.input(orders, player) }
             game.adjudicate()

@@ -122,7 +122,7 @@ class Parser(
                 .combiningInto(notation::asAction) {action, piece -> Pair(when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue).first }
-                    '-' -> piece M asProvince(queue.remove())
+                    '-' -> piece M asProvince(queue.remove()) i 0
                     else -> throw IllegalStateException()}, owner) }
         }
     }
