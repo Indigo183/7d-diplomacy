@@ -2,7 +2,6 @@ package nodomain.seven.dip.adjudication
 
 import nodomain.seven.dip.game.Board
 import nodomain.seven.dip.game.Game
-import nodomain.seven.dip.orders.MoveOrder
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser.NationalisedFormat.DOTC
 import nodomain.seven.dip.orders.getParser
@@ -10,7 +9,9 @@ import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.StandardPlayer
+import nodomain.seven.dip.provinces.StandardPlayer.*
 import nodomain.seven.dip.provinces.StandardProvince
+import nodomain.seven.dip.provinces.StandardProvince.*
 import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
@@ -50,11 +51,26 @@ class DOTC: WithAssertions {
     }
 
     @Test
-    fun `6_A_4 test case, move to own sector`() {
+    fun `6_A_4 TEST CASE, MOVE TO OWN SECTOR`() {
         """
         Germany:
         F Kiel - Kiel
         """.parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 
+    @Test
+    fun `6_A_8 TEST CASE, SUPPORT TO HOLD YOURSELF IS NOT POSSIBLE`() {
+        val result = """Italy:
+        A Venice -Trieste
+        A Tyrolia Supports A Venice - Trieste
+
+        Austria:
+        F Trieste Supports F Trieste
+        """.parse()
+
+        println(result)
+        /*.adjudicateAsDOTC()
+
+        assertThat(result!!.pieces).containsEntry(TRI, Italy)*/
+    }
 }
