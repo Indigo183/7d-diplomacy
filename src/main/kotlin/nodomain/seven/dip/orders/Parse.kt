@@ -1,6 +1,5 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.orders.Parser.Formatted
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.utils.BoardIndex
@@ -31,16 +30,31 @@ class Parser(
     val asProvince: (String) -> Province,
     val notation: Notation = DefaultNotation
 ){
-    fun parseOrderSet(from: String, format: (Parser) -> Formatted<Order>, delimiter: String = "\n\n"): List<Order> =
+    enum class Format(val getFormatter: Parser.() -> ParsingHelper<Order>): (Parser) -> ParsingHelper<Order> {
+        VERBOSE({Verbose()});
+
+        override fun invoke(parser: Parser): ParsingHelper<Order> = parser.getFormatter()
+    }
+    enum class NationalisedFormat(val getFormatter: Parser.() -> ParsingHelper<OwnedOrder>): (Parser) -> ParsingHelper<OwnedOrder> {
+        VERBOSE_WITH_PLAYER({National(Verbose())});
+
+        override fun invoke(parser: Parser): ParsingHelper<OwnedOrder> = parser.getFormatter()
+    }
+
+    fun parseOrderSet(from: String, format: (Parser) -> ParsingHelper<Order>, delimiter: String = "\n\n"): List<Order> =
         from.split(delimiter).flatMap(format(this)::parseOrders)
 
-    fun parseOrderSet(from: String, format: (Parser) -> Formatted<OwnedOrder>, delimiter: String = "\n\n"): Map<Player, List<Order>> {
+    fun parseOrderSet(from: String, format: (Parser) -> ParsingHelper<OwnedOrder>, delimiter: String = "\n\n"): Map<Player, List<Order>> {
         return from.split(delimiter)
             .flatMap(format(this)::parseOrders)
             .groupBy({(_, player) -> player },  {(order, _) -> order})
     }
 
-    interface Formatted<T> {
+    sealed interface ParsingHelper<T> {
+        fun parseOrders(from: String, separatedBy: String = "\n"): List<T>
+    }
+
+    private interface Formatted<T>: ParsingHelper<T> {
         fun Queue<String>.parseOrderInPieces(): T
 
         fun parseOrderInPieces(queue: Queue<String>): T = queue.parseOrderInPieces()
@@ -52,7 +66,7 @@ class Parser(
             try { parseOrder(asString) }
             catch (_ : Exception) { null }
 
-        fun parseOrders(from: String, separatedBy: String = "\n"): List<T> =
+        override fun parseOrders(from: String, separatedBy: String): List<T> =
             from.split(separatedBy).asSequence().map(this::parseOrderOrNull).filterNotNull().toList()
     }
 
@@ -76,7 +90,7 @@ class Parser(
             combiner(parseT(remaining.remove()), intermediateResult)
     }
 
-    inner class Verbose: Formatted<Order> {
+    private inner class Verbose: Formatted<Order> {
         override fun Queue<String>.parseOrderInPieces(): Order {
             return withFirst(notation::asBoardIndex)
                 .combiningNext(notation::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
@@ -91,7 +105,7 @@ class Parser(
         }
     }
 
-    inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
+    private inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
         override fun Queue<String>.parseOrderInPieces(): Pair<Order, Player> {
             val player = asPlayer(remove())
             return Pair(basedOn.parseOrderInPieces(this), player)
@@ -116,15 +130,4 @@ object DefaultNotation: Notation {
     override fun asAction(string: String): Char = string.first().uppercaseChar()
 
     override fun asTemporalFlare(string: String): Int = string.last().toString().toInt()
-}
-
-enum class Format(val getFormatter: Parser.() -> Formatted<Order>): (Parser) -> Formatted<Order> {
-    VERBOSE({Verbose()});
-
-    override fun invoke(parser: Parser): Formatted<Order> = parser.getFormatter()
-}
-enum class NationalisedFormat(val getFormatter: Parser.() -> Formatted<OwnedOrder>): (Parser) -> Formatted<OwnedOrder> {
-    VERBOSE_WITH_PLAYER({National(Verbose())});
-
-    override fun invoke(parser: Parser): Formatted<OwnedOrder> = parser.getFormatter()
 }
