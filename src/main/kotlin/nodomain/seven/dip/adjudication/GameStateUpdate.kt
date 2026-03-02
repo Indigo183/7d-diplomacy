@@ -25,7 +25,7 @@ fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder
 fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<Location, Player> {
     val pieces: MutableMap<Location, Player> = mutableMapOf()
     for (t in timeplanes) for (board in t.boards()) if (!onlyActive || board.isActive) for (piece in board.pieces) {
-        if (player !== null && piece.value == player) {
+        if (player === null || piece.value == player) {
             pieces[Location(piece.key, board.boardIndex)] = piece.value
         }
     }
