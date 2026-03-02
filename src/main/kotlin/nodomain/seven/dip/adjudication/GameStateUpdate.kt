@@ -55,9 +55,13 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
         }
     }
 
+    // Propagate child up
+    var iter = board.boardIndex.timeplane!!
+    while (getBoard(BoardIndex(board.boardIndex.coordinate + direction.direction, iter)) !== null) iter++
+
     // Compare the new board with the last produced child
     val newChild = Board(
-        BoardIndex(board.boardIndex.coordinate + direction.direction, board.boardIndex.timeplane),
+        BoardIndex(board.boardIndex.coordinate + direction.direction, iter),
         board,
         pieces,
         centres,
@@ -68,7 +72,7 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
         (latestChild === null &&
             (newChild.pieces != board.pieces || newChild.centres != board.centres))
         || (latestChild !== null &&
-        (newChild.pieces != latestChild!!.pieces || newChild.centres != latestChild.centres))
+        (newChild.pieces != latestChild.pieces || newChild.centres != latestChild.centres))
     ) newChild else null
 }
 
@@ -119,9 +123,6 @@ fun Game.adjudicateMoves() {
             }
         }
     }
-
-    //val boardDestinations: List<BoardIndex> = mutableListOf()
-    //for ((parent, child) in parentChildBoardPairs)
 
     advanceState()
     if (retreats.isEmpty()) adjudicateRetreats()

@@ -55,8 +55,9 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
         if (child.parent !== parent) throw IllegalArgumentException("`child.parent` is not equal to `parent`")
         parent.children += child
         if (child.boardIndex.timeplane !== null) {
-            if (timeplanes.getOrNull(child.boardIndex.timeplane!!) === null) // Create new timeplane
-                _timeplanes[child.boardIndex.timeplane!!] = mutableMapOf()
+            // Create new timeplane if necessary
+            while (timeplanes.getOrNull(child.boardIndex.timeplane!!) === null)
+                _timeplanes += mutableMapOf()
             _timeplanes[child.boardIndex.timeplane!!][child.boardIndex.coordinate] = child
         } else {
             _limbo += child
