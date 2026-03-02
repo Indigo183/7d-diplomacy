@@ -3,7 +3,7 @@ package nodomain.seven.dip.dotc
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.Parser
+import nodomain.seven.dip.orders.Parser.NationalisedFormat.DOTC
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
@@ -15,22 +15,25 @@ import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
 
+typealias Setup = Map<Province, Player>
+
 interface WithAssertionsDOTC: WithAssertions {
     companion object {
-        val parser = getParser<StandardPlayer, StandardProvince>(provinceTrim = { trim().substring(0, 3).uppercase() })
+        private val parser = getParser<StandardPlayer, StandardProvince>(provinceTrim = { trim().substring(0, 3).uppercase() })
     }
 
     fun String.parse(): Map<Player, List<Order>> =
-        parser.parseOrderSet(this.trimMargin(), Parser.NationalisedFormat.DOTC)
+        parser.parseOrderSet(this.trimMargin(), DOTC)
 
-    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Map<Province, Player> = impliedSetup()): Game {
+
+    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Setup = impliedSetup()): Game {
         val game = Game(setup)
         forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
         return game
     }
 
-    fun Map<Player, List<Order>>.impliedSetup(): Map<Province, Player> =
+    fun Map<Player, List<Order>>.impliedSetup(): Setup =
         asSequence().flatMap { (player, orders) -> orders.map { it.from.province to player } }.toMap()
 
     val Game.pieces: Map<Province, Player>? get() = getBoard(BoardIndex(1.c))?.pieces

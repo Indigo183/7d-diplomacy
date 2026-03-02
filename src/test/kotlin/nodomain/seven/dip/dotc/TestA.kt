@@ -1,7 +1,5 @@
 package nodomain.seven.dip.dotc
 
-import nodomain.seven.dip.provinces.Player
-import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.StandardPlayer.*
 import nodomain.seven.dip.provinces.StandardProvince.*
 import kotlin.test.Test
@@ -34,12 +32,12 @@ object TestA: WithAssertionsDOTC {
 
     @Test
     fun `6_A_6 TEST CASE, ORDERING A UNIT OF ANOTHER COUNTRY`() {// Modified due to involving sea regions
-        val setup: Map<Province, Player> = mapOf(PAR to France) //France has an army in Paris.
+        val franceHasAnArmyInParis: Setup = mapOf(PAR to France)
 
         """
         |Germany:
         |A Paris - Brest
-        |""".parse().adjudicateAsDOTC(setup).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(franceHasAnArmyInParis).andAssertThatNothingMoved()
     }
 
     //6.A.7. TEST CASE, ONLY ARMIES CAN BE CONVOYED
