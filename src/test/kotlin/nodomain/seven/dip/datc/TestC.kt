@@ -1,4 +1,4 @@
-package nodomain.seven.dip.dotc
+package nodomain.seven.dip.datc
 
 import kotlin.test.Test
 
