@@ -29,10 +29,6 @@ fun main() {
         T(-1.c, 0) A POM M Location(POM, origin) i 1,
     ))
     game.adjudicate()
-    // TODO: fix game state cycling //
-    game.adjudicate()              //
-    game.adjudicate()             //
-    // //  Remove up to here  // //
     for (board in game.timeplanes.flatMap { it.boards() }) testBoard(board)
 }
 
