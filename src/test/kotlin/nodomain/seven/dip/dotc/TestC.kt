@@ -1,11 +1,39 @@
 package nodomain.seven.dip.dotc
 
+import kotlin.test.Test
+
 object TestC: WithAssertionsDOTC {
-    //6.C.1. TEST CASE, THREE ARMY CIRCULAR MOVEMENT
+    @Test
+    fun `6_C_1 TEST CASE, THREE ARMY CIRCULAR MOVEMENT`() {
+        """
+        |Turkey: 
+        |A Ankara - Constantinople
+        |A Constantinople - Smyrna
+        |A Smyrna - Ankara
+        |""".parse().adjudicateAsDOTC()
+    }
 
-    //6.C.2. TEST CASE, THREE ARMY CIRCULAR MOVEMENT WITH SUPPORT
+    @Test
+    fun `6_C_2 TEST CASE, THREE ARMY CIRCULAR MOVEMENT WITH SUPPORT`() {
+        """
+        |Turkey: 
+        |A Ankara - Constantinople
+        |A Constantinople - Smyrna
+        |A Smyrna - Ankara
+        |A Bulgaria Supports A Ankara - Constantinople 
+        |""".parse().adjudicateAsDOTC()
+    }
 
-    //6.C.3. TEST CASE, A DISRUPTED THREE ARMY CIRCULAR MOVEMENT
+    @Test
+    fun `6_C_3 TEST CASE, A DISRUPTED THREE ARMY CIRCULAR MOVEMENT`() {
+        """
+        |Turkey: 
+        |A Ankara - Constantinople
+        |A Constantinople - Smyrna
+        |A Smyrna - Ankara
+        |A Bulgaria - Constantinople
+        |""".parse().adjudicateAsDOTC()
+    }
 
     //6.C.4. TEST CASE, A CIRCULAR MOVEMENT WITH ATTACKED CONVOY
 
@@ -15,7 +43,35 @@ object TestC: WithAssertionsDOTC {
 
     //6.C.7. TEST CASE, DISRUPTED UNIT SWAP
 
-    //6.C.8. TEST CASE, NO SELF DISLODGEMENT IN DISRUPTED CIRCULAR MOVEMENT
+    @Test
+    fun `6_C_8 TEST CASE, NO SELF DISLODGEMENT IN DISRUPTED CIRCULAR MOVEMENT`() { // Modified due to involving sea regions
+        """
+        |Turkey:
+        |A Serbia - Bulgaria
+        |A Bulgaria - Rumania
+        |A Constantinople Supports A Serbia - Bulgaria
+        |
+        |Russia:
+        |A Rumania - Serbia
+        |
+        |Austria
+        |A Trieste - Serbia
+        |""".parse().adjudicateAsDOTC()
+    }
 
-    //6.C.9. TEST CASE, NO HELP IN DISLODGEMENT OF OWN UNIT IN DISRUPTED CIRCULAR MOVEMENT
+    @Test
+    fun `6_C_9 TEST CASE, NO HELP IN DISLODGEMENT OF OWN UNIT IN DISRUPTED CIRCULAR MOVEMENT`() { // Modified due to involving sea regions
+        """
+        |Turkey:
+        |A Bulgaria - Rumania
+        |A Constantinople Supports A Serbia - Bulgaria
+        |
+        |Russia:
+        |A Rumania - Serbia
+        |
+        |Austria
+        |A Trieste - Serbia
+        |A Serbia - Bulgaria
+        |""".parse().adjudicateAsDOTC()
+    }
 }
