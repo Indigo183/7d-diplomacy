@@ -34,7 +34,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
     private val byDestination = byOrigin.values.groupBy { it.order.action.to }
-    private val nonCutSupports = supports.asSequence().filterNot { support ->
+    val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.from]?.asSequence()
             ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.from}
             ?.any { piecesIn[it.order.from] != piecesIn[support.from] } ?: false
