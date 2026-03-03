@@ -1,38 +1,54 @@
 package nodomain.seven.dip.datc
 
+import nodomain.seven.dip.provinces.StandardPlayer.*
+import nodomain.seven.dip.provinces.StandardProvince.*
 import kotlin.test.Test
 
 object TestC: WithAssertionsDOTC {
     @Test
-    fun `6_C_1 TEST CASE, THREE ARMY CIRCULAR MOVEMENT`() {
-        """
+    fun `6_C_1 TEST CASE, THREE ARMY CIRCULAR MOVEMENT`() { // Modified due to involving fleets as separate from armies
+        val result = """
         |Turkey: 
         |A Ankara - Constantinople
         |A Constantinople - Smyrna
+        |
+        |Russia:
         |A Smyrna - Ankara
         |""".parse().adjudicateAsDOTC()
+
+        assertThat(result.pieces)
+            .containsEntry(CON, Turkey)
+            .containsEntry(SMY, Turkey)
+            .containsEntry(ANK, Russia)
     }
 
     @Test
-    fun `6_C_2 TEST CASE, THREE ARMY CIRCULAR MOVEMENT WITH SUPPORT`() {
-        """
+    fun `6_C_2 TEST CASE, THREE ARMY CIRCULAR MOVEMENT WITH SUPPORT`() { // Modified due to involving fleets as separate from armies
+        val result = """
         |Turkey: 
         |A Ankara - Constantinople
         |A Constantinople - Smyrna
-        |A Smyrna - Ankara
         |A Bulgaria Supports A Ankara - Constantinople 
+        |
+        |Russia:
+        |A Smyrna - Ankara
         |""".parse().adjudicateAsDOTC()
+
+        assertThat(result.pieces)
+            .containsEntry(CON, Turkey)
+            .containsEntry(SMY, Turkey)
+            .containsEntry(ANK, Russia)
     }
 
     @Test
-    fun `6_C_3 TEST CASE, A DISRUPTED THREE ARMY CIRCULAR MOVEMENT`() {
+    fun `6_C_3 TEST CASE, A DISRUPTED THREE ARMY CIRCULAR MOVEMENT`() { // Modified due to involving fleets as separate from armies
         """
         |Turkey: 
         |A Ankara - Constantinople
         |A Constantinople - Smyrna
         |A Smyrna - Ankara
         |A Bulgaria - Constantinople
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 
     //6.C.4. TEST CASE, A CIRCULAR MOVEMENT WITH ATTACKED CONVOY
@@ -56,7 +72,7 @@ object TestC: WithAssertionsDOTC {
         |
         |Austria
         |A Trieste - Serbia
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -72,6 +88,6 @@ object TestC: WithAssertionsDOTC {
         |Austria
         |A Trieste - Serbia
         |A Serbia - Bulgaria
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 }
