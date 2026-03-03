@@ -15,8 +15,8 @@ sealed interface Piece {
     infix fun M(destination: Province): MoveOrder = M(Location(destination, location.boardIndex))
 
     infix fun S(supporting: () -> Order): SupportOrder {
-        val order = supporting();
-        return SupportOrder(this, Supports(if (order.action is Supports) order.piece.holds else order));
+        val order = supporting()
+        return SupportOrder(this, Supports(if (order.action is Supports) order.piece.holds else order))
     }
 }
 
