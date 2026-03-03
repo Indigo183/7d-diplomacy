@@ -131,7 +131,7 @@ fun Game.adjudicateMoves() {
 fun Game.adjudicateRetreats() {
     retreats.clear()
     advanceState()
-    if (timeplanes.flatMap { it.boards().filter { it.isActive && it.boardIndex.coordinate.isEven() } }.isEmpty()) {
+    if (timeplanes.asSequence().flatMap { it.boards() }.none { it.isActive && it.boardIndex.coordinate.isEven() }) {
         adjudicateBuilds()
     }
 }
