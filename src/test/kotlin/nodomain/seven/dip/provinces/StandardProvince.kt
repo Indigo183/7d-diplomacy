@@ -11,7 +11,7 @@ object A {
     operator fun get(province: StandardProvince): Army = Army(Location(province, origin))
 }
 
-enum class StandardProvince(override val isSupplyCenter: Boolean): Province {
+enum class StandardProvince(override val isSupplyCentre: Boolean): Province {
     POR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA) } },
     SPA(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS) } },
     MAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAS, SPA, BUR, PIE) } },

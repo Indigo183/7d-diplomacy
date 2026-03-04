@@ -1,9 +1,21 @@
 package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.adjudication.isAdjacentTo
-import nodomain.seven.dip.adjudication.sortOrders
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.Player
+
+fun Game.sortOrders(orders: List<Order>) {
+    // For future optimisation
+    currentOrders = orders
+
+    for (order in orders) when (order) {
+        is MoveOrder -> moves += order
+        is SupportOrder -> supports += order
+        else -> {}
+    }
+}
+// TODO:
+//  fun Game.sortOrders(orders: List<BuildOrder>)
 
 /** Checks that:
  * 1. the ordered unit exists
@@ -17,8 +29,8 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     order.from.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.from.boardIndex) ?: return false // 1 (partly)
     if (!board.isActive) return false // 6
-    if(! (player?.equals(board.pieces[order.from.province])
-            ?: (board.pieces[order.from.province] !== null))) return false
+    if(! (player?.equals(board.pieces[order.from.province]) // 2
+            ?: (board.pieces[order.from.province] !== null))) return false // 1
     val destination = when(order) {
         is MoveOrder  -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
@@ -35,9 +47,18 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
             order.action.order.from.boardIndex.timeplane ?: return false // 5
             order.action.order.piece.location
         }
-        is HoldOrder -> return true //hold orders do not have a destination, thus 4 is trivial
+        is HoldOrder -> return true // hold orders do not have a destination, thus 4 is trivial
     }
     return order.piece.location.isAdjacentTo(destination) // 4
+}
+
+fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
+    order.piece.location.boardIndex.timeplane ?: return false
+    if (!order.piece.location.boardIndex.coordinate.isEven()) return false
+    val board = getBoard(order.piece.location.boardIndex) ?: return false
+    if (!board.isActive) return false
+    return player?.equals(board.pieces[order.piece.location.province])
+            ?: board.pieces[order.piece.location.province] === null
 }
 
 fun Game.input(orders: List<Order>, player: Player? = null) {
@@ -48,3 +69,12 @@ fun Game.input(orders: List<Order>, player: Player? = null) {
         }
     })
 }
+
+fun Game.inputBuilds(builds: List<BuildOrder>, player: Player? = null) {
+    adjustments += builds.filter { isValid(it, player) || run {
+        println("WARNING: invalid build:\n$it")
+        false
+    }}
+}
+
+// TODO: order storage should be MutableMap<Location, (Build)Order> to avoid duplicates

@@ -30,6 +30,10 @@ fun main() {
     ))
     game.adjudicate()
     for (board in game.timeplanes.flatMap { it.boards() }) testBoard(board)
+
+    game.inputBuilds(listOf(Build(T(-1+i, 0) A CAT)))
+    game.adjudicate()
+    for (board in game.timeplanes.flatMap { it.boards() }) testBoard(board)
 }
 
 fun testBoard(board: Board) {

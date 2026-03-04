@@ -1,25 +1,12 @@
 package nodomain.seven.dip.adjudication
 
 import nodomain.seven.dip.game.*
-import nodomain.seven.dip.orders.MoveOrder
-import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.SupportOrder
+import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.orders.TemporalFlare
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.utils.*
-
-fun Game.sortOrders(orders: List<Order>): Pair<Map<TemporalFlare, List<MoveOrder>>, List<SupportOrder>> {
-    // For future optimisation
-    currentOrders = orders
-
-    for (order in orders) when (order) {
-        is MoveOrder -> moves += order
-        is SupportOrder -> supports += order
-        else -> {}
-    }
-    return Pair(moves.groupBy { it.flare !! }, supports)
-}
 
 fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<Location, Player> {
     /*val pieces: MutableMap<Location, Player> = mutableMapOf()
@@ -47,17 +34,15 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
     val pieces: MutableMap<Province, Player> = board.pieces.toMutableMap()
     val centres: MutableMap<Province, Player> = board.centres.toMutableMap()
 
-    for (move in moveResults) if (move is SuccessfulMove) {
-        // Add pieces moving to board
-        if (move.moveOrder.action.to.boardIndex == board.boardIndex) {
-            pieces[move.moveOrder.action.to.province] =
-                getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province]
-                ?: throw IllegalStateException("order not properly validated")
-        }
-        // Remove pieces moving from board
-        if (move.moveOrder.from.boardIndex == board.boardIndex) {
-            pieces.remove(move.moveOrder.from.province)
-        }
+    // Remove pieces moving from board
+    for (move in moveResults) if (move is SuccessfulMove) if (move.moveOrder.from.boardIndex == board.boardIndex) {
+        pieces.remove(move.moveOrder.from.province)
+    }
+    // Add pieces moving to board
+    for (move in moveResults) if (move is SuccessfulMove) if (move.moveOrder.action.to.boardIndex == board.boardIndex) {
+        pieces[move.moveOrder.action.to.province] =
+            getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province]
+            ?: throw IllegalStateException("order not properly validated")
     }
 
     // Propagate child up
@@ -130,20 +115,45 @@ fun Game.adjudicateMoves() {
     }
 
     advanceState()
-    if (retreats.isEmpty()) adjudicateRetreats()
+    if (adjustments.isEmpty()) adjudicateRetreats()
 }
 
 fun Game.adjudicateRetreats() {
-    retreats.clear()
+    // TODO: adjudicate retreats
+    adjustments.clear()
     advanceState()
+    for (board in timeplanes.flatMap { it.boards() }) if (board.isActive) for (piece in board.pieces) {
+        // TODO: is null check necessary?
+        if (board.centres[piece.key] === null || board.centres[piece.key] != piece.value) if (piece.key.isSupplyCentre)
+            board.centres[piece.key] = piece.value
+    }
+    // TODO: calculate builds
     if (timeplanes.asSequence().flatMap { it.boards() }.none { it.isActive && it.boardIndex.coordinate.isEven() }) {
         adjudicateBuilds()
     }
 }
 
 fun Game.adjudicateBuilds() {
+    for (order in adjustments) {
+        val board = getBoard(order.piece.location.boardIndex)!!
+        val province = order.piece.location.province
+        // TODO: only allow disbands if they are forced
+        when (order) {
+            is Build -> board.pieces[province] =
+                board.centres[order.piece.location.province]!!
+            is Disband -> board.pieces.remove(order.piece.location.province)
+            else -> throw IllegalStateException("adjustments contained wrong type (retreat vs build)")
+        }
+    }
     val boards = timeplanes.flatMap { it.boards().filter { it.isActive && it.boardIndex.coordinate.isEven() } }
-    for (board in boards); // TODO: adjudicate builds
+    for (board in boards) if (board.isActive && board.boardIndex.coordinate.isEven()) {
+        for (player in RomanPlayers.entries) {
+            if (board.pieces.filter { it.value == player }.size > board.centres.filter { it.value == player }.size)
+                // TODO: actually implement forced disbands
+                throw IllegalArgumentException("Too many builds given or not enough disbands given")
+        }
+    }
+    adjustments.clear()
     advanceState()
 }
 

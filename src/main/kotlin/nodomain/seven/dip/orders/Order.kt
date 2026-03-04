@@ -47,4 +47,14 @@ value class Supports(val order: Order): Action
 class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " S ")
 
 // Timeplane specifier shorthand
-fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex  = BoardIndex(boardIndex, timeplane)
+fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex = BoardIndex(boardIndex, timeplane)
+
+sealed interface Adjustment {
+    val piece: Piece
+}
+
+sealed interface BuildOrder: Adjustment
+sealed interface RetreatOrder: Adjustment
+
+class Build(override val piece: Piece): BuildOrder
+class Disband(override val piece: Piece): BuildOrder, RetreatOrder

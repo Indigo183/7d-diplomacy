@@ -1,16 +1,11 @@
 package nodomain.seven.dip.game
 
-import nodomain.seven.dip.orders.MoveOrder
-import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.Piece
-import nodomain.seven.dip.utils.*
-
-import nodomain.seven.dip.orders.SupportOrder
+import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
-import nodomain.seven.dip.utils.BoardIndex
+import nodomain.seven.dip.utils.*
 
 enum class GameState {
     MOVES,
@@ -21,7 +16,7 @@ enum class GameState {
 class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
     val supports: MutableList<SupportOrder> = mutableListOf()
     val moves: MutableList<MoveOrder> = mutableListOf()
-    val retreats: MutableList<Piece> = mutableListOf()
+    val adjustments: MutableList<Adjustment> = mutableListOf() // Stores both retreats and builds
 
     // For future optimisation of adjudication
     var currentOrders: List<Order> = listOf()
@@ -29,7 +24,7 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
     // Interior mutability
     private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
         mutableMapOf(
-            0.c to Board(BoardIndex(0.c), pieces = setup)
+            0.c to Board(BoardIndex(0.c), pieces = setup.toMutableMap())
         ))
     private val _limbo: MutableSet<Board> = mutableSetOf() // Set of all boards currently in Limbo
 
@@ -80,8 +75,8 @@ class Board(
     var boardIndex: BoardIndex,
     val parent: Board? = null, // null represents the origin board
 
-    val pieces: Map<Province, Player>,
-    val centres: Map<Province, Player> = pieces
+    val pieces: MutableMap<Province, Player>,
+    val centres: MutableMap<Province, Player> = pieces.toMutableMap() // clone pieces
 ) {
     val children = mutableListOf<Board>()
     var isActive = true

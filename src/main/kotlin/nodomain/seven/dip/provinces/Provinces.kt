@@ -4,7 +4,7 @@ import kotlin.enums.enumEntries
 
 interface Province {
     infix fun isAdjacentTo(other: Province): Boolean;
-    val isSupplyCenter: Boolean;
+    val isSupplyCentre: Boolean;
 }
 
 interface Player {

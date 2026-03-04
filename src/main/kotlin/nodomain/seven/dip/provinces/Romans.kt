@@ -3,7 +3,7 @@ package nodomain.seven.dip.provinces
 // TODO: Parse specific variant details from external config file, rather than having province and player details
 //   hard-coded into an import
 
-enum class Romans(override val isSupplyCenter: Boolean): Province {
+enum class Romans(override val isSupplyCentre: Boolean): Province {
     CAT(true ) { override val adjacency: Set<Romans> by lazy { setOf(CAE, BRU) } },
     CAE(false) { override val adjacency: Set<Romans> by lazy { setOf(CAT, BRU, POM) } },
     POM(true ) { override val adjacency: Set<Romans> by lazy { setOf(CAE, BRU) } },
