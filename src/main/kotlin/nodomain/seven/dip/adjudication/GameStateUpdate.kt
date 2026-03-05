@@ -9,12 +9,6 @@ import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.utils.*
 
 fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<Location, Player> {
-    /*val pieces: MutableMap<Location, Player> = mutableMapOf()
-    for (t in timeplanes) for (board in t.boards()) if (!onlyActive || board.isActive) for (piece in board.pieces) {
-        if (player === null || piece.value == player) {
-            pieces[Location(piece.key, board.boardIndex)] = piece.value
-        }
-    }*/
     return timeplanes.asSequence()
         .flatMap{it.boards()}
         .filter{!onlyActive || it.isActive}
