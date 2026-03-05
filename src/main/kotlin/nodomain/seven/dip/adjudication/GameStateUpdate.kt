@@ -142,7 +142,6 @@ fun Game.adjudicateBuilds() {
             is Build -> board.pieces[province] =
                 board.centres[order.piece.location.province]!!
             is Disband -> board.pieces.remove(order.piece.location.province)
-            else -> throw IllegalStateException("adjustments contained wrong type (retreat vs build)")
         }
     }
     val boards = timeplanes.flatMap { it.boards().filter { it.isActive && it.boardIndex.coordinate.isEven() } }
