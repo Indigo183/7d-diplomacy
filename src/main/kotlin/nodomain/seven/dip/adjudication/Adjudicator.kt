@@ -62,10 +62,10 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     // no optimisation is done to avoid going down the same chain multiple times
     private tailrec fun PreResult.analyseDependency(dependantMove: DependantMove, origin: MoveOrder = dependantMove.moveOrder): MoveResult {
         if (dependantMove.moveOrder.from == dependantMove.dependsOn.action.to) return Bounce(origin.action.to)
-        if (origin.from == dependantMove.dependsOn.action.to) return origin.(MoveResult.succeed)()
         return when (val dependency = this[dependantMove.dependsOn.action.to]) {
             is Bounce, null -> Bounce(origin.action.to)
             is SuccessfulMove -> origin.(MoveResult.succeed)()
+            is DependantMove if (origin.from == dependantMove.dependsOn.action.to) -> return origin.(MoveResult.succeed)()
             is DependantMove -> this.analyseDependency(dependency, origin)
         }
     }

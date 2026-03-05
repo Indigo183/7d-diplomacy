@@ -77,4 +77,20 @@ class AdjudicatorTest: WithAssertions {
 
         assertThat(results).containsAll(moves.map { SuccessfulMove(it) })
     }
+
+    @Test
+    fun whenThreeUnitsEntersEachOthersLocationInACircleAndOneBounces_thenTheirMovesAllFail() {
+        val origin = T(0.c , 0)
+        val pieces = mapOf(origin[CAT] to Cato, origin[BRU] to Pompey, origin[CAE] to Pompey, origin[POM] to Pompey)
+        val moves = listOf(
+            origin A CAT M BRU i 3,
+            origin A BRU M CAE i 3,
+            origin A CAE M CAT i 3,
+            origin A POM M CAE i 3
+        )
+
+        val results = Adjudicator(moves, listOf(), pieces).moveResults
+
+        assertThat(results).doesNotContainAnyElementsOf(moves.map { SuccessfulMove(it) })
+    }
 }
