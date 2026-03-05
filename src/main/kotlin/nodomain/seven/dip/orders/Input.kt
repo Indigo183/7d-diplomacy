@@ -4,16 +4,6 @@ import nodomain.seven.dip.adjudication.isAdjacentTo
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.Player
 
-fun Game.sortOrders(orders: List<Order>) {
-    // For future optimisation
-    currentOrders = orders
-
-    for (order in orders) when (order) {
-        is MoveOrder -> moves += order
-        is SupportOrder -> supports += order
-        else -> {}
-    }
-}
 // TODO:
 //  fun Game.sortOrders(orders: List<BuildOrder>)
 
@@ -62,7 +52,7 @@ fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
 }
 
 fun Game.input(orders: List<Order>, player: Player? = null) {
-    sortOrders(orders.filter {
+    addOrders(orders.filter {
         isValid(it, player) || run {
             println("WARNING: invalid order:\n$it")
             false

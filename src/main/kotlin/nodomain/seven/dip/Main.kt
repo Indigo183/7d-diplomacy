@@ -47,6 +47,8 @@ fun main() {
     for (board in game.timeplanes.flatMap { it.boards() }) testBoard(board)
 
     println(game.gameState)
+
+    for (board in game.limbo) testBoard(board)
 }
 
 fun testBoard(board: Board) {

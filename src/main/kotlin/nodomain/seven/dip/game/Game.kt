@@ -14,8 +14,12 @@ enum class GameState {
 }
 
 class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
-    val supports: MutableList<SupportOrder> = mutableListOf()
-    val moves: MutableList<MoveOrder> = mutableListOf()
+    private val orders: MutableMap<Location, Order> = mutableMapOf()
+    val moves: List<MoveOrder>
+        get() = orders.values.filter { it is MoveOrder } as List<MoveOrder>
+    val supports: List<SupportOrder>
+        get() = orders.values.filter { it is SupportOrder } as List<SupportOrder>
+
     val adjustments: MutableList<Adjustment> = mutableListOf() // Stores both retreats and builds
 
     // For future optimisation of adjudication
@@ -42,6 +46,24 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
             timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.coordinate)
         } else {
             limbo.singleOrNull { board -> board.boardIndex.coordinate == boardIndex.coordinate }
+        }
+    }
+
+    // Add new orders to the map of orders
+    fun Game.addOrders(newOrders: List<Order>) {
+        // TODO: For future optimisation
+        currentOrders = newOrders
+
+        // for (order in orders) when (order) {
+        //     is MoveOrder -> moves += order
+        //     is SupportOrder -> supports += order
+        //     else -> {}
+        // }
+
+        for (order in newOrders) {
+            val location = order.piece.location
+            if (orders[location] !== null) println("WARN: overwriting order in $location")
+            orders[location] = order
         }
     }
 
