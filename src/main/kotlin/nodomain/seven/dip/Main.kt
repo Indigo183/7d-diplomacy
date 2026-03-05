@@ -34,6 +34,19 @@ fun main() {
     game.inputBuilds(listOf(Build(T(-1+i, 0) A CAT)))
     game.adjudicate()
     for (board in game.timeplanes.flatMap { it.boards() }) testBoard(board)
+
+    game.input(listOf(
+        T(-1+i, 0) A CAT M Location(CAE, T(i, 0)) i 3,
+        T(-1+i, 0) A POM M Location(POM, T(i, 0)) i 3,
+
+        T(i, 1) A CAT S { T(-1+i, 0) A CAT M Location(CAE, T(i, 0)) },
+        T(i, 1) A POM M CAE i 3,
+        T(i, 1) A BRU S { T(i, 1) A POM M CAE },
+    ))
+    game.adjudicate()
+    for (board in game.timeplanes.flatMap { it.boards() }) testBoard(board)
+
+    println(game.gameState)
 }
 
 fun testBoard(board: Board) {
