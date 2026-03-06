@@ -35,7 +35,7 @@ class HoldOrder(piece: Piece): Order(piece, " ") {
 
 @JvmInline
 value class Moves(val to: Location): Action
-class MoveOrder(piece: Piece, override val action: Moves, var flare: TemporalFlare? = null): Order(piece, " - ") {
+class MoveOrder(piece: Piece, override val action: Moves, var flare: TemporalFlare? = null): RetreatOrder, Order(piece, " - ") {
     infix fun i(timeFlare: Int): MoveOrder {
         flare = enumEntries<TemporalFlare>()[timeFlare % 4]
         return this
