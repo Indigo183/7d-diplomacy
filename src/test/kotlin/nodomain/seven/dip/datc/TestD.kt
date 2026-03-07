@@ -281,7 +281,17 @@ object TestD: WithAssertionsDOTC {
 
     //6.D.23. TEST CASE, IMPOSSIBLE COAST MOVE CANNOT BE SUPPORTED
 
-    //6_D_24 TEST CASE, IMPOSSIBLE ARMY MOVE CANNOT BE SUPPORTED
+    @Test
+    fun `6_D_24 TEST CASE, IMPOSSIBLE ARMY MOVE CANNOT BE SUPPORTED`() { // Modified due to involving sea regions
+        """
+        |France:
+        |A Marseilles - Portugal
+        |A Spain Supports A Marseilles - Portugal
+        |
+        |Italy:
+        |A Portugal Hold
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+    }
 
     @Test
     fun `6_D_25 TEST CASE, FAILING HOLD SUPPORT CAN BE SUPPORTED`() {
