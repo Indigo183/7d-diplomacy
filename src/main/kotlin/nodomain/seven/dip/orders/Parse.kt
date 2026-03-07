@@ -87,10 +87,13 @@ class Parser(
 
     private data class BeingParsed<I>(val remaining: Queue<String>, val intermediateResult: I) {
         fun <T, R> combiningNext(parseT: (String) -> T,  combiner: (T, I) -> R): BeingParsed<R> =
-            BeingParsed(remaining, combiningInto(parseT,  combiner))
+            BeingParsed(remaining, combiningInto(parseT,  combiner = combiner))
 
-        fun <T, R> combiningInto(parseT: (String) -> T,  combiner: (T, I) -> R): R =
-            combiner(parseT(remaining.remove()), intermediateResult)
+        fun <T, R> combiningInto(parseT: (String) -> T, default: T? = null, combiner: (T, I) -> R): R =
+            if (remaining.isEmpty() && default !== null)
+                combiner(default, intermediateResult)
+            else
+                combiner(parseT(remaining.remove()), intermediateResult)
     }
 
     private inner class Verbose: Formatted<Order> {
@@ -98,11 +101,11 @@ class Parser(
             return queue.withFirst(notation::asBoardIndex)
                 .combiningNext(notation::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
                 .combiningNext(asProvince) { province, board  -> board(province)}
-                .combiningInto(notation::asAction) { action, piece -> when(action) {
+                .combiningInto(notation::asAction, 'H') { action, piece -> when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue) }
                     'M' -> piece M queue.withFirst(notation::asBoardIndex)
-                        .combiningInto(asProvince, ::Location) i notation.asTemporalFlare(queue.remove())
+                        .combiningInto(asProvince, combiner = ::Location) i notation.asTemporalFlare(queue.remove())
                     else -> throw IllegalStateException()
                 } }
         }
@@ -119,7 +122,7 @@ class Parser(
         override fun parseOrderInPieces(queue: Queue<String>): OwnedOrder {
             return queue.withFirst(notation::asUnitType)
                 .combiningNext(asProvince) { province, unitType -> unitType(Location(province, origin))}
-                .combiningInto(notation::asAction) {action, piece -> Pair(when(action) {
+                .combiningInto(notation::asAction, 'H') {action, piece -> Pair(when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue).first }
                     '-' -> piece M asProvince(queue.remove()) i 0

@@ -30,7 +30,16 @@ data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): Co
 value class Bounce(override val location: Location): MoveResult
 
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Location, Player>) {
-    private class MoveAnalyse(val order: MoveOrder, var strength: Int = 1)
+    private inner class MoveAnalyse(val order: MoveOrder) {
+        var strengthExcludingVictim: Int = 1
+        var strength: Int = 1
+        val against: Player? = piecesIn[order.action.to]
+
+        fun increaseStrength(withHelpFrom: Player) {
+            strength++
+            if (withHelpFrom != against) strengthExcludingVictim++
+        }
+    }
 
     private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
     private val byDestination = byOrigin.values.groupBy { it.order.action.to }
@@ -38,7 +47,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         byDestination[support.from]?.asSequence()
             ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.from}
             ?.any { piecesIn[it.order.from] != piecesIn[support.from] } ?: false
-    }
+    }.toList()
     private val dislodgements: MutableList<MoveOrder> = mutableListOf()
 
     /** Produces a list containing Bounces and SuccessfulMoves.
@@ -84,8 +93,8 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private fun initialMoveResults(): PreResult {
         nonCutSupports
-            .filter { it.action.order is MoveOrder && it.action.order == byOrigin[it.action.order.from] }
-            .forEach { byOrigin[it.action.order.from]?.strength++ }
+            .filter { it.action.order is MoveOrder && it.action.order == byOrigin[it.action.order.from]?.order }
+            .forEach { byOrigin[it.action.order.from]?.increaseStrength(piecesIn[it.from]!!) }
         return byDestination.asSequence()
             .map { (destination, orders) -> destination to strongestMove(destination,  orders) }
             .toMap(mutableMapOf())
@@ -94,15 +103,15 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     private fun strongestMove(destination: Location, orders: List<MoveAnalyse>): ComputableMoveResult {
         val topStrength = orders.maxOf { it.strength }
         val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
-            orders.maxBy { it.strength }.order else return Bounce(destination)
+            orders.maxBy { it.strength } else return Bounce(destination)
         return when (piecesIn[destination]) {
-            null -> presumptiveMove.(MoveResult.succeed)()
-            piecesIn[presumptiveMove.from] -> presumptiveMove.dependOnDestination()
-            else if (topStrength == 1) -> presumptiveMove.dependOnDestination()
-            else if (byOrigin[destination] !== null && topStrength <= holdStrength(destination)) -> Bounce(destination)
+            null -> presumptiveMove.order.(MoveResult.succeed)()
+            piecesIn[presumptiveMove.order.from] -> presumptiveMove.order.dependOnDestination()
+            else if (presumptiveMove.strengthExcludingVictim == 1) -> presumptiveMove.order.dependOnDestination()
+            else if (byOrigin[destination] !== null && presumptiveMove.strengthExcludingVictim <= holdStrength(destination)) -> Bounce(destination)
             else -> {
-                dislodgements += presumptiveMove
-                presumptiveMove.(MoveResult.succeed)()
+                dislodgements += presumptiveMove.order
+                presumptiveMove.order.(MoveResult.succeed)()
             }
         }
     }
