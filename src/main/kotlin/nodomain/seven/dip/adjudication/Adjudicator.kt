@@ -81,17 +81,32 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private fun PreResult.updateBouncesDueToDislodgement(): PreResult {
         for (dislodgement in dislodgements) {
-            val dislodgedMove = byOrigin[dislodgement.action.to]
-            if (dislodgedMove?.order?.action?.to != dislodgement.from || byDestination[dislodgement.from]!!.size <= 1) continue
-            dislodgedMove.strength = 0
-            val newResult = strongestMove(dislodgement.from, byDestination[dislodgement.from]!!)
-            if (newResult !is Bounce)
-                set(dislodgement.from, newResult)
+            dislodgedMovesDontEffectTheProvinceTheyWareDislodgedFrom(dislodgement)
+            dislodgedSupportsDontEffectTheProvinceTheyWareDislodgedFrom(dislodgement)
         }
         return this
     }
 
-    private fun initialMoveResults(): PreResult {
+    private fun PreResult.dislodgedMovesDontEffectTheProvinceTheyWareDislodgedFrom(dislodgingMove: MoveOrder) {
+        val dislodgedMove = byOrigin[dislodgingMove.action.to] ?: return
+        if (dislodgedMove.order.action.to != dislodgingMove.from || byDestination[dislodgingMove.from]!!.size <= 1) return
+        dislodgedMove.strength = 0
+        val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)
+        if (newResult !is Bounce)
+            set(dislodgingMove.from, newResult)
+
+    }
+
+    private fun PreResult.dislodgedSupportsDontEffectTheProvinceTheyWareDislodgedFrom(dislodgingMove: MoveOrder) {
+        val dislodgedSupport = nonCutSupports.find { it.from == dislodgingMove.action.to } ?: return
+        if (dislodgedSupport.action.order !is MoveOrder || dislodgedSupport.action.order.action.to != dislodgingMove.from) return
+        byOrigin[dislodgedSupport.action.order.from]?.strength--
+        val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)
+        set(dislodgingMove.from, newResult)
+
+    }
+
+        private fun initialMoveResults(): PreResult {
         nonCutSupports
             .filter { it.action.order is MoveOrder && it.action.order == byOrigin[it.action.order.from]?.order }
             .forEach { byOrigin[it.action.order.from]?.increaseStrength(piecesIn[it.from]!!) }
