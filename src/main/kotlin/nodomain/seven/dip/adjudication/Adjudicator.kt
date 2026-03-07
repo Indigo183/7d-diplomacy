@@ -45,7 +45,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     private val byDestination = byOrigin.values.groupBy { it.order.action.to }
     val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.from]?.asSequence()
-            ?.filter {support.action.order !is MoveOrder || support.action.order.action.to == it.order.from}
+            ?.filter {support.action.order !is MoveOrder || support.action.order.action.to != it.order.from}
             ?.any { piecesIn[it.order.from] != piecesIn[support.from] } ?: false
     }.toList()
     private val dislodgements: MutableList<MoveOrder> = mutableListOf()
