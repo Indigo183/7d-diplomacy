@@ -108,7 +108,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             null -> presumptiveMove.order.(MoveResult.succeed)()
             piecesIn[presumptiveMove.order.from] -> presumptiveMove.order.dependOnDestination()
             else if (presumptiveMove.strengthExcludingVictim == 1) -> presumptiveMove.order.dependOnDestination()
-            else if (byOrigin[destination] !== null && presumptiveMove.strengthExcludingVictim <= holdStrength(destination)) -> Bounce(destination)
+            else if (byOrigin[destination] === null && presumptiveMove.strengthExcludingVictim <= holdStrength(destination)) -> Bounce(destination)
             else -> {
                 dislodgements += presumptiveMove.order
                 presumptiveMove.order.(MoveResult.succeed)()
