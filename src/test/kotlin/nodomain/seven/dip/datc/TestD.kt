@@ -62,7 +62,6 @@ object TestD: WithAssertionsDOTC {
         |Russia:
         |A Silesia Supports A Prussia - Berlin
         |A Munich - Berlin
-        |The Russian move from Prussia to Berlin fails.
         |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 
@@ -90,7 +89,7 @@ object TestD: WithAssertionsDOTC {
         |Germany:
         |A Warsaw - Ukraine
         |A Prussia Supports A Warsaw
-        | 
+        |
         |Russia:
         |A Livonia - Warsaw
         |A Moscow Supports A Livonia - Warsaw
@@ -138,7 +137,7 @@ object TestD: WithAssertionsDOTC {
         |A Berlin - Prussia
         |A Kiel - Berlin
         |A Munich Supports A Kiel - Berlin
-        | 
+        |
         |Russia:
         |A Warsaw - Prussia
         |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
@@ -225,12 +224,12 @@ object TestD: WithAssertionsDOTC {
         val result = """
         |Russia:
         |A Ankara Supports A Sevastopol - Armenia
-        |A Black Sea - Ankara
+        |A Sevastopol - Armenia
         |A Constantinople Supports A Ankara
-        | 
+        |
         |Turkey:
         |A Armenia - Ankara
-        |A Smyrna Supports F Armenia - Ankara
+        |A Smyrna Supports A Armenia - Ankara
         |A Syria - Armenia
         |""".parse().adjudicateAsDOTC()
 
@@ -264,7 +263,7 @@ object TestD: WithAssertionsDOTC {
         |Italy:
         |A Venice - Trieste
         |A Tyrolia Supports A Venice - Trieste
-        | 
+        |
         |Germany:
         |A Munich - Tyrolia
         |
