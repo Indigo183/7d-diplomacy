@@ -1,5 +1,7 @@
 package nodomain.seven.dip.utils
 
+import kotlin.math.absoluteValue
+
 // Used in ComplexNumber shorthand notation, e.g. `1 + 2*i`
 val i = ComplexNumber(0, 1)
 
@@ -20,7 +22,11 @@ data class ComplexNumber(val real: Int, val imaginary: Int) {
 
     fun isEven(): Boolean = real + imaginary % 2 == 0
 
-    override fun toString(): String = "$real + ${imaginary}i"
+    override fun toString(): String = if (imaginary == 0) "$real" else {
+        val op = if (imaginary < 0) "-" else "+"
+        val imaginary = imaginary.absoluteValue
+        if (imaginary == 1) "$real $op i" else "$real $op ${imaginary}i"
+    }
 }
 
 // Used for ComplexNumber shorthand notation, e.g. `1 + 2*i`
