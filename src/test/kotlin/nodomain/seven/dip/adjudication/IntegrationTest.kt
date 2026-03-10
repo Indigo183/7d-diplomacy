@@ -24,7 +24,7 @@ class IntegrationTest: WithAssertions {
 
         game.input(listOf(
             T(i, 0) A CAE M POM i 2,
-            T(i, 0) A POM M Location(CAE, origin) i 2,
+            T(i, 0) A POM M origin[CAE] i 2,
 
             T(-i, 0) A CAT M CAE i 3,
             T(-i, 0) A CAE M BRU i 2,
@@ -36,14 +36,14 @@ class IntegrationTest: WithAssertions {
 
         // Wheel
         game.input(listOf(
-            T(-1+i, 0) A CAT M Location(CAE, T(-1.c, 0)) i 2,
-            T(-1+i, 0) A POM M Location(POM, T(-1.c, 0)) i 2,
+            T(-1+i, 0) A CAT M T(-1.c, 0)[CAE] i 2,
+            T(-1+i, 0) A POM M T(-1.c, 0)[POM] i 2,
 
-            T(-1.c, 0) A CAT M Location(CAT, T(-1+i, 0)) i 2,
-            T(-1.c, 0) A CAE M Location(POM, T(-1+i, 0)) i 2,
-            T(-1.c, 0) A POM M Location(BRU, T(-1-i, 0)) i 2,
+            T(-1.c, 0) A CAT M T(-1+i, 0)[CAT] i 2,
+            T(-1.c, 0) A CAE M T(-1+i, 0)[POM] i 2,
+            T(-1.c, 0) A POM M T(-1-i, 0)[BRU] i 2,
 
-            T(-1-i, 0) A CAT M Location(CAT, T(-1.c, 0)) i 2,
+            T(-1-i, 0) A CAT M T(-1.c, 0)[CAT] i 2,
             T(-1-i, 0) A BRU M CAT i 2,
         ))
         game.adjudicate()
