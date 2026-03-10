@@ -116,7 +116,8 @@ fun Game.adjudicateRetreats() {
     // TODO: adjudicate retreats
     adjustments.clear()
     advanceState()
-    for (board in timeplanes.flatMap { it.boards() }) if (board.isActive) for (piece in board.pieces) {
+    for (board in timeplanes.flatMap { it.boards() }) if (board.isActive && board.boardIndex.coordinate.isEven())
+        for (piece in board.pieces) {
         // TODO: is null check necessary?
         if (board.centres[piece.key] === null || board.centres[piece.key] != piece.value) if (piece.key.isSupplyCentre)
             board.centres[piece.key] = piece.value
