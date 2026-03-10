@@ -59,7 +59,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     val moveResults = computeMovesAndBounces()
 
     private fun computeMovesAndBounces(): List<MoveResult> {
-        val withDependantMove = initialMoveResults().updateBouncesDueToDislodgement()
+        val withDependantMove = initialMoveResults().updatesDueToDislodgement()
         return withDependantMove.values.map {
             when(it) {
                 is DependantMove -> withDependantMove.analyseDependency(it)
@@ -79,7 +79,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         }
     }
 
-    private fun PreResult.updateBouncesDueToDislodgement(): PreResult {
+    private fun PreResult.updatesDueToDislodgement(): PreResult {
         for (dislodgement in dislodgements) {
             dislodgedMovesDontEffectTheProvinceTheyWareDislodgedFrom(dislodgement)
             dislodgedSupportsDontEffectTheProvinceTheyWareDislodgedFrom(dislodgement)
@@ -94,7 +94,6 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)
         if (newResult !is Bounce)
             set(dislodgingMove.from, newResult)
-
     }
 
     private fun PreResult.dislodgedSupportsDontEffectTheProvinceTheyWareDislodgedFrom(dislodgingMove: MoveOrder) {
@@ -103,10 +102,9 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         byOrigin[dislodgedSupport.action.order.from]?.strength--
         val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)
         set(dislodgingMove.from, newResult)
-
     }
 
-        private fun initialMoveResults(): PreResult {
+    private fun initialMoveResults(): PreResult {
         nonCutSupports
             .filter { it.action.order is MoveOrder && it.action.order == byOrigin[it.action.order.from]?.order }
             .forEach { byOrigin[it.action.order.from]?.increaseStrength(piecesIn[it.from]!!) }
