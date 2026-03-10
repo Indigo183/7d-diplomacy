@@ -28,7 +28,7 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
     // Interior mutability
     private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
         mutableMapOf(
-            0.c to Board(BoardIndex(0.c), pieces = setup.toMutableMap())
+            0.c to Board(BoardIndex(0.c), originalPieces = setup.toMutableMap())
         ))
     private val _limbo: MutableSet<Board> = mutableSetOf() // Set of all boards currently in Limbo
 
@@ -97,9 +97,10 @@ class Board(
     var boardIndex: BoardIndex,
     val parent: Board? = null, // null represents the origin board
 
-    val pieces: MutableMap<Province, Player>,
-    val centres: MutableMap<Province, Player> = pieces.toMutableMap() // clone pieces
+    val originalPieces: Map<Province, Player>,
+    val centres: MutableMap<Province, Player> = originalPieces.toMutableMap() // clone pieces
 ) {
+    val pieces: MutableMap<Province, Player> = originalPieces.toMutableMap()
     val children = mutableListOf<Board>()
     var isActive = true
         private set
