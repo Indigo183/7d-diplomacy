@@ -8,7 +8,7 @@ import nodomain.seven.dip.utils.*
 import org.assertj.core.api.WithAssertions
 import kotlin.test.Test
 
-class IntegrationTest: WithAssertions {
+object IntegrationTest {
     val origin = T(0.c, 0)
 
     @Test
