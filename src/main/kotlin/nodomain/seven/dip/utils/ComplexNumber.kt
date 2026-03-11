@@ -22,7 +22,7 @@ data class ComplexNumber(val real: Int, val imaginary: Int) {
 
     fun isEven(): Boolean = real + imaginary % 2 == 0
 
-    override fun toString(): String = if (imaginary == 0) "$real" else {
+    override fun toString(): String = if (imaginary == 0) "$real" else if (real == 0) "${imaginary}i" else {
         val op = if (imaginary < 0) "-" else "+"
         val imaginary = imaginary.absoluteValue
         if (imaginary == 1) "$real $op i" else "$real $op ${imaginary}i"
