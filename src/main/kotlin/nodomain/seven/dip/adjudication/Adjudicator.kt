@@ -48,7 +48,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             ?.filter {support.action.order !is MoveOrder || support.action.order.action.to != it.order.from}
             ?.any { piecesIn[it.order.from] != piecesIn[support.from] } ?: false
     }.toList()
-    private val dislodgements: MutableList<MoveOrder> = mutableListOf()
+    val dislodgements: MutableList<MoveOrder> = mutableListOf()
 
     /** Produces a list containing Bounces and SuccessfulMoves.
      *  1. A SuccessfulMove will be produced for every MoveOrder in moves which succeeds in accordance with the rules of diplomacy

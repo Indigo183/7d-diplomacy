@@ -89,14 +89,16 @@ fun Game.adjudicateMoves() {
             val childrenAndStrengths: MutableList<Pair<Board, Int>> = mutableListOf()
             for (child in children) childrenAndStrengths += Pair(
                 child,
-                moves.filter {
+                moves.asSequence().filter {
                     it.action.to.boardIndex == child.parent!!.boardIndex
-                    && it.flare!!.direction == child.boardIndex.coordinate - child.parent.boardIndex.coordinate
-                    && adjudicators[it.flare]!!.moveResults.contains(SuccessfulMove(it))
-                }.map { // TODO: move strength
-                    1
+                            && it.flare!!.direction == child.boardIndex.coordinate - child.parent.boardIndex.coordinate
+                            && adjudicators[it.flare]!!.moveResults.contains(SuccessfulMove(it))
+                }.sumOf {
+                    adjudicators[it.flare]!!.nonCutSupports.filter { support ->
+                        support.action.order == it
+                                && !adjudicators[it.flare]!!.dislodgements.any { it.action.to == support.piece.location }
+                    }.size + 1
                 }
-                .sum()
             )
             childrenAndStrengths.sortBy { it.second }
             childrenAndStrengths.forEach { println("INFO: ${it.second}") }
