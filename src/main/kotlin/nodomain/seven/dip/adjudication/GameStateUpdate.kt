@@ -90,17 +90,27 @@ fun Game.adjudicateMoves() {
             for (child in children) childrenAndStrengths += Pair(
                 child,
                 moves.filter {
-                    it.action.to == child.parent!!.boardIndex &&
-                    it.flare!!.direction == child.boardIndex.coordinate - child.parent.boardIndex.coordinate
-                }.map { 1 } // TODO: move strength
+                    it.action.to.boardIndex == child.parent!!.boardIndex
+                    && it.flare!!.direction == child.boardIndex.coordinate - child.parent.boardIndex.coordinate
+                    && adjudicators[it.flare]!!.moveResults.contains(SuccessfulMove(it))
+                }.map { // TODO: move strength
+                    1
+                }
                 .sum()
             )
             childrenAndStrengths.sortBy { it.second }
             childrenAndStrengths.forEach { println("INFO: ${it.second}") }
-            while (childrenAndStrengths.last().second !=
-                childrenAndStrengths.last { childrenAndStrengths.last() != it }.second)
+            while (!childrenAndStrengths.isEmpty()
+                && (childrenAndStrengths.size == 1
+                || childrenAndStrengths.last().second !=
+                childrenAndStrengths.last { childrenAndStrengths.last() != it }.second))
             { // last != penultimate
-                val child = childrenAndStrengths.last().first
+                val child = childrenAndStrengths.removeLast().first
+                println(child)
+                addChild(child.parent!!, child)
+            }
+            for ((child, _) in childrenAndStrengths) {
+                child.boardIndex.timeplane = null
                 addChild(child.parent!!, child)
             }
         }

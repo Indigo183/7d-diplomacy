@@ -43,7 +43,7 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
 
     fun getBoard(boardIndex: BoardIndex): Board? {
         return if (boardIndex.timeplane !== null) {
-            timeplanes.getOrNull(boardIndex.timeplane)?.get(boardIndex.coordinate)
+            timeplanes.getOrNull(boardIndex.timeplane!!)?.get(boardIndex.coordinate)
         } else {
             limbo.singleOrNull { board -> board.boardIndex.coordinate == boardIndex.coordinate }
         }
@@ -72,6 +72,10 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
         if (child.parent !== parent) throw IllegalArgumentException("`child.parent` is not equal to `parent`")
         parent.children += child
         if (child.boardIndex.timeplane !== null) {
+            // Propagate child up
+            var iter = child.boardIndex.timeplane!!
+            while (getBoard(BoardIndex(child.boardIndex.coordinate, iter)) !== null) iter++
+            child.boardIndex.timeplane = iter
             // Create new timeplane if necessary
             while (timeplanes.getOrNull(child.boardIndex.timeplane!!) === null)
                 _timeplanes += mutableMapOf()

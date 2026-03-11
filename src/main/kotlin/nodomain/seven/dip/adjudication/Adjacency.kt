@@ -18,8 +18,8 @@ fun BoardIndex.isAdjacentTo(other: BoardIndex): Boolean {
         return false
     }
     return if (coordinate == other.coordinate) {
-        timeplane - other.timeplane == 1 || timeplane - other.timeplane == -1
-    } else if (timeplane == other.timeplane) when (coordinate - other.coordinate) {
+        timeplane!! - other.timeplane!! == 1 || timeplane!! - other.timeplane!! == -1
+    } else if (timeplane!! == other.timeplane!!) when (coordinate - other.coordinate) {
         i, -i, 1.c, (-1).c -> true
         else -> false
     } else false
