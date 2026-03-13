@@ -4,9 +4,6 @@ import nodomain.seven.dip.adjudication.isAdjacentTo
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.Player
 
-// TODO:
-//  fun Game.sortOrders(orders: List<BuildOrder>)
-
 /** Checks that:
  * 1. the ordered unit exists
  * 2. if a player is passed, the player owns the unit
@@ -47,8 +44,8 @@ fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
     if (!order.piece.location.boardIndex.coordinate.isEven()) return false
     val board = getBoard(order.piece.location.boardIndex) ?: return false
     if (!board.isActive) return false
-    return player?.equals(board.pieces[order.piece.location.province])
-            ?: board.pieces[order.piece.location.province] === null
+    return (player?.equals(board.pieces[order.piece.location.province])
+        ?: board.pieces[order.piece.location.province]) === null
 }
 
 fun Game.input(orders: List<Order>, player: Player? = null) {
@@ -61,10 +58,8 @@ fun Game.input(orders: List<Order>, player: Player? = null) {
 }
 
 fun Game.inputBuilds(builds: List<BuildOrder>, player: Player? = null) {
-    adjustments += builds.filter { isValid(it, player) || run {
+    addAdjustments(builds.filter { isValid(it, player) || run {
         println("WARNING: invalid build:\n$it")
         false
-    }}
+    }})
 }
-
-// TODO: order storage should be MutableMap<Location, (Build)Order> to avoid duplicates

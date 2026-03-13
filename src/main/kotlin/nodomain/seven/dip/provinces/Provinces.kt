@@ -8,7 +8,6 @@ interface Province {
 }
 
 interface Player {
-	// TODO: should this be a List or a Set?
 	val homeCentres: List<Province>;
 }
 

@@ -84,7 +84,6 @@ fun Game.adjudicateMoves() {
     for ((_, children) in children.groupBy { it.boardIndex }) {
         // The origin board can never create a board bounce out of its children
         if (children.size == 1) addChild(children[0].parent!!, children[0])
-        // TODO: "else <check board bounce>" (done?)
         else {
             val childrenAndStrengths: MutableList<Pair<Board, Int>> = mutableListOf()
             for (child in children) childrenAndStrengths += Pair(
@@ -124,13 +123,11 @@ fun Game.adjudicateMoves() {
 
 fun Game.adjudicateRetreats() {
     // TODO: adjudicate retreats
-    adjustments.clear()
+    clearAdjustments()
     advanceState()
     for (board in timeplanes.flatMap { it.boards() }) if (board.isActive && board.boardIndex.coordinate.isEven())
         for (piece in board.pieces) {
-        // TODO: is null check necessary?
-        if (board.centres[piece.key] === null || board.centres[piece.key] != piece.value) if (piece.key.isSupplyCentre)
-            board.centres[piece.key] = piece.value
+        if (board.centres[piece.key] != piece.value && piece.key.isSupplyCentre) board.centres[piece.key] = piece.value
     }
     // TODO: calculate builds
     if (timeplanes.asSequence().flatMap { it.boards() }.none { it.isActive && it.boardIndex.coordinate.isEven() }) {
@@ -158,7 +155,7 @@ fun Game.adjudicateBuilds() {
                 throw IllegalArgumentException("Too many builds given or not enough disbands given")
         }
     }
-    adjustments.clear()
+    clearAdjustments()
     advanceState()
 }
 
