@@ -34,6 +34,7 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
     }
     // Add pieces moving to board
     for (move in moveResults) if (move is SuccessfulMove) if (move.moveOrder.action.to.boardIndex == board.boardIndex) {
+        if (pieces[move.moveOrder.action.to.province] !== null) retreats += move.moveOrder.action.to
         pieces[move.moveOrder.action.to.province] =
             getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province]
             ?: throw IllegalStateException("order not properly validated")
@@ -122,7 +123,9 @@ fun Game.adjudicateMoves() {
 }
 
 fun Game.adjudicateRetreats() {
+    for (retreat in retreats) println(retreat)
     // TODO: adjudicate retreats
+    retreats.clear()
     clearAdjustments()
     advanceState()
     for (board in timeplanes.flatMap { it.boards() }) if (board.isActive && board.boardIndex.coordinate.isEven())
