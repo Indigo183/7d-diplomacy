@@ -14,14 +14,17 @@ enum class GameState {
 }
 
 class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
+    // All orders, past and present
     private val orders: MutableMap<Location, Order> = mutableMapOf()
     val moves: List<MoveOrder>
         get() = orders.values.filterIsInstance<MoveOrder>()
     val supports: List<SupportOrder>
         get() = orders.values.filterIsInstance<SupportOrder>()
 
+    // All units requiring retreats
     val retreats: MutableList<Location> = mutableListOf()
 
+    // All inputted retreats/builds
     private val _adjustments: MutableMap<Location, Adjustment> = mutableMapOf() // Stores both retreats and builds
     val adjustments: Collection<Adjustment>
         get() = _adjustments.values
