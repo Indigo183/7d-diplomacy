@@ -29,12 +29,12 @@ fun Game.adjudicateBoard(board: Board, direction: TemporalFlare, moveResults: Li
     val centres: MutableMap<Province, Player> = board.centres.toMutableMap()
 
     // Remove pieces moving from board
-    for (move in moveResults) if (move is SuccessfulMove) if (move.moveOrder.from.boardIndex == board.boardIndex) {
+    for (move in moveResults.filter { it is SuccessfulMove && it.moveOrder.from.boardIndex == board.boardIndex }) {
         pieces.remove(move.moveOrder.from.province)
     }
     // Add pieces moving to board
-    for (move in moveResults) if (move is SuccessfulMove) if (move.moveOrder.action.to.boardIndex == board.boardIndex) {
-        if (pieces[move.moveOrder.action.to.province] !== null) retreats += move.moveOrder.action.to
+    for (move in moveResults.filter { it is SuccessfulMove && it.moveOrder.action.to.boardIndex == board.boardIndex }) {
+        if (pieces[move.moveOrder.action.to.province] !== null) retreats += Pair(move.moveOrder.action.to, move.flare!!)
         pieces[move.moveOrder.action.to.province] =
             getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province]
             ?: throw IllegalStateException("order not properly validated")
@@ -108,7 +108,6 @@ fun Game.adjudicateMoves() {
                 childrenAndStrengths.last { childrenAndStrengths.last() != it }.second))
             { // last != penultimate
                 val child = childrenAndStrengths.removeLast().first
-                println(child)
                 addChild(child.parent!!, child)
             }
             for ((child, _) in childrenAndStrengths) {
@@ -119,7 +118,7 @@ fun Game.adjudicateMoves() {
     }
 
     advanceState()
-    if (adjustments.isEmpty()) adjudicateRetreats()
+    if (retreats.isEmpty()) adjudicateRetreats()
 }
 
 fun Game.adjudicateRetreats() {
