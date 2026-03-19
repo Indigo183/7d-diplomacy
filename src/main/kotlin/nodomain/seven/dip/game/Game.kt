@@ -121,10 +121,13 @@ class Board(
     var isActive = true
         private set
 
-    // set `isActive` to false (very useful comment)
+    // Sets `isActive` to false (very useful comment)
     fun kill() {
         isActive = false
     }
+
+    // Returns the number of builds a player has on a board
+    fun countBuilds(player: Player) = centres.values.filter { it === player } - pieces.values.filter { it === player }
 
     override fun toString(): String {
         return """

@@ -39,11 +39,23 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     return order.piece.location.isAdjacentTo(destination) // 4
 }
 
+/** Checks that:
+ * 1. the board exists
+ * 2. the board is not in Limbo
+ * 3. the board is in winter
+ * 4. the board is active
+ */
 fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
-    order.piece.location.boardIndex.timeplane ?: return false
-    if (!order.piece.location.boardIndex.coordinate.isEven()) return false
-    val board = getBoard(order.piece.location.boardIndex) ?: return false
-    if (!board.isActive) return false
+    order.piece.location.boardIndex.timeplane ?: return false // 2
+    if (!order.piece.location.boardIndex.coordinate.isEven()) return false // 3
+    val board = getBoard(order.piece.location.boardIndex) ?: return false // 1
+    val player = if (player !== null) {
+        // if...
+        player
+    } else board.centres[order.piece.location.province] ?: return false
+    if (!board.isActive) return false //
+    val count = board.countBuilds(player)
+    // if ()
     return (player?.equals(board.pieces[order.piece.location.province])
         ?: board.pieces[order.piece.location.province]) === null
 }
