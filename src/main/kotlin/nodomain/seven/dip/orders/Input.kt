@@ -44,20 +44,24 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
  * 2. the board is not in Limbo
  * 3. the board is in winter
  * 4. the board is active
+ * 5. the adjustment is the correct type (if any) based on adjustment count
+ * 6. the player owns the (centre / unit) being (built in / disbanded) respectively
  */
 fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
-    order.piece.location.boardIndex.timeplane ?: return false // 2
-    if (!order.piece.location.boardIndex.coordinate.isEven()) return false // 3
-    val board = getBoard(order.piece.location.boardIndex) ?: return false // 1
-    val player = if (player !== null) {
-        // if...
-        player
-    } else board.centres[order.piece.location.province] ?: return false
-    if (!board.isActive) return false //
+    val location = order.piece.location
+    location.boardIndex.timeplane ?: return false // 2
+    if (!location.boardIndex.coordinate.isEven()) return false // 3
+    val board = getBoard(location.boardIndex) ?: return false // 1
+    if (!board.isActive) return false // 4
+    val player = player ?: board.pieces[location.province] ?: board.centres[location.province] ?: return false
     val count = board.countBuilds(player)
-    // if ()
-    return (player?.equals(board.pieces[order.piece.location.province])
-        ?: board.pieces[order.piece.location.province]) === null
+    return when {
+        count > 0 -> order is Build // 5
+                && player == board.centres[location.province] && board.pieces[location.province] === null // 6
+        count < 0 -> order is Disband // 5
+                && player == board.pieces[location.province] // 6
+        else -> false // 5
+    }
 }
 
 fun Game.input(orders: List<Order>, player: Player? = null) {

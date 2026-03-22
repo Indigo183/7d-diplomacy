@@ -127,7 +127,8 @@ class Board(
     }
 
     // Returns the number of builds a player has on a board
-    fun countBuilds(player: Player) = centres.values.filter { it === player } - pieces.values.filter { it === player }
+    fun countBuilds(player: Player) =
+        centres.values.filter { it === player }.size - pieces.values.filter { it === player }.size
 
     override fun toString(): String {
         return """
