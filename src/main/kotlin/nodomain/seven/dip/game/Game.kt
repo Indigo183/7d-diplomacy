@@ -22,7 +22,7 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
         get() = orders.values.filterIsInstance<SupportOrder>()
 
     // All units requiring retreats
-    val retreats: MutableList<Pair<Location, TemporalFlare>> = mutableListOf()
+    val requiredRetreats: MutableList<Pair<Location, TemporalFlare>> = mutableListOf()
 
     // All inputted retreats/builds
     private val _adjustments: MutableMap<Location, Adjustment> = mutableMapOf() // Stores both retreats and builds
@@ -31,7 +31,7 @@ class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
 
     fun clearAdjustments() = _adjustments.clear()
     fun addAdjustments(newAdjustments: List<Adjustment>) {
-        for (item in newAdjustments) _adjustments[item.piece.location]
+        for (adjustment in newAdjustments) _adjustments[adjustment.piece.location] = adjustment
     }
 
     // For future optimisation of adjudication
