@@ -8,7 +8,11 @@ import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.Location
 
 sealed interface ComputableMoveResult {
-    val location: Location
+    val moveOrder: MoveOrder?
+    val location: Location get() = moveOrder!!.action.to
+
+    fun ifCompatibleWith(moveOrder: MoveOrder): ComputableMoveResult? =
+        if (this.moveOrder?.from == moveOrder.action.to) this else null
 }
 sealed interface MoveResult: ComputableMoveResult {
     companion object {
@@ -19,15 +23,13 @@ sealed interface MoveResult: ComputableMoveResult {
 }
 typealias PreResult = MutableMap<Location, ComputableMoveResult>
 
+data class DependantMove(override val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult
 @JvmInline
-value class SuccessfulMove(val moveOrder: MoveOrder): MoveResult {
-    override val location get() = moveOrder.action.to
-}
-data class DependantMove(val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult {
-    override val location get() = moveOrder.action.to
-}
+value class SuccessfulMove(override val moveOrder: MoveOrder): MoveResult
 @JvmInline
-value class Bounce(override val location: Location): MoveResult
+value class Bounce(override val location: Location): MoveResult {
+    override val moveOrder: MoveOrder? get() = null
+}
 
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Location, Player>) {
     private inner class MoveAnalyse(val order: MoveOrder) {
@@ -39,6 +41,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             strength++
             if (withHelpFrom != against) strengthExcludingVictim++
         }
+        override fun toString(): String = "$order with strength $strength ($strengthExcludingVictim without target)"
     }
 
     private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
@@ -71,7 +74,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     // no optimisation is done to avoid going down the same chain multiple times
     private tailrec fun PreResult.analyseDependency(dependantMove: DependantMove, origin: MoveOrder = dependantMove.moveOrder): MoveResult {
         if (dependantMove.moveOrder.from == dependantMove.dependsOn.action.to) return Bounce(origin.action.to)
-        return when (val dependency = this[dependantMove.dependsOn.action.to]) {
+        return when (val dependency = this[dependantMove.dependsOn.action.to]?.ifCompatibleWith(dependantMove.moveOrder)) {
             is Bounce, null -> Bounce(origin.action.to)
             is SuccessfulMove -> origin.(MoveResult.succeed)()
             is DependantMove if (origin.from == dependantMove.dependsOn.action.to) -> return origin.(MoveResult.succeed)()
