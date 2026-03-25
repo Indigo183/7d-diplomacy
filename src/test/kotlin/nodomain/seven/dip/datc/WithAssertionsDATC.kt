@@ -30,7 +30,7 @@ interface WithAssertionsDATC: WithAssertions {
         parser.parseOrderSet(this.trimMargin(), DATC)
 
 
-    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Setup = impliedSetup(), game: Game = Game(setup)): Game {
+    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: ()->Setup = {impliedSetup()}, game: Game = Game(setup())): Game {
         forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
         return game

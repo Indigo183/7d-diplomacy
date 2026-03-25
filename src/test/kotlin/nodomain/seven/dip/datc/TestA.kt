@@ -37,7 +37,7 @@ object TestA: WithAssertionsDATC {
         """
         |Germany:
         |A Paris - Brest
-        |""".parse().adjudicateAsDOTC(setup = franceHasAnArmyInParis).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(setup = {franceHasAnArmyInParis}).andAssertThatNothingMoved()
     }
 
     //6.A.7. TEST CASE, ONLY ARMIES CAN BE CONVOYED
