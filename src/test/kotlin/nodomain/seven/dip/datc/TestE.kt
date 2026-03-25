@@ -4,7 +4,9 @@ import nodomain.seven.dip.provinces.StandardPlayer.*
 import nodomain.seven.dip.provinces.StandardProvince.*
 import kotlin.test.Test
 
-//6.E. TEST CASES, HEAD-TO-HEAD BATTLES AND BELEAGUERED GARRISON
+/** ## 6.E. TEST CASES, HEAD-TO-HEAD BATTLES AND BELEAGUERED GARRISON
+ * Missing tests clearly irrelevant due to not using fleets, coasts and sea regions
+ */
 object TestE: WithAssertionsDATC {
     @Test
     fun `6_E_1 TEST CASE, DISLODGED UNIT HAS NO EFFECT ON ATTACKER'S AREA`() {
