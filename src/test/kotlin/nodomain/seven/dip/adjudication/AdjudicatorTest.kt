@@ -52,13 +52,31 @@ class AdjudicatorTest: WithAssertions {
     @Test
     fun whenTwoUnitsEntersEachOthersLocation_thenTheirMovesAreNotSuccessful() {
         val origin = T(0.c , 0)
-        val pieces = mapOf(origin[CAT] to Cato, origin[BRU] to Pompey)
+        val pieces = mapOf(origin[CAE] to Cato, origin[BRU] to Pompey)
         val moves = listOf(
-            origin A CAT M BRU i 3,
-            origin A BRU M CAT i 3
+            origin A CAE M BRU i 3,
+            origin A BRU M CAE i 3
         )
 
         val results = Adjudicator(moves, listOf(), pieces).moveResults
+
+        assertThat(results).doesNotContainAnyElementsOf(moves.map { SuccessfulMove(it) })
+    }
+
+    @Test
+    fun whenTwoUnitsEntersEachOthersLocationWithEqualSupport_thenTheirMovesAreNotSuccessful() {
+        val origin = T(0.c , 0)
+        val pieces = mapOf(origin[CAE] to Cato, origin[CAT] to Cato, origin[BRU] to Pompey, origin[POM] to Pompey)
+        val moves = listOf(
+            origin A CAE M BRU i 3,
+            origin A BRU M CAE i 3
+        )
+        val supports = listOf(
+            origin A CAT S {origin A CAE M BRU i 3},
+            origin A POM S {origin A BRU M CAE i 3}
+        )
+
+        val results = Adjudicator(moves, supports, pieces).moveResults
 
         assertThat(results).doesNotContainAnyElementsOf(moves.map { SuccessfulMove(it) })
     }

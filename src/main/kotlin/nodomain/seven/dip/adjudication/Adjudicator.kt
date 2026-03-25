@@ -124,7 +124,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             null -> presumptiveMove.order.(MoveResult.succeed)()
             piecesIn[presumptiveMove.order.from] -> presumptiveMove.order.dependOnDestination()
             else if (presumptiveMove.strengthExcludingVictim == 1) -> presumptiveMove.order.dependOnDestination()
-            else if (byOrigin[destination] === null && presumptiveMove.strengthExcludingVictim <= holdStrength(destination)) -> Bounce(destination)
+            else if (presumptiveMove.strengthExcludingVictim <= holdStrength(destination, presumptiveMove)) -> Bounce(destination)
             else if (presumptiveMove != orders.maxBy { it.strengthExcludingVictim }) -> presumptiveMove.order.dependOnDestination()
             else -> {
                 dislodgements += presumptiveMove.order
@@ -133,9 +133,14 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         }
     }
 
-    fun MoveOrder.dependOnDestination(): ComputableMoveResult = // this method assumes the destination to be occupied
+    private fun MoveOrder.dependOnDestination(): ComputableMoveResult = // this method assumes the destination to be occupied
         (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order) ?: Bounce(action.to)
 
-    fun holdStrength(destination: Location): Int =
-        nonCutSupports.count { it.action.order is HoldOrder && it.action.order.from == destination } + 1
+    private fun holdStrength(destination: Location, against: MoveAnalyse): Int {
+        return when (val moveAtDestination = byOrigin[destination]) {
+            null -> nonCutSupports.count { it.action.order is HoldOrder && it.action.order.from == destination } + 1
+            else if (moveAtDestination.order.action.to == against.order.from) -> moveAtDestination.strength
+            else -> 0 // neither holding, nor moving counter
+        }
+    }
 }
