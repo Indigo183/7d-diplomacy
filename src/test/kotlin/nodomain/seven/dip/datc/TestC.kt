@@ -7,7 +7,7 @@ import kotlin.test.Test
 /** ## 6.C. TEST CASES, CIRCULAR MOVEMENT
  *  Missing tests clearly irrelevant due to not using fleets, coasts and sea regions
  */
-object TestC: WithAssertionsDOTC {
+object TestC: WithAssertionsDATC {
     @Test
     fun `6_C_1 TEST CASE, THREE ARMY CIRCULAR MOVEMENT`() { // Modified due to involving fleets as separate from armies
         val result = """

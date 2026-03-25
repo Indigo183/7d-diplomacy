@@ -5,7 +5,7 @@ import nodomain.seven.dip.provinces.StandardProvince.*
 import kotlin.test.Test
 
 //6.E. TEST CASES, HEAD-TO-HEAD BATTLES AND BELEAGUERED GARRISON
-object TestE: WithAssertionsDOTC {
+object TestE: WithAssertionsDATC {
     @Test
     fun `6_E_1 TEST CASE, DISLODGED UNIT HAS NO EFFECT ON ATTACKER'S AREA`() {
         val result = """
@@ -175,7 +175,7 @@ object TestE: WithAssertionsDOTC {
         |Italy:
         |A Marseilles Supports A Gascony - Burgundy
         |A Gascony - Burgundy
-        |A Paris  - Gascony
+        |A Paris - Gascony
         |
         |Germany:
         |A Munich Supports A Ruhr - Burgundy
@@ -247,7 +247,7 @@ object TestE: WithAssertionsDOTC {
         |Germany:
         |A Munich - Burgundy
         |A Ruhr Supports A Munich - Burgundy
-        |A Belgium Bight Supports A Munich - Burgundy
+        |A Belgium Supports A Munich - Burgundy
         |
         |Russia:
         |A Berlin Supports A Silesia - Munich

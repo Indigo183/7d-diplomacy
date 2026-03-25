@@ -7,7 +7,7 @@ import kotlin.test.Test
 /** ## 6.D. TEST CASES, SUPPORTS AND DISLODGES
  *  Missing tests clearly irrelevant due to not using fleets, coasts and sea regions
  */
-object TestD: WithAssertionsDOTC {
+object TestD: WithAssertionsDATC {
     @Test
     fun `6_D_1 TEST CASE, SUPPORTED HOLD CAN PREVENT DISLODGEMENT`() { // Modified due to involving sea regions
         """

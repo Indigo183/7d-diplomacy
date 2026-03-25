@@ -7,7 +7,7 @@ import kotlin.test.Test
 /** ## 6.A. TEST CASES, BASIC CHECKS
  *  Missing tests clearly irrelevant due to not using fleets, coasts and sea regions
  */
-object TestA: WithAssertionsDOTC {
+object TestA: WithAssertionsDATC {
     @Test
     fun `6_A_1 TEST CASE, MOVING TO AN AREA THAT IS NOT A NEIGHBOUR`() { // Modified due to involving sea regions
         """

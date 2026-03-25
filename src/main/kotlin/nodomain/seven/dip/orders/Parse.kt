@@ -41,7 +41,7 @@ class Parser(
     }
     enum class NationalisedFormat(val getFormatter: Parser.() -> ParsingHelper<OwnedOrder>): (Parser) -> ParsingHelper<OwnedOrder> {
         VERBOSE_WITH_PLAYER({National(Verbose())}),
-        DOTC({DOTC()});
+        DATC({ this.DATC() });
 
         override fun invoke(parser: Parser): ParsingHelper<OwnedOrder> = parser.getFormatter()
     }
@@ -111,7 +111,7 @@ class Parser(
         }
     }
 
-    private inner class DOTC: Announced<OwnedOrder> {
+    private inner class DATC: Announced<OwnedOrder> {
         val origin = BoardIndex(0.c)
         lateinit var owner: Player
 

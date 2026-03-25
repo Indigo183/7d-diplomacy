@@ -3,7 +3,7 @@ package nodomain.seven.dip.datc
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.Parser.NationalisedFormat.DOTC
+import nodomain.seven.dip.orders.Parser.NationalisedFormat.DATC
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
@@ -17,13 +17,13 @@ import org.assertj.core.api.WithAssertions
 
 typealias Setup = Map<Province, Player>
 
-interface WithAssertionsDOTC: WithAssertions {
+interface WithAssertionsDATC: WithAssertions {
     companion object {
         private val parser = getParser<StandardPlayer, StandardProvince>(provinceTrim = { trim().substring(0, 3).uppercase() })
     }
 
     fun String.parse(): Map<Player, List<Order>> =
-        parser.parseOrderSet(this.trimMargin(), DOTC)
+        parser.parseOrderSet(this.trimMargin(), DATC)
 
 
     fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: Setup = impliedSetup()): Game {
