@@ -24,7 +24,7 @@ fun interface Adjacency {
 }
 
 // Checks if boards are adjacent, but not the same
-fun BoardIndex.isAdjacentTo(other: BoardIndex, forPiece: Piece? = null): Boolean {
+fun BoardIndex.isAdjacentTo(other: BoardIndex): Boolean {
     if (timeplane === null || other.timeplane === null) {
         System.err.println("WARNING: called `BoardIndex.isAdjacentTo()` on a BoardIndex in Limbo")
         return false
