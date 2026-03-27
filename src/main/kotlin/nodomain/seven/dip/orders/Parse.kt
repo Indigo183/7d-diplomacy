@@ -149,6 +149,7 @@ object DefaultNotation: Notation {
 
     override fun asUnitType(string: String): (Location) -> Piece = when (string.first()) {
         'A' -> ::Army
+        'F' -> ::Fleet
         else -> throw IncompatibleParserException()
     }
 

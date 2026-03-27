@@ -26,3 +26,7 @@ operator fun BoardIndex.get(province: Province): Location = Location(province, t
 @JvmInline
 value class Army(override val location: Location): Piece
 infix fun BoardIndex.A(province: Province): Army = Army(Location(province, this))
+
+@JvmInline
+value class Fleet(override val location: Location): Piece
+infix fun BoardIndex.F(province: Province): Fleet = Fleet(Location(province, this))

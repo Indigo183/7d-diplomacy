@@ -1,6 +1,6 @@
 package nodomain.seven.dip.orders
 
-import nodomain.seven.dip.adjudication.isAdjacentTo
+import nodomain.seven.dip.provinces.isAdjacentTo
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.Player
 
@@ -8,7 +8,7 @@ import nodomain.seven.dip.provinces.Player
  * 1. the ordered unit exists
  * 2. if a player is passed, the player owns the unit
  * 3. if the order is a move, the destination exists, and a flare is present
- * 4. the origin and destination are adjacent and ignores the possibility of convoys
+ * 4. the origin and destination are adjacent for the relevant unit and ignores the possibility of convoys
  * 5. no involved board indexes reference Limbo (i.e. boardIndex.timeplane is never null)
  * 6. the ordered unit is on an active board
  */
@@ -36,7 +36,7 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
         }
         is HoldOrder -> return true // hold orders do not have a destination, thus 4 is trivial
     }
-    return order.piece.location.isAdjacentTo(destination) // 4
+    return order.piece.location.isAdjacentTo(destination, forPiece = order.piece) // 4
 }
 
 /** Checks that:
