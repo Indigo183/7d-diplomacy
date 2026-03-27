@@ -7,17 +7,19 @@ import nodomain.seven.dip.utils.c
 import nodomain.seven.dip.utils.i
 import kotlin.math.abs
 
+fun Province.equalTo(other: Province): Adjacency = Adjacency {equals(other)}
+
 enum class AdjacencyType(val isAdjacentOnForeignBoard: Province.(Province) -> Adjacency) {
-    LOOSE({isAdjacentWith(it) + equals(it)}),
-    STRICT({ Adjacency{ unit -> equals(it)} });
+    LOOSE({isAdjacentWith(it) + equalTo(it)}),
+    STRICT({equalTo(it)});
 }
 
 fun interface Adjacency {
     fun forUnit(piece: Piece?): Boolean
     fun forAnyUnit(): Boolean = forUnit(null)
 
-    operator fun plus(alternative: Boolean): Adjacency {
-        return Adjacency { forUnit(it) || alternative }
+    operator fun plus(alternative: Adjacency): Adjacency {
+        return Adjacency { forUnit(it) || alternative.forUnit(it) }
     }
 }
 
