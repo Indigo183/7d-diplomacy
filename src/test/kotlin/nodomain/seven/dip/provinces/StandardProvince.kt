@@ -13,7 +13,20 @@ object A {
     operator fun get(province: StandardProvince): Army = Army(Location(province, origin))
 }
 
-interface StandardProvince: Province
+interface StandardProvince: Province{
+    val adjacency: Set<StandardProvince>
+    override fun isAdjacent(other: Province): Boolean = other in adjacency
+
+
+    companion object {
+        val entries: List<StandardProvince>
+            get() = sequenceOf(StandardSea.entries, StandardInLand.entries, StandardCoast.entries).flatten().toList()
+
+        fun valueOf(string: String): StandardProvince =
+            sequenceOf(StandardSea.entries, StandardInLand.entries, StandardCoast.entries)
+                .flatten().first { it.name == string }
+    }
+}
 
 enum class StandardSea(): Sea, StandardProvince {
     BAR { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, NWG, NWY) } },
@@ -36,8 +49,6 @@ enum class StandardSea(): Sea, StandardProvince {
     EAS { override val adjacency: Set<StandardProvince> by lazy { setOf(ION, AEG, SMY, SYR) } },
     BLA { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, BUL, RUM, SEV, ARM, ANK) } };
 
-    abstract val adjacency: Set<StandardProvince>
-    override fun isAdjacent(other: Province): Boolean = other in adjacency
     override val isSupplyCentre: Boolean get() = false
 }
 
@@ -86,8 +97,6 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     WAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(LVP, LON, ENG, IRI) } },
     NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) } };
 
-    abstract val adjacency: Set<StandardProvince>
-    override fun isAdjacent(other: Province): Boolean = other in adjacency
     override fun hasInlandBorderWith(coast: Coast): Boolean = false
 }
 
@@ -107,15 +116,12 @@ enum class StandardInLand(override val isSupplyCentre: Boolean): InLand, Standar
     GAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SIL, WAR, UKR, RUM, BUD, VIE, BOH) } },
     BOH(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, SIL, GAL, VIE, TYR) } },
     TYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, BOH, VIE, TRI, VEN, PIE) } };
-
-    abstract val adjacency: Set<StandardProvince>
-    override fun isAdjacent(other: Province): Boolean = other in adjacency
 }
 
-/*fun main() {
+fun main() {
     for (province in StandardProvince.entries)
         if (!province.adjacency.all { it.isAdjacent(province) }) println("$province is not symmetrically linked")
-}*/
+}
 
 enum class StandardPlayer(override val homeCentres: List<Province>): Player {
     Austria(listOf(VIE, BUD, TRI)),
