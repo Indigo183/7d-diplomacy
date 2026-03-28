@@ -2,7 +2,9 @@ package nodomain.seven.dip.provinces
 
 import nodomain.seven.dip.orders.Army
 import nodomain.seven.dip.orders.T
-import nodomain.seven.dip.provinces.StandardProvince.*
+import nodomain.seven.dip.provinces.StandardInLand.*
+import nodomain.seven.dip.provinces.StandardCoast.*
+import nodomain.seven.dip.provinces.StandardSea.*
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.c
 
@@ -11,65 +13,109 @@ object A {
     operator fun get(province: StandardProvince): Army = Army(Location(province, origin))
 }
 
-enum class StandardProvince(override val isSupplyCentre: Boolean): Province {
-    POR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA) } },
-    SPA(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS) } },
-    MAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAS, SPA, BUR, PIE) } },
-    BRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, PAR, GAS) } },
+interface StandardProvince: Province
+
+enum class StandardSea(): Sea, StandardProvince {
+    BAR { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, NWG, NWY) } },
+    NWG { override val adjacency: Set<StandardProvince> by lazy { setOf(BAR, NWY, NAO, CLY, EDI, NTH) } },
+    NTH { override val adjacency: Set<StandardProvince> by lazy { setOf(NWG, NWY, SKA, DEN, HEL, HOL, BEL, ENG, LON, YOR, EDI) } },
+    SKA { override val adjacency: Set<StandardProvince> by lazy { setOf(NTH, NWY, SWE, DEN) } },
+    HEL { override val adjacency: Set<StandardProvince> by lazy { setOf(NTH, DEN, KIE, HOL) } },
+    BAL { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, DEN, KIE, BER, PRU, LVN, BOT) } },
+    BOT { override val adjacency: Set<StandardProvince> by lazy { setOf(BAL, SWE, FIN, STP, LVN) } },
+    ENG { override val adjacency: Set<StandardProvince> by lazy { setOf(BEL, PIC, BRE, MAO, IRI, WAL, LON, NTH) } },
+    IRI { override val adjacency: Set<StandardProvince> by lazy { setOf(MAO, ENG, NAO, WAL, LVP) } },
+    NAO { override val adjacency: Set<StandardProvince> by lazy { setOf(NWG, CLY, MAO, LVP, IRI) } },
+    MAO { override val adjacency: Set<StandardProvince> by lazy { setOf(NAO, IRI, ENG, BRE, GAL, SPA, POR, WES, NAF) } },
+    WES { override val adjacency: Set<StandardProvince> by lazy { setOf(NAF, WES, SPA, LYO, TYS, TUN) } },
+    LYO { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, MAR, PIE, TUS, TYS, WES) } },
+    TYS { override val adjacency: Set<StandardProvince> by lazy { setOf(LYO, TUS, ROM, NAP, ION, TUN, WES) } },
+    ION { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, TYS, NAP, APU, ADR, ALB, GRE, AEG, EAS) } },
+    ADR { override val adjacency: Set<StandardProvince> by lazy { setOf(ION, APU, VEN, TRI, ALB) } },
+    AEG { override val adjacency: Set<StandardProvince> by lazy { setOf(ION, GRE, BUL, CON, SMY, EAS) } },
+    EAS { override val adjacency: Set<StandardProvince> by lazy { setOf(ION, AEG, SMY, SYR) } },
+    BLA { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, BUL, RUM, SEV, ARM, ANK) } };
+
+    abstract val adjacency: Set<StandardProvince>
+    override fun isAdjacent(other: Province): Boolean = other in adjacency
+    override val isSupplyCentre: Boolean get() = false
+}
+
+enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardProvince {
+    POR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, MAO) } },
+    SPA(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS, MAO, WES, LYO) } },
+    MAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAS, SPA, BUR, PIE, LYO) } },
+    BRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, PAR, GAS, MAO, ENG) } },
+    BEL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, BUR, RUH, HOL, ENG,  NTH) } },
+    HOL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BEL, KIE, RUH, NTH, HEL) } },
+    KIE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(HOL, RUH, MUN, BER, DEN, HEL, BAL) } },
+    BER(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(KIE, MUN, SIL, PRU, BAL) } },
+    DEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(KIE, SWE, HEL, SKA, NTH, BAL) } },
+    SWE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(DEN, NWY, FIN, SKA, BAL, BOT) } },
+    NWY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, FIN, STP, NTH, SKA, NWG, BAR) } },
+    STP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) } },
+    SEV(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, UKR, RUM, ARM, BLA) } },
+    SMY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, ANK, ARM, SYR, AEG, EAS) } },
+    ANK(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ARM, SMY, CON, BLA) } },
+    CON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ANK, SMY, BUL, BLA, AEG) } },
+    BUL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE, BLA, AEG) } },
+    RUM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAL, UKR, SEV, BUL, SER, BUD, BLA) } },
+    GRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BUL, SER, ALB, AEG, ION) } },
+    TRI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ALB, SER, BUD, VIE, VEN, TYR, ADR) } },
+    VEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TRI, TYR, PIE, ROM, TUS, APU, ADR) } },
+    ROM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUS, VEN, APU, NAP, TYS) } },
+    NAP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ROM, APU, TYS, ION) } },
+    EDI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, LVP, YOR, NTH, NWG) } },
+    LVP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, EDI, YOR, WAL, IRI, NAO) } },
+    LON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(YOR, WAL, ENG, NTH) } },
+    TUN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAF, WES, TYS, ION) } },
+
+    GAS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, BRE, PAR, BUR, MAR, MAO) } },
+    PIC(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BRE, PAR, BUR, BEL, ENG) } },
+    PRU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BER, SIL, WAR, LVN, BAL) } },
+    FIN(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, NWY, STP, BOT) } },
+    LVN(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, MOS, WAR, PRU, BAL, BOT) } },
+    ARM(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SEV, SYR, ANK, SMY, BLA) } },
+    SYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SMY, ARM, EAS) } },
+    ALB(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(GRE, SER, TRI, ION, ADR) } },
+    PIE(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MAR, TYR, VEN, TUS, LYO) } },
+    TUS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIE, VEN, ROM, TYS) } },
+    APU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAP, ROM, VEN, ION, ADR) } },
+    CLY(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, NAO, NWG) } },
+    YOR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, WAL, LON, NTH) } },
+    WAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(LVP, LON, ENG, IRI) } },
+    NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) } };
+
+    abstract val adjacency: Set<StandardProvince>
+    override fun isAdjacent(other: Province): Boolean = other in adjacency
+    override fun hasInlandBorderWith(coast: Coast): Boolean = false
+}
+
+enum class StandardInLand(override val isSupplyCentre: Boolean): InLand, StandardProvince {
     PAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, BRE, GAS, BUR) } },
-    BEL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, BUR, RUH, HOL) } },
-    HOL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BEL, KIE, RUH) } },
-    KIE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(HOL, RUH, MUN, BER, DEN) } },
-    BER(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(KIE, MUN, SIL, PRU) } },
     MUN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BUR, RUH, KIE, BER, SIL, BOH, TYR) } },
-    DEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(KIE, SWE) } },
-    SWE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(DEN, NWY, FIN) } },
-    NWY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, FIN, STP) } },
-    STP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LIV, MOS) } },
-    MOS(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, LIV, WAR, UKR, SEV) } },
-    WAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SIL, PRU, LIV, MOS, UKR, GAL) } },
-    SEV(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, UKR, RUM, ARM) } },
-    SMY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, ANK, ARM, SYR) } },
-    ANK(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ARM, SMY, CON) } },
-    CON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ANK, SMY, BUL) } },
-    BUL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE) } },
-    RUM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAL, UKR, SEV, BUL, SER, BUD) } },
+    MOS(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, LVN, WAR, UKR, SEV) } },
+    WAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SIL, PRU, LVN, MOS, UKR, GAL) } },
     SER(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(RUM, BUL, GRE, ALB, TRI, BUD) } },
-    GRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BUL, SER, ALB) } },
-    TRI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ALB, SER, BUD, VIE, VEN, TYR) } },
     BUD(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SER, RUM, GAL, VIE, TRI) } },
     VIE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TYR, BOH, GAL, BUD, TRI) } },
-    VEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TRI, TYR, PIE, ROM, TUS, APU) } },
-    ROM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUS, VEN, APU, NAP) } },
-    NAP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ROM, APU) } },
 
-    GAS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, BRE, PAR, BUR, MAR) } },
     BUR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MAR, GAS, PAR, PIC, BEL, RUH, MUN) } },
-    PIC(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BRE, PAR, BUR, BEL) } },
     RUH(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(HOL, BEL, BUR, MUN, KIE) } },
     SIL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, BER, PRU, WAR, GAL, BOH) } },
-    PRU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BER, SIL, WAR, LIV) } },
-    FIN(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, NWY, STP) } },
-    LIV(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, MOS, WAR, PRU) } },
     UKR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, WAR, GAL, RUM, SEV) } },
-    ARM(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SEV, SYR, ANK, SMY) } },
-    SYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SMY, ARM) } },
-    ALB(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(GRE, SER, TRI) } },
     GAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SIL, WAR, UKR, RUM, BUD, VIE, BOH) } },
     BOH(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, SIL, GAL, VIE, TYR) } },
-    TYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, BOH, VIE, TRI, VEN, PIE) } },
-    PIE(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MAR, TYR, VEN, TUS) } },
-    TUS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIE, VEN, ROM, ) } },
-    APU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAP, ROM, VEN) } };
+    TYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, BOH, VIE, TRI, VEN, PIE) } };
 
     abstract val adjacency: Set<StandardProvince>
     override fun isAdjacent(other: Province): Boolean = other in adjacency
 }
 
-fun main() {
+/*fun main() {
     for (province in StandardProvince.entries)
         if (!province.adjacency.all { it.isAdjacent(province) }) println("$province is not symmetrically linked")
-}
+}*/
 
 enum class StandardPlayer(override val homeCentres: List<Province>): Player {
     Austria(listOf(VIE, BUD, TRI)),
