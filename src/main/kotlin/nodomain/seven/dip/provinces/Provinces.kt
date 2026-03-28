@@ -5,27 +5,27 @@ import nodomain.seven.dip.orders.Fleet
 import kotlin.enums.enumEntries
 
 interface Province {
-    infix fun isAdjacentTo(other: Province): Boolean
+    infix fun isAdjacent(other: Province): Boolean
 
-    infix fun isAdjacentWith(other: Province): Adjacency {
+    infix fun isAdjacentTo(other: Province): Adjacency {
         return Adjacency { when (it) {
             is Army -> isAdjacentForArmies(other)
             is Fleet -> isAdjacentForFleets(other)
-            null -> isAdjacentTo(other) }
+            null -> isAdjacent(other) }
         }
     }
 
     infix fun isAdjacentForFleets(other: Province): Boolean {
         return when (other) {
             is InLand -> false
-            else -> isAdjacentTo(other)
+            else -> isAdjacent(other)
         }
     }
 
     infix fun isAdjacentForArmies(other: Province): Boolean {
         return when (other) {
             is Sea -> false
-            else -> isAdjacentTo(other)
+            else -> isAdjacent(other)
         }
     }
 

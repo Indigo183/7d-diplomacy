@@ -10,7 +10,7 @@ import kotlin.math.abs
 fun Province.equalTo(other: Province): Adjacency = Adjacency {equals(other)}
 
 enum class AdjacencyType(val isAdjacentOnForeignBoard: Province.(Province) -> Adjacency) {
-    LOOSE({isAdjacentWith(it) + equalTo(it)}),
+    LOOSE({isAdjacentTo(it) + equalTo(it)}),
     STRICT({equalTo(it)});
 }
 
@@ -40,7 +40,7 @@ fun BoardIndex.isAdjacentTo(other: BoardIndex): Boolean {
 fun Location.isAdjacentTo(other: Location, adjacencyType: AdjacencyType = AdjacencyType.LOOSE, forPiece: Piece? = null): Boolean {
     return when {
         boardIndex == other.boardIndex -> // adjacency is local
-            province isAdjacentWith other.province
+            province isAdjacentTo other.province
         boardIndex.isAdjacentTo(other.boardIndex) ->
             province.(adjacencyType.isAdjacentOnForeignBoard)(other.province)
         else -> return false

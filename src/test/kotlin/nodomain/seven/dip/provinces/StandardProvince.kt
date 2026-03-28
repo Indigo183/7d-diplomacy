@@ -63,12 +63,12 @@ enum class StandardProvince(override val isSupplyCentre: Boolean): Province {
     APU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAP, ROM, VEN) } };
 
     abstract val adjacency: Set<StandardProvince>
-    override fun isAdjacentTo(other: Province): Boolean = other in adjacency
+    override fun isAdjacent(other: Province): Boolean = other in adjacency
 }
 
 fun main() {
     for (province in StandardProvince.entries)
-        if (!province.adjacency.all { it.isAdjacentTo(province) }) println("$province is not symmetrically linked")
+        if (!province.adjacency.all { it.isAdjacent(province) }) println("$province is not symmetrically linked")
 }
 
 enum class StandardPlayer(override val homeCentres: List<Province>): Player {

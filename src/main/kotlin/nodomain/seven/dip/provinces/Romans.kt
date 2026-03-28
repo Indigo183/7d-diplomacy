@@ -10,7 +10,7 @@ enum class Romans(override val isSupplyCentre: Boolean): Province {
     BRU(false) { override val adjacency: Set<Romans> by lazy { setOf(CAE, CAT, POM) } };
 
     abstract val adjacency: Set<Romans>
-    override fun isAdjacentTo(other: Province): Boolean = other in adjacency
+    override fun isAdjacent(other: Province): Boolean = other in adjacency
 }
 
 enum class RomanPlayers(override val homeCentres: List<Romans>): Player {
