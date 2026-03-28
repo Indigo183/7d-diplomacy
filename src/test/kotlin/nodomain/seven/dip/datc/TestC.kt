@@ -1,7 +1,9 @@
 package nodomain.seven.dip.datc
 
 import nodomain.seven.dip.provinces.StandardPlayer.*
-import nodomain.seven.dip.provinces.StandardProvince.*
+import nodomain.seven.dip.provinces.StandardCoast.*
+import nodomain.seven.dip.provinces.StandardSea.*
+import nodomain.seven.dip.provinces.StandardInLand.*
 import kotlin.test.Test
 
 /** ## 6.C. TEST CASES, CIRCULAR MOVEMENT

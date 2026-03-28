@@ -3,7 +3,7 @@ package nodomain.seven.dip.orders
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.provinces.A
 import nodomain.seven.dip.provinces.StandardPlayer
-import nodomain.seven.dip.provinces.StandardProvince.*
+import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.setup
 import org.assertj.core.api.WithAssertions
 import kotlin.test.Test

@@ -11,6 +11,7 @@ import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.StandardCoast
 import nodomain.seven.dip.provinces.StandardPlayer
 import nodomain.seven.dip.provinces.StandardProvince
 import nodomain.seven.dip.utils.BoardIndex
@@ -22,7 +23,7 @@ typealias Setup = Map<Province, Player>
 
 interface WithAssertionsDATC: WithAssertions {
     companion object {
-        private val parser = getParser<StandardPlayer, StandardProvince>(provinceTrim = { trim().substring(0, 3).uppercase() })
+        private val parser = getParser<StandardPlayer, StandardCoast>(provinceTrim = { trim().substring(0, 3).uppercase() })
         val origin = T(0.c, 0)
     }
 
