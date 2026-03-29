@@ -13,7 +13,10 @@ inline fun <reified Pl, reified Pr> getParser(
     crossinline playerTrim: String.() -> String = String::trim,
     crossinline provinceTrim: String.() -> String = String::trim
 ): Parser where Pl: Player, Pl : Enum<Pl>, Pr : Province, Pr : Enum<Pr> =
-    Parser({ enumValueOf<Pl>(it.playerTrim()) }, { enumValueOf<Pr>(it.provinceTrim()) })
+    Parser(
+        { PartiallyParsed { enumValueOf<Pl>(it.playerTrim()) }},
+        { PartiallyParsed { enumValueOf<Pr>(it.provinceTrim()) }}
+    )
 
 class IncompatibleParserException() : RuntimeException()
 
@@ -29,9 +32,23 @@ interface Notation {
 
 typealias OwnedOrder = Pair<Order, Player>
 
+fun interface PartiallyParsed<R> {
+    fun isComplete(): Boolean = true
+    fun feed(string: String) {}
+    fun provideComplete(): R
+}
+
+fun <R> Queue<String>.take(asR: (String) -> PartiallyParsed<R>): R {
+    val partiallyParsed = asR(remove())
+    while (!partiallyParsed.isComplete()) {
+        partiallyParsed.feed(remove())
+    }
+    return partiallyParsed.provideComplete()
+}
+
 class Parser(
-    val asPlayer: (String) -> Player,
-    val asProvince: (String) -> Province,
+    val asPlayer: (String) -> PartiallyParsed<Player>,
+    val asProvince: (String) -> PartiallyParsed<Province>,
     val notation: Notation = DefaultNotation
 ){
     enum class Format(val getFormatter: Parser.() -> ParsingHelper<Order>): (Parser) -> ParsingHelper<Order> {
@@ -89,23 +106,30 @@ class Parser(
         fun <T, R> combiningNext(parseT: (String) -> T,  combiner: (T, I) -> R): BeingParsed<R> =
             BeingParsed(remaining, combiningInto(parseT,  combiner = combiner))
 
+        fun <T, R> combiningManyNext(parseT: (String) -> PartiallyParsed<T>,  combiner: (T, I) -> R): BeingParsed<R> =
+            BeingParsed(remaining, combiningManyInto(parseT,  combiner = combiner))
+
         fun <T, R> combiningInto(parseT: (String) -> T, default: T? = null, combiner: (T, I) -> R): R =
             if (remaining.isEmpty() && default !== null)
                 combiner(default, intermediateResult)
             else
                 combiner(parseT(remaining.remove()), intermediateResult)
+
+        fun <T, R> combiningManyInto(parseT: (String) -> PartiallyParsed<T>,  combiner: (T, I) -> R): R {
+            return combiner(remaining.take(parseT), intermediateResult)
+        }
     }
 
     private inner class Verbose: Formatted<Order> {
         override fun parseOrderInPieces(queue: Queue<String>): Order {
             return queue.withFirst(notation::asBoardIndex)
                 .combiningNext(notation::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
-                .combiningNext(asProvince) { province, board  -> board(province)}
+                .combiningManyNext(asProvince) { province, board  -> board(province)}
                 .combiningInto(notation::asAction, 'H') { action, piece -> when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue) }
                     'M' -> piece M queue.withFirst(notation::asBoardIndex)
-                        .combiningInto(asProvince, combiner = ::Location) i notation.asTemporalFlare(queue.remove())
+                        .combiningManyInto(asProvince, combiner = ::Location) i notation.asTemporalFlare(queue.remove())
                     else -> throw IllegalStateException()
                 } }
         }
@@ -116,23 +140,23 @@ class Parser(
         lateinit var owner: Player
 
         override fun parseHeader(asString: String) {
-            owner = asPlayer(asString.substringBefore(':'))
+            owner = asPlayer(asString.substringBefore(':')).provideComplete()
         }
 
         override fun parseOrderInPieces(queue: Queue<String>): OwnedOrder {
             return queue.withFirst(notation::asUnitType)
-                .combiningNext(asProvince) { province, unitType -> unitType(Location(province, origin))}
+                .combiningManyNext(asProvince) { province, unitType -> unitType(Location(province, origin))}
                 .combiningInto(notation::asAction, 'H') {action, piece -> Pair(when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue).first }
-                    '-' -> piece M asProvince(queue.remove()) i 0
+                    '-' -> piece M queue.take(asProvince) i 0
                     else -> throw IllegalStateException()}, owner) }
         }
     }
 
     private inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
         override fun parseOrderInPieces(queue: Queue<String>): Pair<Order, Player> {
-            val player = asPlayer(queue.remove())
+            val player = queue.take(asPlayer)
             return Pair(basedOn.parseOrderInPieces(queue), player)
         }
     }
