@@ -55,7 +55,6 @@ enum class StandardSea(): Sea, StandardProvince {
 enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardProvince {
     POR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, MAO) } },
     SPA(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS, MAO, WES, LYO) } },
-    MAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAS, SPA, BUR, PIE, LYO) } },
     BRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, PAR, GAS, MAO, ENG) } },
     BEL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, BUR, RUH, HOL, ENG,  NTH) } },
     HOL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BEL, KIE, RUH, NTH, HEL) } },
@@ -66,36 +65,84 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     NWY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, FIN, STP, NTH, SKA, NWG, BAR) } },
     STP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) } },
     SEV(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, UKR, RUM, ARM, BLA) } },
-    SMY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, ANK, ARM, SYR, AEG, EAS) } },
-    ANK(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ARM, SMY, CON, BLA) } },
     CON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ANK, SMY, BUL, BLA, AEG) } },
     BUL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE, BLA, AEG) } },
     RUM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAL, UKR, SEV, BUL, SER, BUD, BLA) } },
     GRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BUL, SER, ALB, AEG, ION) } },
     TRI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ALB, SER, BUD, VIE, VEN, TYR, ADR) } },
-    VEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TRI, TYR, PIE, ROM, TUS, APU, ADR) } },
-    ROM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUS, VEN, APU, NAP, TYS) } },
     NAP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ROM, APU, TYS, ION) } },
-    EDI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, LVP, YOR, NTH, NWG) } },
-    LVP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, EDI, YOR, WAL, IRI, NAO) } },
     LON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(YOR, WAL, ENG, NTH) } },
     TUN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAF, WES, TYS, ION) } },
 
-    GAS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, BRE, PAR, BUR, MAR, MAO) } },
+    MAR(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(GAS, SPA, BUR, PIE, LYO) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(GAS)
+    },
+    VEN(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(TRI, TYR, PIE, ROM, TUS, APU, ADR) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  when (coast) {
+            ROM, TUS, PIE -> true
+            else -> false
+        }
+    },
+    ROM(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(TUS, VEN, APU, NAP, TYS) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(VEN)
+    },
+    SMY(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(CON, ANK, ARM, SYR, AEG, EAS) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(ANK) || equals(ARM)
+    },
+    ANK(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(ARM, SMY, CON, BLA) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(SMY)
+    },
+    EDI(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, LVP, YOR, NTH, NWG) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(LVP)
+    },
+    LVP(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, EDI, YOR, WAL, IRI, NAO) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(EDI) || equals(YOR)
+    },
+
     PIC(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BRE, PAR, BUR, BEL, ENG) } },
     PRU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BER, SIL, WAR, LVN, BAL) } },
     FIN(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, NWY, STP, BOT) } },
     LVN(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, MOS, WAR, PRU, BAL, BOT) } },
-    ARM(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SEV, SYR, ANK, SMY, BLA) } },
-    SYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SMY, ARM, EAS) } },
     ALB(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(GRE, SER, TRI, ION, ADR) } },
-    PIE(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MAR, TYR, VEN, TUS, LYO) } },
-    TUS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIE, VEN, ROM, TYS, LYO) } },
     APU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAP, ROM, VEN, ION, ADR) } },
     CLY(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, NAO, NWG) } },
-    YOR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, WAL, LON, NTH) } },
-    WAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(LVP, LON, ENG, IRI, YOR) } },
-    NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) } };
+    NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) } },
+
+    GAS(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, BRE, PAR, BUR, MAR, MAO) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(MAR)
+    },
+    PIE(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(MAR, TYR, VEN, TUS, LYO) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(VEN)
+    },
+    TUS(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(PIE, VEN, ROM, TYS, LYO) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(VEN)
+    },
+    ARM(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(SEV, SYR, ANK, SMY, BLA) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(SMY) || equals(SYR)
+    },
+    SYR(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(SMY, ARM, EAS) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(ARM)
+    },
+    YOR(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, WAL, LON, NTH) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(LVP) || equals(WAL)
+    },
+    WAL(false) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(LVP, LON, ENG, IRI, YOR) }
+        override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(YOR)
+    };
 
     override fun hasInlandBorderWith(coast: Coast): Boolean = false
 }
@@ -126,11 +173,12 @@ fun main() {
         if (province.isAdjacent(province)) println("$province is reflectively linked")
 }
 
-enum class StandardPlayer(override val homeCentres: List<Province>): Player {
+enum class StandardPlayer(override val homeCentres: List<StandardProvince>): Player {
     Austria(listOf(VIE, BUD, TRI)),
     France(listOf(PAR, BRE, MAR)),
     Italy(listOf(VEN, ROM, NAP)),
     Russia(listOf(STP, MOS, SEV, WAR)),
     Turkey(listOf(CON, ANK, SMY)),
-    Germany(listOf(BER, MUN, KIE))
+    Germany(listOf(BER, MUN, KIE)),
+    England(listOf(LON, EDI, LVP))
 }
