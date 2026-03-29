@@ -38,9 +38,9 @@ enum class StandardSea(): Sea, StandardProvince {
     BOT { override val adjacency: Set<StandardProvince> by lazy { setOf(BAL, SWE, FIN, STP, LVN) } },
     ENG { override val adjacency: Set<StandardProvince> by lazy { setOf(BEL, PIC, BRE, MAO, IRI, WAL, LON, NTH) } },
     IRI { override val adjacency: Set<StandardProvince> by lazy { setOf(MAO, ENG, NAO, WAL, LVP) } },
-    NAO { override val adjacency: Set<StandardProvince> by lazy { setOf(NWG, CLY, MAO, LVP, IRI) } },
-    MAO { override val adjacency: Set<StandardProvince> by lazy { setOf(NAO, IRI, ENG, BRE, GAL, SPA, POR, WES, NAF) } },
-    WES { override val adjacency: Set<StandardProvince> by lazy { setOf(NAF, WES, SPA, LYO, TYS, TUN) } },
+    NAO { override val adjacency: Set<StandardProvince> by lazy { setOf(MAO, NWG, CLY, MAO, LVP, IRI) } },
+    MAO { override val adjacency: Set<StandardProvince> by lazy { setOf(NAO, IRI, ENG, BRE, GAS, SPA, POR, WES, NAF) } },
+    WES { override val adjacency: Set<StandardProvince> by lazy { setOf(NAF, MAO, SPA, LYO, TYS, TUN) } },
     LYO { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, MAR, PIE, TUS, TYS, WES) } },
     TYS { override val adjacency: Set<StandardProvince> by lazy { setOf(LYO, TUS, ROM, NAP, ION, TUN, WES) } },
     ION { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, TYS, NAP, APU, ADR, ALB, GRE, AEG, EAS) } },
@@ -90,11 +90,11 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     SYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SMY, ARM, EAS) } },
     ALB(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(GRE, SER, TRI, ION, ADR) } },
     PIE(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MAR, TYR, VEN, TUS, LYO) } },
-    TUS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIE, VEN, ROM, TYS) } },
+    TUS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIE, VEN, ROM, TYS, LYO) } },
     APU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAP, ROM, VEN, ION, ADR) } },
     CLY(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, NAO, NWG) } },
     YOR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, WAL, LON, NTH) } },
-    WAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(LVP, LON, ENG, IRI) } },
+    WAL(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(LVP, LON, ENG, IRI, YOR) } },
     NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) } };
 
     override fun hasInlandBorderWith(coast: Coast): Boolean = false
@@ -121,6 +121,9 @@ enum class StandardInLand(override val isSupplyCentre: Boolean): InLand, Standar
 fun main() {
     for (province in StandardProvince.entries)
         if (!province.adjacency.all { it.isAdjacent(province) }) println("$province is not symmetrically linked")
+
+    for (province in StandardProvince.entries)
+        if (province.isAdjacent(province)) println("$province is reflectively linked")
 }
 
 enum class StandardPlayer(override val homeCentres: List<Province>): Player {
