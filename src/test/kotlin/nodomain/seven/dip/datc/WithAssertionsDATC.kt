@@ -23,7 +23,7 @@ typealias Setup = Map<Province, Player>
 
 interface WithAssertionsDATC: WithAssertions {
     companion object {
-        private val parser = getParser<StandardPlayer, StandardCoast>(provinceTrim = { trim().substring(0, 3).uppercase() })
+        private val parser = getParser<StandardPlayer>(StandardProvince.Companion)
         val origin = T(0.c, 0)
     }
 

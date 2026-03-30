@@ -2,6 +2,7 @@ package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.Provinces
 import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.ComplexNumber
 import nodomain.seven.dip.utils.Location
@@ -18,6 +19,16 @@ inline fun <reified Pl, reified Pr> getParser(
         { PartiallyParsed { enumValueOf<Pr>(it.provinceTrim()) }}
     )
 
+inline fun <reified Pl> getParser(
+    provinces: Provinces,
+    crossinline playerTrim: String.() -> String = String::trim,
+): Parser where Pl: Player, Pl : Enum<Pl> =
+    Parser(
+        { PartiallyParsed { enumValueOf<Pl>(it.playerTrim()) }},
+        { provinces.asProvince(it) }
+    )
+
+
 class IncompatibleParserException() : RuntimeException()
 
 interface Notation {
@@ -32,7 +43,7 @@ interface Notation {
 
 typealias OwnedOrder = Pair<Order, Player>
 
-fun interface PartiallyParsed<R> {
+fun interface PartiallyParsed<out R> {
     fun isComplete(): Boolean = true
     fun feed(string: String) {}
     fun provideComplete(): R

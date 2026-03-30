@@ -2,6 +2,9 @@ package nodomain.seven.dip.provinces
 
 import nodomain.seven.dip.orders.Army
 import nodomain.seven.dip.orders.Fleet
+import nodomain.seven.dip.orders.PartiallyParsed
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.enums.enumEntries
 
 interface Province {
@@ -30,6 +33,7 @@ interface Province {
     }
 
     val isSupplyCentre: Boolean;
+    val name: String
 }
 
 interface InLand: Province {
@@ -47,6 +51,29 @@ interface Coast: Province {
 
 interface Sea: Province {
     override fun isAdjacentForArmies(other: Province): Boolean = false
+}
+
+interface Provinces {
+    val entries: List<Province>
+
+    fun valueOf(string: String): Province =
+        entries.first { it.name == string }
+
+    val nonTrivialNames: Map<String, PartiallyParsed<Province>>
+
+    fun asProvince(string: String): PartiallyParsed<Province> {
+        return nonTrivialNames.asSequence()
+            .filter { (name, _) -> string.startsWith(name, ignoreCase = true) }
+            .map { it.value }
+            .firstOrNull() ?: PartiallyParsed {valueOf(string.trim().substring(0, 3).uppercase())}
+    }
+}
+
+class TakeN<R>(val n: Int, val output: R): PartiallyParsed<R> {
+    var counter = 0
+    override fun isComplete(): Boolean = counter >= n
+    override fun feed(string: String) { counter++ }
+    override fun provideComplete(): R = output
 }
 
 interface Player {
