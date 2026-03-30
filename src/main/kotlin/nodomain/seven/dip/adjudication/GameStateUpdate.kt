@@ -5,7 +5,6 @@ import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.orders.TemporalFlare
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
-import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.utils.*
 import kotlin.math.absoluteValue
 
@@ -38,8 +37,9 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     for (move in moveResults.asSequence().filterIsInstance<SuccessfulMove>()
         .filter { it.moveOrder.action.to.boardIndex == board.boardIndex }) {
 
-        if (pieces[move.moveOrder.action.to.province] !== null)
-            requiredRetreats += Pair(move.moveOrder.action.to, move.moveOrder.flare!!)
+        val player = pieces[move.moveOrder.action.to.province]
+        if (player !== null)
+            requiredRetreats += Triple(move.moveOrder.action.to, move.moveOrder.flare!!, player)
         pieces[move.moveOrder.action.to.province] =
             getBoard(move.moveOrder.piece.location.boardIndex)?.pieces[move.moveOrder.from.province]
             ?: throw IllegalStateException("order not properly validated")
@@ -127,8 +127,14 @@ fun Game.adjudicateMoves() {
 }
 
 fun Game.adjudicateRetreats() {
-    for (retreat in requiredRetreats) println(retreat)
-    // TODO: adjudicate retreats
+    // Retreats take place on the parent board
+    for ((retreatLocation, retreatFlare, player) in requiredRetreats) {
+        val retreat = (locationsOfAdjustments[retreatLocation]?: continue) as MoveOrder
+        getBoard(retreatLocation.boardIndex)!!.pieces[
+            retreat.action.to.province
+        ] = player
+    }
+
     requiredRetreats.clear()
     clearAdjustments()
     advanceState()

@@ -35,7 +35,7 @@ class HoldOrder(piece: Piece): Order(piece, " ") {
 
 @JvmInline
 value class Moves(val to: Location): Action
-class MoveOrder(piece: Piece, override val action: Moves, var flare: TemporalFlare? = null): RetreatOrder, Order(piece, " - ") {
+class MoveOrder(piece: Piece, override val action: Moves, override var flare: TemporalFlare? = null): RetreatOrder, Order(piece, " - ") {
     infix fun i(timeFlare: Int): MoveOrder {
         flare = enumEntries<TemporalFlare>()[timeFlare % 4]
         return this
@@ -54,7 +54,9 @@ sealed interface Adjustment {
 }
 
 sealed interface BuildOrder: Adjustment
-sealed interface RetreatOrder: Adjustment
+sealed interface RetreatOrder: Adjustment {
+    val flare: TemporalFlare?
+}
 
 class Build(override val piece: Piece): BuildOrder
-class Disband(override val piece: Piece): BuildOrder, RetreatOrder
+class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder
