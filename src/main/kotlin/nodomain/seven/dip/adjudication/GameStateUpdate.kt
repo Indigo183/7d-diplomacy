@@ -31,7 +31,7 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
 
     // Remove pieces moving from board
     for (move in moveResults.asSequence().filterIsInstance<SuccessfulMove>()
-        .filter { it.moveOrder.action.to.boardIndex == board.boardIndex })
+        .filter { it.moveOrder.from.boardIndex == board.boardIndex })
         pieces.remove(move.moveOrder.from.province)
 
     // Add pieces moving to board
