@@ -9,6 +9,8 @@ import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardSea.*
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.c
+import org.assertj.core.api.WithAssertions
+import kotlin.test.Test
 
 val origin = T(0.c, 0)
 object A {
@@ -162,12 +164,14 @@ enum class StandardInLand(override val isSupplyCentre: Boolean): InLand, Standar
     override val nameWordCount: Int = 1
 }
 
-fun main() {
-    for (province in StandardProvince.entries)
-        if (!province.adjacency.all { it.isAdjacent(province) }) println("$province is not symmetrically linked")
-
-    for (province in StandardProvince.entries)
-        if (province.isAdjacent(province)) println("$province is reflectively linked")
+object StandardProvinceTest: WithAssertions {
+    @Test
+    fun standardProvinceIsSymmetricNonReflectiveAndComplete() {
+        for (province in StandardProvince.entries) {
+            assertThat(province.adjacency).allMatch { it is StandardProvince && it.isAdjacent(province) }
+            assertThat(province).doesNotMatch { it.isAdjacent(it) }
+        }
+    }
 }
 
 enum class StandardPlayer(override val homeCentres: List<StandardProvince>): Player {
