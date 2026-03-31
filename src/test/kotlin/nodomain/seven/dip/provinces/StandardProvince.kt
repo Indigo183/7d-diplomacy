@@ -12,9 +12,8 @@ import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
 import kotlin.test.Test
 
-val origin = T(0.c, 0)
 object A {
-    operator fun get(province: StandardProvince): Army = Army(Location(province, origin))
+    operator fun get(province: StandardProvince): Army = Army(Location(province, T(0.c, 0)))
 }
 
 sealed interface StandardProvince: Province{

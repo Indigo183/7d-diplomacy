@@ -2,6 +2,7 @@ package nodomain.seven.dip.datc
 
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.Game
+import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser.NationalisedFormat.DATC
 import nodomain.seven.dip.orders.T
@@ -11,7 +12,6 @@ import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
-import nodomain.seven.dip.provinces.StandardCoast
 import nodomain.seven.dip.provinces.StandardPlayer
 import nodomain.seven.dip.provinces.StandardProvince
 import nodomain.seven.dip.utils.BoardIndex
@@ -31,7 +31,10 @@ interface WithAssertionsDATC: WithAssertions {
         parser.parseOrderSet(this.trimMargin(), DATC)
 
 
-    fun Map<Player, List<Order>>.adjudicateAsDOTC(setup: ()->Setup = {impliedSetup()}, game: Game = Game(setup())): Game {
+    fun Map<Player, List<Order>>.adjudicateAsDOTC(
+        setup: ()->Setup = {impliedSetup()},
+        game: Game = Game(setup().mapKeys { (province, _) -> origin A province })
+    ): Game {
         forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
         return game
@@ -40,7 +43,8 @@ interface WithAssertionsDATC: WithAssertions {
     fun Map<Player, List<Order>>.impliedSetup(): Setup =
         asSequence().flatMap { (player, orders) -> orders.map { it.from.province to player } }.toMap()
 
-    val Game.pieces: Map<Province, Player>? get() = getBoard(BoardIndex(1.c))?.pieces
+    val Game.pieces: Map<Province, Player>? get() =
+        getBoard(BoardIndex(1.c))?.pieces?.mapKeys { (piece, _) -> piece.location.province }
 
     fun Game.andAssertThatNothingMoved(): Game {
         assertThat(pieces).satisfiesAnyOf(

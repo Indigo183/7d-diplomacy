@@ -12,8 +12,10 @@ fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<
     return timeplanes.asSequence()
         .flatMap { it.boards() }
         .filter { !onlyActive || it.isActive }
-        .map { it.pieces }
-        .associate { it.entries.first().toPair() }
+        .flatMap{ board -> board.pieces.asSequence()
+            .filter{ (_, owner) -> player === null || owner == player }
+            .map{ it.toPair() }
+        }.toMap()
 }
 // Adjudicate board in a single direction
 fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResults: List<MoveResult>): Board? {
