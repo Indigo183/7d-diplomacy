@@ -59,18 +59,18 @@ interface Provinces {
     fun valueOf(string: String): Province =
         entries.first { it.name == string }
 
-    val nonTrivialNames: Map<String, PartiallyParsed<Province>>
+    val nonTrivialNames: Map<String, () -> PartiallyParsed<Province>>
 
     fun asProvince(string: String): PartiallyParsed<Province> {
         return nonTrivialNames.asSequence()
             .filter { (name, _) -> string.startsWith(name, ignoreCase = true) }
-            .map { it.value }
+            .map { (it.value)() }
             .firstOrNull() ?: PartiallyParsed {valueOf(string.trim().substring(0, 3).uppercase())}
     }
 }
 
 class TakeN<R>(val n: Int, val output: R): PartiallyParsed<R> {
-    var counter = 0
+    var counter = 1
     override fun isComplete(): Boolean = counter >= n
     override fun feed(string: String) { counter++ }
     override fun provideComplete(): R = output
