@@ -23,6 +23,11 @@ sealed interface StandardProvince: Province{
         override val entries: List<StandardProvince> =
             sequenceOf(StandardSea.entries, StandardInLand.entries, StandardCoast.entries).flatten().toList()
 
+        override fun trivialPartialParser(string: String): PartiallyParsed<StandardProvince> {
+            val province = valueOf(string.trim().substring(0, 3).uppercase())
+            return TakeN(province.nameWordCount, province)
+        }
+
         override val nonTrivialNames: Map<String, () -> PartiallyParsed<StandardProvince>> =
             mapOf<String, StandardProvince>(
                 "live" to LVP,

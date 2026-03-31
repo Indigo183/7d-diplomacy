@@ -59,13 +59,16 @@ interface Provinces<T: Province> {
     fun valueOf(string: String): T =
         entries.first { it.name == string }
 
+    fun trivialPartialParser(string: String): PartiallyParsed<T> =
+        PartiallyParsed {valueOf(string.trim().substring(0, 3).uppercase())}
+
     val nonTrivialNames: Map<String, () -> PartiallyParsed<T>>
 
     fun asProvince(string: String): PartiallyParsed<T> {
         return nonTrivialNames.asSequence()
             .filter { (name, _) -> string.startsWith(name, ignoreCase = true) }
             .map { (it.value)() }
-            .firstOrNull() ?: PartiallyParsed {valueOf(string.trim().substring(0, 3).uppercase())}
+            .firstOrNull() ?: trivialPartialParser(string)
     }
 }
 
