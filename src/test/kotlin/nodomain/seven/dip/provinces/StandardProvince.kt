@@ -1,6 +1,7 @@
 package nodomain.seven.dip.provinces
 
 import nodomain.seven.dip.orders.Army
+import nodomain.seven.dip.orders.IncompatibleParserException
 import nodomain.seven.dip.orders.PartiallyParsed
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.provinces.StandardInLand.*
@@ -31,9 +32,22 @@ sealed interface StandardProvince: Province{
         override val nonTrivialNames: Map<String, () -> PartiallyParsed<StandardProvince>> =
             mapOf<String, StandardProvince>(
                 "live" to LVP,
-                "livo" to LVN
+                "livo" to LVN,
+                "norwa" to NWY,
+                "norwe" to NWG,
+                "st" to STP,
+                "mid" to MAO,
+                "tyrrh" to TYR,
             ).mapValues { (_, province) -> {TakeN(province.nameWordCount, province)} }
-                .plus("gulf" to { Defer(3, 3) {valueOf(it)} })
+                .plus(mapOf<String, () -> PartiallyParsed<StandardProvince>>(
+                    "gulf" to { Defer({3}, 3) {valueOf(it)} },
+                    "north"  to { Defer(StandardProvince::nameWordCount, 2) {when(it.lowercase()) {
+                        "sea" -> NTH
+                        "africa" -> NAF
+                        "atlantic" -> NAO
+                        else -> throw IncompatibleParserException()
+                    } } })
+                )
     }
 }
 
@@ -72,7 +86,8 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     DEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(KIE, SWE, HEL, SKA, NTH, BAL) } },
     SWE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(DEN, NWY, FIN, SKA, BAL, BOT) } },
     NWY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, FIN, STP, NTH, SKA, NWG, BAR) } },
-    STP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) } },
+    STP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) }
+                override val nameWordCount: Int = 2 },
     SEV(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, UKR, RUM, ARM, BLA) } },
     CON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ANK, SMY, BUL, BLA, AEG) } },
     BUL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE, BLA, AEG) } },
@@ -105,7 +120,8 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     ALB(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(GRE, SER, TRI, ION, ADR) } },
     APU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAP, ROM, VEN, ION, ADR) } },
     CLY(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(EDI, LVP, NAO, NWG) } },
-    NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) } },
+    NAF(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUN, MAO, WES) }
+                 override val nameWordCount: Int = 2 },
 
     GAS(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, BRE, PAR, BUR, MAR, MAO) }
                  override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(MAR) },

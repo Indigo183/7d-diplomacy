@@ -20,7 +20,7 @@ inline fun <reified Pl, reified Pr> getParser(
     )
 
 inline fun <reified Pl> getParser(
-    provinces: Provinces,
+    provinces: Provinces<out Province>,
     crossinline playerTrim: String.() -> String = String::trim,
 ): Parser where Pl: Player, Pl : Enum<Pl> =
     Parser(

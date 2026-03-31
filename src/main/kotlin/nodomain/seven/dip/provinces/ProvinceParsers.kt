@@ -9,11 +9,10 @@ class TakeN<R>(val n: Int, val output: R): PartiallyParsed<R> {
     override fun provideComplete(): R = output
 }
 
-class Defer<R>(val totalWords: Int, val deferredAt: Int, val decider: (String) -> R): PartiallyParsed<R> {
-    init { require(totalWords >= deferredAt) }
+class Defer<R>(val totalWords: R.() ->  Int, val deferredAt: Int, val decider: (String) -> R): PartiallyParsed<R> {
     var counter = 1
     var output: R? = null
-    override fun isComplete(): Boolean = counter >= totalWords
+    override fun isComplete(): Boolean = counter >= (output?.totalWords() ?: Int.MAX_VALUE)
     override fun feed(string: String) { if (++counter == deferredAt) output = decider(string) }
     override fun provideComplete(): R = output!!
 }
