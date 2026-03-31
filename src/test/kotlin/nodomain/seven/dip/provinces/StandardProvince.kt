@@ -19,7 +19,7 @@ sealed interface StandardProvince: Province{
     override fun isAdjacent(other: Province): Boolean = other in adjacency
     val nameWordCount: Int
 
-    companion object: Provinces {
+    companion object: Provinces<StandardProvince> {
         override val entries: List<StandardProvince> =
             sequenceOf(StandardSea.entries, StandardInLand.entries, StandardCoast.entries).flatten().toList()
 
@@ -28,6 +28,7 @@ sealed interface StandardProvince: Province{
                 "live" to LVP,
                 "livo" to LVN
             ).mapValues { (_, province) -> {TakeN(province.nameWordCount, province)} }
+                .plus("gulf" to { Defer(3, 3) {valueOf(it)} })
     }
 }
 

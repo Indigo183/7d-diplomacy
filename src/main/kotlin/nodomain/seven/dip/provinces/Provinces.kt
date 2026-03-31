@@ -53,15 +53,15 @@ interface Sea: Province {
     override fun isAdjacentForArmies(other: Province): Boolean = false
 }
 
-interface Provinces {
-    val entries: List<Province>
+interface Provinces<T: Province> {
+    val entries: List<T>
 
-    fun valueOf(string: String): Province =
+    fun valueOf(string: String): T =
         entries.first { it.name == string }
 
-    val nonTrivialNames: Map<String, () -> PartiallyParsed<Province>>
+    val nonTrivialNames: Map<String, () -> PartiallyParsed<T>>
 
-    fun asProvince(string: String): PartiallyParsed<Province> {
+    fun asProvince(string: String): PartiallyParsed<T> {
         return nonTrivialNames.asSequence()
             .filter { (name, _) -> string.startsWith(name, ignoreCase = true) }
             .map { (it.value)() }
@@ -69,12 +69,6 @@ interface Provinces {
     }
 }
 
-class TakeN<R>(val n: Int, val output: R): PartiallyParsed<R> {
-    var counter = 1
-    override fun isComplete(): Boolean = counter >= n
-    override fun feed(string: String) { counter++ }
-    override fun provideComplete(): R = output
-}
 
 interface Player {
 	val homeCentres: List<Province>;
