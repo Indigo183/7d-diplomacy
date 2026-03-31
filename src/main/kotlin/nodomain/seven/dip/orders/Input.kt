@@ -1,7 +1,7 @@
 package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.provinces.isAdjacentTo
-import nodomain.seven.dip.game.Game
+import nodomain.seven.dip.game.*
 import nodomain.seven.dip.provinces.Player
 
 /** Checks that:
@@ -16,8 +16,8 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
     order.from.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.from.boardIndex) ?: return false // 1 (partly)
     if (!board.isActive) return false // 6
-    if(! (player?.equals(board.pieces[order.from.province]) // 2
-            ?: (board.pieces[order.from.province] !== null))) return false // 1
+    if(! (player?.equals(board.pieces[order.from]) // 2
+            ?: (board.pieces[order.from] !== null))) return false // 1
     val destination = when(order) {
         is MoveOrder  -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
@@ -53,13 +53,13 @@ fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
     if (!location.boardIndex.coordinate.isEven()) return false // 3
     val board = getBoard(location.boardIndex) ?: return false // 1
     if (!board.isActive) return false // 4
-    val player = player ?: board.pieces[location.province] ?: board.centres[location.province] ?: return false
+    val player = player ?: board.pieces[location] ?: board.centres[location.province] ?: return false
     val count = board.countBuilds(player)
     return when {
         count > 0 -> order is Build // 5
-                && player == board.centres[location.province] && board.pieces[location.province] === null // 6
+                && player == board.centres[location.province] && board.pieces[location] === null // 6
         count < 0 -> order is Disband // 5
-                && player == board.pieces[location.province] // 6
+                && player == board.pieces[location] // 6
         else -> false // 5
     }
 }

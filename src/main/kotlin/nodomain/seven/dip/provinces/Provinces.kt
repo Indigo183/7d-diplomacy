@@ -1,8 +1,7 @@
 package nodomain.seven.dip.provinces
 
-import nodomain.seven.dip.orders.Army
-import nodomain.seven.dip.orders.Fleet
-import nodomain.seven.dip.orders.PartiallyParsed
+import nodomain.seven.dip.orders.*
+import nodomain.seven.dip.utils.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.enums.enumEntries
@@ -77,5 +76,5 @@ interface Player {
 	val homeCentres: List<Province>;
 }
 
-inline fun <reified T> setup(): Map<Province, Player> where T : Player, T : Enum<T> =
-    enumEntries<T>().asSequence().flatMap { player -> player.homeCentres.map { it to player } }.toMap()
+inline fun <reified T> setup(): Map<Piece, Player> where T : Player, T : Enum<T> =
+    enumEntries<T>().asSequence().flatMap { player -> player.homeCentres.map { T(0.c, 0) A it to player } }.toMap()

@@ -7,13 +7,29 @@ import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 
+fun MutableMap<Piece, Player>.remove(province: Province) {
+    this.forEach { (piece, _) -> if (piece.location.province == province) this.remove(piece) }
+}
+
+fun MutableMap<Piece, Player>.remove(location: Location) {
+    this.forEach { (piece, _) -> if (piece.location == location) this.remove(piece) }
+}
+
+operator fun MutableMap<Piece, Player>.get(location: Location): Player? {
+    return this.asSequence().find { (piece, _) -> piece.location == location }?.value
+}
+
+fun MutableMap<Piece, Player>.getEntry(location: Location): Map.Entry<Piece, Player>? {
+    return this.asSequence().find { (piece, _) -> piece.location == location }
+}
+
 enum class GameState {
     MOVES,
     RETREATS,
     BUILDS,
 }
 
-class Game(setup: Map<Province, Player> = setup<RomanPlayers>()) {
+class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     // All orders, past and present
     private val orders: MutableMap<Location, Order> = mutableMapOf()
     val moves: List<MoveOrder>
@@ -113,10 +129,12 @@ class Board(
     var boardIndex: BoardIndex,
     val parent: Board? = null, // null represents the origin board
 
-    val originalPieces: Map<Province, Player>,
-    val centres: MutableMap<Province, Player> = originalPieces.toMutableMap() // clone pieces
+    val originalPieces: Map<Piece, Player>,
+    val centres: MutableMap<Province, Player> = originalPieces.mapKeys {
+        (piece, _) -> piece.location.province
+    }.toMutableMap()
 ) {
-    val pieces: MutableMap<Province, Player> = originalPieces.toMutableMap()
+    val pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
     val children = mutableListOf<Board>()
     var isActive = true
         private set

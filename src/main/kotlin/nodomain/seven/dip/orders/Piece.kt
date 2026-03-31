@@ -18,6 +18,12 @@ sealed interface Piece {
         val order = supporting()
         return SupportOrder(this, Supports(if (order.action is Supports) order.piece.holds else order))
     }
+
+    // Creates a new piece of the same type but with the new location
+    infix fun moveTo(destination: Location): Piece = when (this) {
+        is Army -> Army(destination)
+        is Fleet -> Fleet(destination)
+    }
 }
 
 // Support square bracket notation for creating a `Location` out of its components
