@@ -8,11 +8,13 @@ import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 
 fun MutableMap<Piece, Player>.remove(province: Province) {
-    this.forEach { (piece, _) -> if (piece.location.province == province) this.remove(piece) }
+    val pieces = keys.filter { it.location.province == province}
+    pieces.forEach { remove(it) }
 }
 
 fun MutableMap<Piece, Player>.remove(location: Location) {
-    this.forEach { (piece, _) -> if (piece.location == location) this.remove(piece) }
+    val piece = keys.find { it.location == location}
+    remove(piece)
 }
 
 operator fun MutableMap<Piece, Player>.get(location: Location): Player? {
