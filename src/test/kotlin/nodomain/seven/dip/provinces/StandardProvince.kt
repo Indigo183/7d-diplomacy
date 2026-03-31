@@ -100,19 +100,19 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     TUN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NAF, WES, TYS, ION) } },
 
     MAR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAS, SPA, BUR, PIE, LYO) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(GAS) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean = coast == GAS },
     VEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TRI, TYR, PIE, ROM, TUS, APU, ADR) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean = equals(PIE) || equals(TUS) || equals(ROM) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean = coast == PIE || coast == TUS || coast == ROM },
     ROM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(TUS, VEN, APU, NAP, TYS) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(VEN) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean =  coast == VEN },
     SMY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, ANK, ARM, SYR, AEG, EAS) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(ANK) || equals(ARM) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean =  coast == ANK || coast == ARM },
     ANK(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ARM, SMY, CON, BLA) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(SMY) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean =  coast == SMY },
     EDI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, LVP, YOR, NTH, NWG) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(LVP) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean =  coast == LVP },
     LVP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CLY, EDI, YOR, WAL, IRI, NAO) }
-                override fun hasInlandBorderWith(coast: Coast): Boolean =  equals(EDI) || equals(YOR) },
+                override fun hasInlandBorderWith(coast: Coast): Boolean =  coast == EDI || coast == YOR },
 
     PIC(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BRE, PAR, BUR, BEL, ENG) } },
     PRU(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(BER, SIL, WAR, LVN, BAL) } },

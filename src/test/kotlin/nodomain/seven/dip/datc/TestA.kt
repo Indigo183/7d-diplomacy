@@ -11,10 +11,10 @@ import kotlin.test.Test
  */
 object TestA: WithAssertionsDATC {
     @Test
-    fun `6_A_1 TEST CASE, MOVING TO AN AREA THAT IS NOT A NEIGHBOUR`() { // Modified due to involving sea regions
+    fun `6_A_1 TEST CASE, MOVING TO AN AREA THAT IS NOT A NEIGHBOUR`() {
         """
-        |Turkey:
-        |F Smyrna - Bulgaria
+        |England: 
+        |F North Sea - Picardy
         |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 
@@ -33,12 +33,12 @@ object TestA: WithAssertionsDATC {
     //6.A.5. TEST CASE, MOVE TO OWN SECTOR WITH CONVOY
 
     @Test
-    fun `6_A_6 TEST CASE, ORDERING A UNIT OF ANOTHER COUNTRY`() {// Modified due to involving sea regions
-        val franceHasAnArmyInParis: Setup = mapOf(PAR to France)
+    fun `6_A_6 TEST CASE, ORDERING A UNIT OF ANOTHER COUNTRY`() {
+        val franceHasAnArmyInParis: Setup = mapOf(LON to England)
 
         """
         |Germany:
-        |A Paris - Brest
+        |F London - North Sea
         |""".parse().adjudicateAsDOTC(setup = {franceHasAnArmyInParis}).andAssertThatNothingMoved()
     }
 
@@ -61,13 +61,13 @@ object TestA: WithAssertionsDATC {
     //6.A.9. TEST CASE, FLEETS MUST FOLLOW COAST IF NOT ON SEA
 
     @Test
-    fun `6_A_10 TEST CASE, SUPPORT ON UNREACHABLE DESTINATION NOT POSSIBLE`() { // Modified due to involving sea regions
+    fun `6_A_10 TEST CASE, SUPPORT ON UNREACHABLE DESTINATION NOT POSSIBLE`() {
         """
         |Austria:
         |A Venice Hold
         |
         |Italy:
-        |A Naples Supports A Apulia - Venice
+        |F Rome Supports A Apulia - Venice
         |A Apulia - Venice
         |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
