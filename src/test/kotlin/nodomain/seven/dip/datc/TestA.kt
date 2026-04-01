@@ -15,7 +15,7 @@ object TestA: WithAssertionsDATC {
         """
         |England: 
         |F North Sea - Picardy
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -23,7 +23,7 @@ object TestA: WithAssertionsDATC {
         """
         |England: 
         |A Liverpool - Irish Sea
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -31,7 +31,7 @@ object TestA: WithAssertionsDATC {
         """
         |Germany: 
         |F Kiel - Munich
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -39,7 +39,7 @@ object TestA: WithAssertionsDATC {
         """
         |Germany:
         |A Kiel - Kiel
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     //6.A.5. TEST CASE, MOVE TO OWN SECTOR WITH CONVOY
@@ -51,7 +51,7 @@ object TestA: WithAssertionsDATC {
         """
         |Germany:
         |F London - North Sea
-        |""".parse().adjudicateAsDOTC(setup = {franceHasAnArmyInParis}).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(setup = {franceHasAnArmyInParis}, expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     //6.A.7. TEST CASE, ONLY ARMIES CAN BE CONVOYED
@@ -65,7 +65,7 @@ object TestA: WithAssertionsDATC {
         |
         |Austria:
         |F Trieste Supports F Trieste
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false)
 
         assertThat(result.pieces).containsEntry(TRI, Italy)
     }
@@ -75,7 +75,7 @@ object TestA: WithAssertionsDATC {
         """
         |Italy: 
         |F Rome - Venice
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -87,7 +87,7 @@ object TestA: WithAssertionsDATC {
         |Italy:
         |F Rome Supports A Apulia - Venice
         |A Apulia - Venice
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test

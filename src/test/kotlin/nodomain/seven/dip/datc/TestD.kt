@@ -295,7 +295,7 @@ object TestD: WithAssertionsDATC {
         |Turkey:
         |F Tyrrhenian Sea Supports F Western Mediterranean - Gulf of Lyon
         |F Western Mediterranean - Gulf of Lyon
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -338,7 +338,7 @@ object TestD: WithAssertionsDATC {
         |Turkey:
         |F Black Sea - Rumania
         |A Bulgaria Supports F Black Sea - Rumania
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     //6.D.29. TEST CASE, MOVE TO IMPOSSIBLE COAST AND SUPPORT

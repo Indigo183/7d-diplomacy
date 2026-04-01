@@ -233,7 +233,7 @@ object TestE: WithAssertionsDATC {
         |
         |Russia:
         |A Serbia - Albania
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test

@@ -10,6 +10,7 @@ import nodomain.seven.dip.orders.TemporalFlare
 import nodomain.seven.dip.orders.get
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
+import nodomain.seven.dip.orders.isValid
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.StandardPlayer
@@ -33,8 +34,11 @@ interface WithAssertionsDATC: WithAssertions {
 
     fun Map<Player, List<Order>>.adjudicateAsDOTC(
         setup: ()->Setup = {impliedSetup()},
-        game: Game = Game(setup().mapKeys { (province, _) -> origin A province })
+        game: Game = Game(setup().mapKeys { (province, _) -> origin A province }),
+        expectAllOrderToBeValid: Boolean = true
     ): Game {
+        if (expectAllOrderToBeValid)
+            forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
         forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
         return game
