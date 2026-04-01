@@ -38,9 +38,9 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     for (move in moveResults.asSequence().filterIsInstance<SuccessfulMove>()
         .filter { it.moveOrder.action.to.boardIndex == board.boardIndex }) {
 
-        val player = pieces[move.moveOrder.action.to]
-        if (player !== null)
-            requiredRetreats += Triple(move.moveOrder.action.to, move.moveOrder.flare!!, player)
+        val entry = pieces.getEntry(move.moveOrder.action.to)
+        if (entry !== null)
+            requiredRetreats += Triple(entry.key, move.moveOrder.flare!!, entry.value)
 
         // Map of pieces now requires knowledge of Army/Fleet status
         val (movingPiece, owner) = getBoard(move.moveOrder.piece.location.boardIndex)?.pieces?.getEntry(move.moveOrder.from)
@@ -136,18 +136,18 @@ fun Game.adjudicateMoves() {
 
 fun Game.adjudicateRetreats() {
     // TODO: make sure retreats aren't readjudicated
-    // TODO: also find a way of storing retreating unit type
     // Retreats take place on the parent board
-    for ((retreatLocation, retreatFlare, player) in requiredRetreats) {
-        val retreat = (locationsOfAdjustments[retreatLocation]?: continue) as MoveOrder
-        // getBoard(retreatLocation.boardIndex)!!.pieces[
-        //     retreat.action.to.province
-        // ] = player
+    for ((retreatingPiece, retreatFlare, player) in requiredRetreats) {
+        val retreat = (locationsOfAdjustments[retreatingPiece.location]?: continue) as RetreatOrder
+        if (retreat is MoveOrder) getBoard(retreatingPiece.location.boardIndex)!!.pieces[
+            retreatingPiece moveTo retreat.action.to
+        ] = player
     }
 
     requiredRetreats.clear()
     clearAdjustments()
     advanceState()
+    // Update ownership of centres
     for (board in timeplanes.flatMap { it.boards() }) if (board.isActive && board.boardIndex.coordinate.isEven()) {
         for (piece in board.pieces) {
             val province = piece.key.location.province
