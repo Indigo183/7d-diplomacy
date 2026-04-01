@@ -148,6 +148,13 @@ class Board(
         isActive = false
     }
 
+    // Returns whether a board requires builds
+    fun requiresBuilds(): Boolean {
+        if (!isActive || !boardIndex.coordinate.isEven()) return false
+        for (player in RomanPlayers.entries) if (countBuilds(player) != 0) return false
+        return true
+    }
+
     // Returns the number of builds a player has on a board
     fun countBuilds(player: Player) =
         centres.values.filter { it === player }.size - pieces.values.filter { it === player }.size

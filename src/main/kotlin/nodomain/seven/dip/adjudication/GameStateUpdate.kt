@@ -199,7 +199,7 @@ fun Game.adjudicateBuildsBoard(board: Board, adjustments: Map<Player, List<Adjus
 }
 
 fun Game.adjudicateBuilds() {
-    val boards = timeplanes.flatMap { it.boards().filter { it.isActive && it.boardIndex.coordinate.isEven() } }
+    val boards = timeplanes.flatMap { it.boards().filter { it.requiresBuilds() } }
     for (board in boards) {
         adjudicateBuildsBoard(
             board,
