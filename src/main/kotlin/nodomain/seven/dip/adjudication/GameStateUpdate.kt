@@ -59,8 +59,9 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
         pieces,
         centres,
     )
-    val latestChild = board.children.lastOrNull { limboBoard ->
-        limboBoard.boardIndex.coordinate - board.boardIndex.coordinate == direction.direction }
+    val latestChild = board.children.lastOrNull {
+        it.boardIndex.coordinate - board.boardIndex.coordinate == direction.direction
+    }
     return if (
         (latestChild === null && newChild.pieces != board.pieces)
         || (latestChild !== null && newChild.pieces != latestChild.originalPieces) // latestChild may have had builds
