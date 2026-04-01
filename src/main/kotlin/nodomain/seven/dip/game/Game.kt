@@ -104,6 +104,10 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
             var iter = child.boardIndex.timeplane!!
             while (getBoard(BoardIndex(child.boardIndex.coordinate, iter)) !== null) iter++
             child.boardIndex.timeplane = iter
+            // Map each piece to the new location of the child board
+            child.pieces = child.pieces.mapKeys {
+                (piece, _) -> piece moveTo Location(piece.location.province, child.boardIndex)
+            }.toMutableMap()
             // Create new timeplane if necessary
             while (timeplanes.getOrNull(child.boardIndex.timeplane!!) === null)
                 _timeplanes += mutableMapOf()
@@ -134,7 +138,7 @@ class Board(
         (piece, _) -> piece.location.province
     }.toMutableMap()
 ) {
-    val pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
+    var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
     val children = mutableListOf<Board>()
     var isActive = true
         private set
