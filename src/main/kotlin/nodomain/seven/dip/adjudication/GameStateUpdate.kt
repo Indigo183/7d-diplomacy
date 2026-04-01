@@ -137,19 +137,31 @@ fun Game.adjudicateMoves() {
 
 fun Game.adjudicateRetreats() {
     // TODO: make sure retreats aren't readjudicated
+    // To check for bounces of retreats
+    val retreats: MutableMap<Location, Boolean> = mutableMapOf()
+
     // Retreats take place on the parent board
-    for ((retreatingPiece, retreatFlare, player) in requiredRetreats) {
-        val retreat = (locationsOfAdjustments[retreatingPiece.location]?: continue) as RetreatOrder
+    for ((retreatingPiece, _, _) in requiredRetreats) {
+        val retreat = (locationsOfAdjustments[retreatingPiece.location] ?: continue) as RetreatOrder
 
         if (retreat is MoveOrder) {
-            val board = getBoard(retreatingPiece.location.boardIndex)!!
-            val latestChild = board.children.last {
-                it.boardIndex.coordinate - board.boardIndex.coordinate == retreatFlare.direction
-            }
-            latestChild.pieces[
-                retreatingPiece moveTo retreat.action.to
-            ] = player
+            // Cycles from null to true to false
+            retreats[retreat.action.to] = retreats[retreat.action.to] === null
         }
+    }
+
+    for ((retreatingPiece, retreatFlare, player) in requiredRetreats.filter {
+        retreats[it.first.location] ?: false
+    }) {
+        val board = getBoard(retreatingPiece.location.boardIndex)!!
+        val latestChild = board.children.last {
+            it.boardIndex.coordinate - board.boardIndex.coordinate == retreatFlare.direction
+        }
+        // Can be assumed due to retreat filtering
+        val retreat = locationsOfAdjustments[retreatingPiece.location]!! as MoveOrder
+        latestChild.pieces[
+            retreatingPiece moveTo retreat.action.to
+        ] = player
     }
 
     requiredRetreats.clear()
