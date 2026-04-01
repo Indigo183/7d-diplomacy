@@ -18,9 +18,21 @@ object TestA: WithAssertionsDATC {
         |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
     }
 
-    //6.A.2. TEST CASE, MOVE ARMY TO SEA
+    @Test
+    fun `6_A_2 TEST CASE, MOVE ARMY TO SEA`() {
+        """
+        |England: 
+        |A Liverpool - Irish Sea
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+    }
 
-    //6.A.3. TEST CASE, MOVE FLEET TO LAND
+    @Test
+    fun `6_A_3 TEST CASE, MOVE FLEET TO LAND`() {
+        """
+        |Germany: 
+        |F Kiel - Munich
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+    }
 
     @Test
     fun `6_A_4 TEST CASE, MOVE TO OWN SECTOR`() {
@@ -58,7 +70,13 @@ object TestA: WithAssertionsDATC {
         assertThat(result.pieces).containsEntry(TRI, Italy)
     }
 
-    //6.A.9. TEST CASE, FLEETS MUST FOLLOW COAST IF NOT ON SEA
+    @Test
+    fun `6_A_9 TEST CASE, FLEETS MUST FOLLOW COAST IF NOT ON SEA`() {
+        """
+        |Italy: 
+        |F Rome - Venice
+        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+    }
 
     @Test
     fun `6_A_10 TEST CASE, SUPPORT ON UNREACHABLE DESTINATION NOT POSSIBLE`() {
