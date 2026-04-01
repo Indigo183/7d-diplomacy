@@ -41,7 +41,7 @@ sealed interface StandardProvince: Province{
                 "tyrrh" to TYR,
             ).mapValues { (_, province) -> {TakeN(province.nameWordCount, province)} }
                 .plus(mapOf<String, () -> PartiallyParsed<StandardProvince>>(
-                    "gulf" to { Defer({3}, 3) {valueOf(it)} },
+                    "gulf" to { Defer({3}, 3) {valueOf(it.trim().substring(0, 3).uppercase())} },
                     "north"  to { Defer(StandardProvince::nameWordCount, 2) {when(it.lowercase()) {
                         "sea" -> NTH
                         "africa" -> NAF
@@ -170,6 +170,17 @@ object StandardProvinceTest: WithAssertions {
             assertThat(province.adjacency).allMatch { it is StandardProvince && it.isAdjacent(province) }
             assertThat(province).doesNotMatch { it.isAdjacent(it) }
         }
+    }
+
+    private fun <R> PartiallyParsed<R>.feedAndGet(vararg strings: String): R {
+        strings.forEach { feed(it) }
+        return provideComplete()
+    }
+
+    @Test
+    fun gulfTest() {
+        assertThat(StandardProvince.asProvince("Gulf").feedAndGet("of", "Bothnia")).isEqualTo(BOT)
+        assertThat(StandardProvince.asProvince("Gulf").feedAndGet("of", "Lyon")).isEqualTo(LYO)
     }
 }
 
