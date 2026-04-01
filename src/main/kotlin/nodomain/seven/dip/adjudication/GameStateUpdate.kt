@@ -141,13 +141,9 @@ fun Game.adjudicateRetreats() {
     val retreats: MutableMap<Location, Boolean> = mutableMapOf()
 
     // Retreats take place on the parent board
-    for ((retreatingPiece, _, _) in requiredRetreats) {
-        val retreat = (locationsOfAdjustments[retreatingPiece.location] ?: continue) as RetreatOrder
-
-        if (retreat is MoveOrder) {
-            // Cycles from null to true to false
-            retreats[retreat.action.to] = retreats[retreat.action.to] === null
-        }
+    for (retreatDestination in adjustments.filterIsInstance<MoveOrder>().map { it.action.to }) {
+        // Cycles from null to true to false
+        retreats[retreatDestination] = retreats[retreatDestination] === null
     }
 
     for ((retreatingPiece, retreatFlare, player) in requiredRetreats.filter {
