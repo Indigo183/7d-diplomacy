@@ -140,9 +140,16 @@ fun Game.adjudicateRetreats() {
     // Retreats take place on the parent board
     for ((retreatingPiece, retreatFlare, player) in requiredRetreats) {
         val retreat = (locationsOfAdjustments[retreatingPiece.location]?: continue) as RetreatOrder
-        if (retreat is MoveOrder) getBoard(retreatingPiece.location.boardIndex)!!.pieces[
-            retreatingPiece moveTo retreat.action.to
-        ] = player
+
+        if (retreat is MoveOrder) {
+            val board = getBoard(retreatingPiece.location.boardIndex)!!
+            val latestChild = board.children.last {
+                it.boardIndex.coordinate - board.boardIndex.coordinate == retreatFlare.direction
+            }
+            latestChild.pieces[
+                retreatingPiece moveTo retreat.action.to
+            ] = player
+        }
     }
 
     requiredRetreats.clear()
