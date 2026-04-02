@@ -8,24 +8,24 @@ import kotlin.test.Test
 object TestH: WithAssertionsDATC {
     @Test
     fun `6_H_1 TEST CASE, NO SUPPORTS DURING RETREAT`() { // Modified due to involving sea regions
-        val winter01_Austria = """
+        val spring01_Austria = """
         Austria:
         A Trieste Hold
         A Greece Hold
         """.parse()
-        val winter01_Italy = """
+        val spring01_Italy = """
         Italy:
         A Venice Supports A Tyrolia - Trieste
         A Tyrolia - Trieste
         A Rumania - Serbia
         A Bulgaria Supports A Rumania - Serbia
         """.parse()
-        val winter01_Turkey = """
+        val spring01_Turkey = """
         Turkey:
         A Serbia Hold
         """.parse()
-        val winter01 = winter01_Austria + winter01_Italy + winter01_Turkey
-        val testGame = winter01.adjudicateAsDATC()
+        val spring01 = spring01_Austria + spring01_Italy + spring01_Turkey
+        val testGame = spring01.adjudicateAsDATC()
 
         println(testGame.requiredRetreats)
 
@@ -33,17 +33,21 @@ object TestH: WithAssertionsDATC {
             it.any { (piece, _, _) -> piece.location.province == TRI }
                     && it.any { (piece, _, _) -> piece.location.province == SER }
         }
-        // .containsExactlyInAnyOrder(*retreatsIn(TRI, SER))
 
-        """
+        val spring01retreats_Austria = """
         Austria:
         F Trieste - Albania
         A Greece Supports F Trieste - Albania
-    
+        """.parse()
+        val spring01retreats_Turkey = """
         Turkey:
         F Serbia - Albania
-        The Austrian support order is illegal. Both dislodged fleets are disbanded.
-        """.parse().adjudicateAsDATC(game = testGame)
+        """.parse()
+        val spring01retreats = spring01retreats_Austria + spring01retreats_Turkey
+
+        println(testGame.gameState)
+
+        spring01retreats.adjudicateAsDATC(game = testGame)
     }
 
     @Test
