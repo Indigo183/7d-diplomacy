@@ -2,7 +2,6 @@ package nodomain.seven.dip.datc
 
 import nodomain.seven.dip.provinces.StandardPlayer.*
 import nodomain.seven.dip.provinces.StandardCoast.*
-import nodomain.seven.dip.provinces.StandardSea.*
 import nodomain.seven.dip.provinces.StandardInLand.*
 import kotlin.test.Test
 
@@ -20,7 +19,7 @@ object TestE: WithAssertionsDATC {
         |
         |Russia:
         |A Prussia - Berlin
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces).containsEntry(BER, Germany)
     }
@@ -32,7 +31,7 @@ object TestE: WithAssertionsDATC {
         |A Berlin - Kiel
         |A Kiel - Berlin
         |A Munich Supports A Berlin - Kiel
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -44,7 +43,7 @@ object TestE: WithAssertionsDATC {
         |
         |France:
         |A Kiel - Berlin
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -67,7 +66,7 @@ object TestE: WithAssertionsDATC {
         |Austria:
         |A Vienna Supports A Trieste - Tyrolia
         |A Trieste - Tyrolia
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -89,7 +88,7 @@ object TestE: WithAssertionsDATC {
         |Austria:
         |A Vienna Supports A Trieste - Tyrolia
         |A Trieste - Tyrolia
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(TRI, Austria)
@@ -111,7 +110,7 @@ object TestE: WithAssertionsDATC {
         |Austria:
         |A Vienna Supports A Trieste - Tyrolia
         |A Trieste - Tyrolia
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -128,7 +127,7 @@ object TestE: WithAssertionsDATC {
         |Germany:
         |A Munich Supports A Ruhr - Burgundy
         |A Ruhr - Burgundy
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -145,7 +144,7 @@ object TestE: WithAssertionsDATC {
         |Germany:
         |A Munich Supports A Ruhr - Burgundy
         |A Ruhr - Burgundy
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -162,7 +161,7 @@ object TestE: WithAssertionsDATC {
         |Germany:
         |A Munich Supports A Ruhr - Burgundy
         |A Ruhr - Burgundy
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(BEL, France)
@@ -184,7 +183,7 @@ object TestE: WithAssertionsDATC {
         |Germany:
         |A Munich Supports A Ruhr - Burgundy
         |A Ruhr - Burgundy
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     //6.E.11. TEST CASE, NO SELF DISLODGEMENT WITH BELEAGUERED GARRISON, UNIT SWAP WITH ADJACENT CONVOYING AND TWO COASTS
@@ -202,7 +201,7 @@ object TestE: WithAssertionsDATC {
         |Russia:
         |A Galicia - Budapest
         |A Rumania Supports A Galicia - Budapest
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -222,7 +221,7 @@ object TestE: WithAssertionsDATC {
         |Russia:
         |A Berlin - Munich
         |A Silesia Supports A Berlin - Munich
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -233,7 +232,7 @@ object TestE: WithAssertionsDATC {
         |
         |Russia:
         |A Serbia - Albania
-        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -256,6 +255,6 @@ object TestE: WithAssertionsDATC {
         |Russia:
         |A Berlin Supports A Silesia - Munich
         |A Silesia - Munich
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 }

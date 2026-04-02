@@ -20,7 +20,7 @@ object TestD: WithAssertionsDATC {
         |Italy:
         |A Venice Hold
         |A Tyrolia Supports A Venice
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -34,7 +34,7 @@ object TestD: WithAssertionsDATC {
         |Italy:
         |A Venice Hold
         |A Tyrolia Supports A Venice
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(VEN, Austria)
@@ -51,7 +51,7 @@ object TestD: WithAssertionsDATC {
         |Italy:
         |A Venice Hold
         |F Ionian Sea - Adriatic Sea
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -64,7 +64,7 @@ object TestD: WithAssertionsDATC {
         |Russia:
         |F Baltic Sea Supports A Prussia - Berlin
         |A Prussia - Berlin
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -78,7 +78,7 @@ object TestD: WithAssertionsDATC {
         |Russia: 
         |F Baltic Sea Supports A Prussia - Berlin
         |A Prussia - Berlin
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces).containsEntry(BER, Germany)
     }
@@ -96,7 +96,7 @@ object TestD: WithAssertionsDATC {
         |F Livonia - Baltic Sea
         |F Gulf of Bothnia Supports F Livonia - Baltic Sea
         |A Finland - Sweden
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(BAL, Russia)
@@ -115,7 +115,7 @@ object TestD: WithAssertionsDATC {
         |Austria:
         |A Albania Supports A Trieste - Serbia
         |A Trieste Hold
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(TRI, Italy)
@@ -129,7 +129,7 @@ object TestD: WithAssertionsDATC {
         |A Berlin Hold
         |F Kiel - Berlin
         |A Munich Supports A Kiel - Berlin
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -142,7 +142,7 @@ object TestD: WithAssertionsDATC {
         |
         |Russia:
         |A Warsaw - Prussia
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -154,7 +154,7 @@ object TestD: WithAssertionsDATC {
         |
         |Italy:
         |A Venice - Trieste
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -167,7 +167,7 @@ object TestD: WithAssertionsDATC {
         |Italy:
         |A Venice - Trieste
         |F Apulia - Adriatic Sea
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -181,7 +181,7 @@ object TestD: WithAssertionsDATC {
         |A Venice - Trieste
         |A Tyrolia Supports A Venice - Trieste
         |F Adriatic Sea Supports A Venice - Trieste
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(TRI, Italy)
@@ -196,7 +196,7 @@ object TestD: WithAssertionsDATC {
         |
         |Turkey:
         |F Ankara - Constantinople
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces).containsEntry(ANK, Russia)
     }
@@ -214,7 +214,7 @@ object TestD: WithAssertionsDATC {
         |F Ankara - Constantinople
         |A Smyrna Supports F Ankara - Constantinople
         |A Armenia - Ankara
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(CON, Turkey)
@@ -233,7 +233,7 @@ object TestD: WithAssertionsDATC {
         |F Ankara - Constantinople
         |A Smyrna Supports F Ankara - Constantinople
         |A Armenia - Ankara
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces).containsEntry(ANK, Russia)
     }
@@ -248,7 +248,7 @@ object TestD: WithAssertionsDATC {
         |
         |Turkey:
         |F Ankara - Constantinople
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces).containsEntry(CON, Russia)
     }
@@ -271,7 +271,7 @@ object TestD: WithAssertionsDATC {
         |Russia:
         |A Silesia - Munich
         |A Berlin Supports A Silesia - Munich
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(TRI, Austria)
@@ -295,7 +295,7 @@ object TestD: WithAssertionsDATC {
         |Turkey:
         |F Tyrrhenian Sea Supports F Western Mediterranean - Gulf of Lyon
         |F Western Mediterranean - Gulf of Lyon
-        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     @Test
@@ -308,7 +308,7 @@ object TestD: WithAssertionsDATC {
         |Russia:
         |F Baltic Sea Supports A Prussia - Berlin
         |A Prussia - Berlin
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -321,7 +321,7 @@ object TestD: WithAssertionsDATC {
         |Russia:
         |F Baltic Sea Supports A Prussia - Berlin
         |A Prussia - Berlin
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     //6.D.27. TEST CASE, FAILING CONVOY CAN BE SUPPORTED
@@ -338,7 +338,7 @@ object TestD: WithAssertionsDATC {
         |Turkey:
         |F Black Sea - Rumania
         |A Bulgaria Supports F Black Sea - Rumania
-        |""".parse().adjudicateAsDOTC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
     }
 
     //6.D.29. TEST CASE, MOVE TO IMPOSSIBLE COAST AND SUPPORT
@@ -361,7 +361,7 @@ object TestD: WithAssertionsDATC {
         |
         |Turkey:
         |A Bulgaria - Serbia
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(BUD, Austria)
@@ -382,7 +382,7 @@ object TestD: WithAssertionsDATC {
         |Russia:
         |A Warsaw Supports A Livonia - Prussia
         |A Livonia - Prussia
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces).containsEntry(PRU, Germany)
     }

@@ -2,8 +2,6 @@ package nodomain.seven.dip.datc
 
 import nodomain.seven.dip.provinces.StandardPlayer.*
 import nodomain.seven.dip.provinces.StandardCoast.*
-import nodomain.seven.dip.provinces.StandardSea.*
-import nodomain.seven.dip.provinces.StandardInLand.*
 import kotlin.test.Test
 
 /** ## 6.C. TEST CASES, CIRCULAR MOVEMENT
@@ -19,7 +17,7 @@ object TestC: WithAssertionsDATC {
         |
         |Russia:
         |A Smyrna - Ankara
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(CON, Turkey)
@@ -37,7 +35,7 @@ object TestC: WithAssertionsDATC {
         |
         |Russia:
         |A Smyrna - Ankara
-        |""".parse().adjudicateAsDOTC()
+        |""".parse().adjudicateAsDATC()
 
         assertThat(result.pieces)
             .containsEntry(CON, Turkey)
@@ -53,7 +51,7 @@ object TestC: WithAssertionsDATC {
         |A Constantinople - Smyrna
         |A Smyrna - Ankara
         |A Bulgaria - Constantinople
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     //6.C.4. TEST CASE, A CIRCULAR MOVEMENT WITH ATTACKED CONVOY
@@ -77,7 +75,7 @@ object TestC: WithAssertionsDATC {
         |
         |Austria
         |A Trieste - Serbia
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 
     @Test
@@ -93,6 +91,6 @@ object TestC: WithAssertionsDATC {
         |Austria
         |A Trieste - Serbia
         |A Serbia - Bulgaria
-        |""".parse().adjudicateAsDOTC().andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC().andAssertThatNothingMoved()
     }
 }
