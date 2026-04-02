@@ -13,7 +13,7 @@ sealed class Order(val piece: Piece, val symbol: String) {
     override fun equals(other: Any?): Boolean =
         other is Order && other.from == from && other.action == action
 
-    override fun toString(): String =  "$piece$symbol$action"
+    override fun toString(): String = "$piece$symbol$action"
     override fun hashCode(): Int = piece.hashCode() * 31 + action.hashCode()
 
 
@@ -58,5 +58,9 @@ sealed interface RetreatOrder: Adjustment {
     val flare: TemporalFlare?
 }
 
-class Build(override val piece: Piece): BuildOrder
-class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder
+class Build(override val piece: Piece): BuildOrder {
+    override fun toString(): String = "+ $piece"
+}
+class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder {
+    override fun toString(): String = "- $piece"
+}
