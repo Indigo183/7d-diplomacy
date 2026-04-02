@@ -40,6 +40,23 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
 }
 
 /** Checks that:
+ * 1. the retreat has a temporal flare
+ * 2. the retreat is on the list of required retreats
+ * 3. if the retreat is a move, the destination is locally adjacent
+ */
+fun Game.isValid(order: RetreatOrder, player: Player? = null): Boolean {
+    order.flare ?: return false // 1
+    if (requiredRetreats.none { (piece, flare, retreatPlayer) ->
+        // Check that the retreat is required
+        piece == order.piece && flare == order.flare && (player ?: retreatPlayer) == retreatPlayer
+    }) return false // 2
+    return (order !is MoveOrder || (
+        order.piece.location.boardIndex == order.action.to.boardIndex
+            && (order.piece.location.province isAdjacentTo order.action.to.province).forUnit(order.piece)
+    )) // 3
+}
+
+/** Checks that:
  * 1. the board exists
  * 2. the board is not in Limbo
  * 3. the board is in winter
@@ -71,6 +88,13 @@ fun Game.input(orders: List<Order>, player: Player? = null) {
             false
         }
     })
+}
+
+fun Game.inputRetreats(retreats: List<RetreatOrder>, player: Player? = null) {
+    if (gameState == GameState.RETREATS) addAdjustments(retreats.filter { isValid(it, player) || run {
+        println("WARNING: invalid retreat:\n$it")
+        false
+    }}) else println("WARNING: gameState is $gameState, not retreats")
 }
 
 fun Game.inputBuilds(builds: List<BuildOrder>, player: Player? = null) {
