@@ -5,6 +5,7 @@ import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser.NationalisedFormat.DATC
+import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.orders.TemporalFlare
 import nodomain.seven.dip.orders.get
@@ -32,14 +33,14 @@ interface WithAssertionsDATC: WithAssertions {
         parser.parseOrderSet(this.trimMargin(), DATC)
 
 
-    fun Map<Player, List<Order>>.adjudicateAsDOTC(
+    fun Map<Player, List<Order>>.adjudicateAsDATC(
         setup: ()->Setup = {impliedSetup()},
         game: Game = Game(setup().mapKeys { (province, _) -> origin A province }),
         expectAllOrderToBeValid: Boolean = true
     ): Game {
         if (expectAllOrderToBeValid)
             forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
-        forEach { (player, orders) -> game.input(orders, player) }
+        forEach { (player, orders) -> print("$player:\n$orders\n\n"); game.input(orders, player) }
         game.adjudicate()
         return game
     }
@@ -60,5 +61,10 @@ interface WithAssertionsDATC: WithAssertions {
 
     fun retreatsIn(vararg province: Province): Array<Pair<Location, TemporalFlare>> {
         return province.map { origin[it] to TemporalFlare.RIGHT }.toTypedArray()
+    }
+    fun retreatsIn(vararg pair: Pair<Piece, Player>): List<Triple<Piece, TemporalFlare, Player>> {
+        val list: MutableList<Triple<Piece, TemporalFlare, Player>> = mutableListOf()
+        for ((piece, player) in pair) list += Triple(piece, TemporalFlare.RIGHT, player)
+        return list
     }
 }
