@@ -82,24 +82,28 @@ fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
 }
 
 fun Game.input(orders: List<Order>, player: Player? = null) {
-    addOrders(orders.filter {
+    if (gameState == GameState.MOVES) addOrders(orders.filter {
         isValid(it, player) || run {
             println("WARNING: invalid order:\n$it")
             false
         }
-    })
+    }) else println("WARNING: gameState is $gameState, not moves")
 }
 
 fun Game.inputRetreats(retreats: List<RetreatOrder>, player: Player? = null) {
-    if (gameState == GameState.RETREATS) addAdjustments(retreats.filter { isValid(it, player) || run {
-        println("WARNING: invalid retreat:\n$it")
-        false
-    }}) else println("WARNING: gameState is $gameState, not retreats")
+    if (gameState == GameState.RETREATS) addAdjustments(retreats.filter {
+        isValid(it, player) || run {
+            println("WARNING: invalid retreat:\n$it")
+            false
+        }
+    }) else println("WARNING: gameState is $gameState, not retreats")
 }
 
 fun Game.inputBuilds(builds: List<BuildOrder>, player: Player? = null) {
-    addAdjustments(builds.filter { isValid(it, player) || run {
-        println("WARNING: invalid build:\n$it")
-        false
-    }})
+    if (gameState == GameState.BUILDS) addAdjustments(builds.filter {
+        isValid(it, player) || run {
+            println("WARNING: invalid build:\n$it")
+            false
+        }
+    }) else println("WARNING: gameState is $gameState, not builds")
 }
