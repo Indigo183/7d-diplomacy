@@ -1,5 +1,6 @@
 package nodomain.seven.dip.game
 
+import nodomain.seven.dip.adjudication.Adjudicator
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
@@ -36,6 +37,9 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
         get() = orders.values.filterIsInstance<MoveOrder>()
     val supports: List<SupportOrder>
         get() = orders.values.filterIsInstance<SupportOrder>()
+
+    // Most recent adjudication results
+    val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
 
     // All units requiring retreats
     val requiredRetreats: MutableList<Triple<Piece, TemporalFlare, Player>> = mutableListOf()

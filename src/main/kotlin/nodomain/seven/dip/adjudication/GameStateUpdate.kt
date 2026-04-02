@@ -72,7 +72,7 @@ fun Game.adjudicateMoves() {
     val pieces = getAllPieces()
     val boards = timeplanes.flatMap { it.boards() } // to ensure the list of boards isn't updated
     val children: MutableList<Board> = mutableListOf()
-    val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
+    adjudicators.clear()
 
     // Generate children
     for (flare in TemporalFlare.entries) {
