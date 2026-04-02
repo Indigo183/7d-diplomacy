@@ -155,9 +155,10 @@ fun Game.adjudicateRetreats() {
         }
         // Can be assumed due to retreat filtering
         val retreat = locationsOfAdjustments[retreatingPiece.location]!! as MoveOrder
-        latestChild.pieces[
-            retreatingPiece moveTo retreat.action.to
-        ] = player
+        // Check for any move to retreat destination, successful or not
+        if (adjudicators[retreatFlare]!!.moveResults.none { it.location == retreat.action.to })
+            latestChild.pieces[retreatingPiece moveTo retreat.action.to] = player
+        // TODO: check if location on child board is already occupied
     }
 
     requiredRetreats.clear()
