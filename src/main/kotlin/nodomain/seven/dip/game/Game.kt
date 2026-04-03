@@ -24,6 +24,8 @@ fun MutableMap<Piece, Player>.getEntry(location: Location): Map.Entry<Piece, Pla
     return this.asSequence().find { (piece, _) -> piece.location == location }
 }
 
+data class RequiredRetreat(val piece: Piece, val  temporalFlare: TemporalFlare, val  player: Player)
+
 enum class GameState {
     MOVES,
     RETREATS,
@@ -42,7 +44,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
 
     // All units requiring retreats
-    val requiredRetreats: MutableList<Triple<Piece, TemporalFlare, Player>> = mutableListOf()
+    val requiredRetreats: MutableList<RequiredRetreat> = mutableListOf()
 
     // All inputted retreats/builds
     val locationsOfAdjustments: MutableMap<Location, Adjustment> = mutableMapOf() // Stores both retreats and builds
