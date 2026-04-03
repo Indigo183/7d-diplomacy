@@ -1,46 +1,47 @@
 
 package nodomain.seven.dip.datc
 
-import nodomain.seven.dip.orders.RetreatOrder
+import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
+import nodomain.seven.dip.utils.c
 import kotlin.test.Test
 
 //6.H. TEST CASES, RETREATING
 object TestH: WithAssertionsDATC {
+    val origin = T(0.c, 0)
+
     @Test
     fun `6_H_1 TEST CASE, NO SUPPORTS DURING RETREAT`() { // Modified due to involving sea regions
         val testGame = """
         |Austria:
-        |A Trieste Hold
-        |A Greece Hold
+        |F Trieste Hold
+        |A Serbia Hold
         |
         |Turkey:
-        |A Serbia Hold
+        |F Greece Hold
         |
         |Italy:
         |A Venice Supports A Tyrolia - Trieste
         |A Tyrolia - Trieste
-        |A Rumania - Serbia
-        |A Bulgaria Supports A Rumania - Serbia
-        |The fleet in Trieste and the fleet in Greece are dislodged. If the retreat orders are as follows:
+        |F Ionian Sea - Greece
+        |F Aegean Sea Supports F Ionian Sea - Greece
         |""".parse().adjudicateAsDATC()
 
         assertThat(testGame.requiredRetreats)
-            .matches {
-                it.any { (piece, _, _) -> piece.location.province == TRI }
-            }.matches {
-                it.any { (piece, _, _) -> piece.location.province == SER }
-            }
+            .matches(
+                { it.any { (piece, _, _) -> piece == origin F TRI } }, "F Tri must retreat"
+            ).matches(
+                { it.any { (piece, _, _) -> piece == origin F GRE } }, "F Gre must retreat"
+            )
 
         """
         |Austria:
-        |A Trieste - Albania
-        |A Greece Supports F Trieste - Albania
+        |F Trieste - Albania
+        |A Serbia Supports F Trieste - Albania
         |
         |Turkey:
-        |A Serbia - Albania
-        |The Austrian support order is illegal. Both dislodged fleets are disbanded.
+        |F Greece - Albania
         |""".parse().mapValues { it.value.filterIsInstance<RetreatOrder>() }.adjudicateRetreatsAsDATC(testGame)
     }
 
