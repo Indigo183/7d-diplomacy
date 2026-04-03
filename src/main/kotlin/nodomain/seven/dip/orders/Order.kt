@@ -63,4 +63,6 @@ class Build(override val piece: Piece): BuildOrder {
 }
 class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder {
     override fun toString(): String = "- $piece"
+
+    infix fun i(timeFlare: Int) = Disband(piece, enumEntries<TemporalFlare>()[timeFlare % 4])
 }

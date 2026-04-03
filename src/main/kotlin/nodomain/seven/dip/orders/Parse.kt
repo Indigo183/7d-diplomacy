@@ -43,8 +43,8 @@ interface Notation {
     fun asBuildAction(string: String): (Piece) -> BuildOrder
 }
 
-typealias OwnedOrder = Pair<Order, Player>
-typealias OwnedBuild = Pair<BuildOrder, Player>
+data class Owned<out T>(val order: T, val player: Player)
+fun <T> Player.having(order: T) = Owned<T>(order, this)
 
 fun interface PartiallyParsed<out R> {
     fun isComplete(): Boolean = true
@@ -70,17 +70,17 @@ class Parser(
 
         override fun invoke(parser: Parser): ParsingHelper<Order> = parser.getFormatter()
     }
-    enum class NationalisedFormat(val getFormatter: Parser.() -> ParsingHelper<OwnedOrder>): (Parser) -> ParsingHelper<OwnedOrder> {
+    enum class NationalisedFormat(val getFormatter: Parser.() -> ParsingHelper<Owned<Order>>): (Parser) -> ParsingHelper<Owned<Order>> {
         VERBOSE_WITH_PLAYER({National(Verbose())}),
-        DATC({ this.DATC() });
+        DATC({ this.OrderDATC() });
 
-        override fun invoke(parser: Parser): ParsingHelper<OwnedOrder> = parser.getFormatter()
+        override fun invoke(parser: Parser): ParsingHelper<Owned<Order>> = parser.getFormatter()
     }
 
     fun parseOrderSet(from: String, format: (Parser) -> ParsingHelper<Order>, delimiter: String = "\n\n"): List<Order> =
         from.split(delimiter).flatMap(format(this)::parseOrders)
 
-    fun parseOrderSet(from: String, format: (Parser) -> ParsingHelper<OwnedOrder>, delimiter: String = "\n\n"): Map<Player, List<Order>> {
+    fun parseOrderSet(from: String, format: (Parser) -> ParsingHelper<Owned<Order>>, delimiter: String = "\n\n"): Map<Player, List<Order>> {
         return from.split(delimiter)
             .flatMap(format(this)::parseOrders)
             .groupBy({(_, player) -> player },  {(order, _) -> order})
@@ -149,45 +149,50 @@ class Parser(
         }
     }
 
-    private inner class DATC: Announced<OwnedOrder> {
+    private abstract inner class DATC<T>: Announced<T> {
         val origin = BoardIndex(0.c)
         lateinit var owner: Player
 
         override fun parseHeader(asString: String) {
             owner = asPlayer(asString.substringBefore(':')).provideComplete()
         }
+    }
 
-        override fun parseOrderInPieces(queue: Queue<String>): OwnedOrder {
+    private inner class OrderDATC: DATC<Owned<Order>>() {
+        override fun parseOrderInPieces(queue: Queue<String>): Owned<Order> {
             return queue.withFirst(notation::asUnitType)
                 .combiningManyNext(asProvince) { province, unitType -> unitType(Location(province, origin))}
-                .combiningInto(notation::asAction, 'H') {action, piece -> Pair(when(action) {
+                .combiningInto(notation::asAction, 'H') {action, piece -> owner.having(when(action) {
                     'H' -> piece.holds
-                    'S' -> piece S { parseOrderInPieces(queue).first }
+                    'S' -> piece S { parseOrderInPieces(queue).order }
                     '-' -> piece M queue.take(asProvince) i 0
-                    else -> throw IllegalStateException()}, owner) }
+                    else -> throw IllegalStateException()}) }
         }
     }
 
-    private inner class DATCbuild: Announced<OwnedBuild> {
-        val origin = BoardIndex(0.c)
-        lateinit var owner: Player
-
-        override fun parseHeader(asString: String) {
-            owner = asPlayer(asString.substringBefore(':')).provideComplete()
-        }
-
-        override fun parseOrderInPieces(queue: Queue<String>): OwnedBuild {
+    private inner class BuildDATC: DATC<Owned<BuildOrder>>() {
+        override fun parseOrderInPieces(queue: Queue<String>): Owned<BuildOrder> {
             return queue.withFirst(notation::asBuildAction)
                 .combiningNext(notation::asUnitType) { unitType, action -> { province: Province -> action(unitType(Location(province, origin)))}}
-                .combiningManyInto(asProvince) {province, action -> action(province) to owner}
+                .combiningManyInto(asProvince) {province, action -> owner.having(action(province))}
+        }
+    }
+
+    private inner class RetreatDATC(val orderDATC: OrderDATC, val buildDATC: BuildDATC): DATC<Owned<RetreatOrder>>() {
+        @Suppress("UNCHECKED_CAST")
+        override fun parseOrderInPieces(queue: Queue<String>): Owned<RetreatOrder> {
+            return when (queue.peek().first().uppercaseChar()) {
+                'A', 'F' -> orderDATC.parseOrderInPieces(queue) as Owned<MoveOrder>
+                else -> buildDATC.parseOrderInPieces(queue) as Owned<Disband>
+            }
         }
     }
 
 
-    private inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
-        override fun parseOrderInPieces(queue: Queue<String>): Pair<Order, Player> {
+    private inner class National(val basedOn: Formatted<Order>): Formatted<Owned<Order>> {
+        override fun parseOrderInPieces(queue: Queue<String>): Owned<Order> {
             val player = queue.take(asPlayer)
-            return Pair(basedOn.parseOrderInPieces(queue), player)
+            return player.having(basedOn.parseOrderInPieces(queue))
         }
     }
 }
