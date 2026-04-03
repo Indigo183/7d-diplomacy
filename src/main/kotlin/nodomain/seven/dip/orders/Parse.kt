@@ -39,9 +39,12 @@ interface Notation {
     fun asAction(string: String): Char
 
     fun asTemporalFlare(string: String): Int
+
+    fun asBuildAction(string: String): (Piece) -> BuildOrder
 }
 
 typealias OwnedOrder = Pair<Order, Player>
+typealias OwnedBuild = Pair<BuildOrder, Player>
 
 fun interface PartiallyParsed<out R> {
     fun isComplete(): Boolean = true
@@ -165,6 +168,22 @@ class Parser(
         }
     }
 
+    private inner class DATCbuild: Announced<OwnedBuild> {
+        val origin = BoardIndex(0.c)
+        lateinit var owner: Player
+
+        override fun parseHeader(asString: String) {
+            owner = asPlayer(asString.substringBefore(':')).provideComplete()
+        }
+
+        override fun parseOrderInPieces(queue: Queue<String>): OwnedBuild {
+            return queue.withFirst(notation::asBuildAction)
+                .combiningNext(notation::asUnitType) { unitType, action -> { province: Province -> action(unitType(Location(province, origin)))}}
+                .combiningManyInto(asProvince) {province, action -> action(province) to owner}
+        }
+    }
+
+
     private inner class National(val basedOn: Formatted<Order>): Formatted<OwnedOrder> {
         override fun parseOrderInPieces(queue: Queue<String>): Pair<Order, Player> {
             val player = queue.take(asPlayer)
@@ -191,4 +210,10 @@ object DefaultNotation: Notation {
     override fun asAction(string: String): Char = string.first().uppercaseChar()
 
     override fun asTemporalFlare(string: String): Int = string.last().toString().toInt()
+
+    override fun asBuildAction(string: String): (Piece) -> BuildOrder = when (string.lowercase()) {
+        "+", "build" -> ::Build
+        "-", "disband","remove" -> ::Disband
+        else -> throw IncompatibleParserException()
+    }
 }
