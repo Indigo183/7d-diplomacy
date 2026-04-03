@@ -3,6 +3,7 @@ package nodomain.seven.dip.datc
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.game.GameState
+import nodomain.seven.dip.game.RequiredRetreat
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.BuildOrder
 import nodomain.seven.dip.orders.Order
@@ -90,8 +91,10 @@ interface WithAssertionsDATC: WithAssertions {
         return this
     }
 
-    fun retreatsIn(vararg province: Province): Array<Pair<Location, TemporalFlare>> {
-        return province.map { origin[it] to TemporalFlare.RIGHT }.toTypedArray()
+    val List<RequiredRetreat>.locations get() = map { it.piece.location }
+
+    fun retreatsIn(vararg province: Province): Array<Location> {
+        return province.map { origin[it] }.toTypedArray()
     }
     fun retreatsIn(vararg pair: Pair<Piece, Player>): List<Triple<Piece, TemporalFlare, Player>> {
         val list: MutableList<Triple<Piece, TemporalFlare, Player>> = mutableListOf()

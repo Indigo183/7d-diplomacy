@@ -1,16 +1,12 @@
-
 package nodomain.seven.dip.datc
 
-import nodomain.seven.dip.orders.*
+import nodomain.seven.dip.orders.RetreatOrder
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
-import nodomain.seven.dip.utils.c
 import kotlin.test.Test
 
 //6.H. TEST CASES, RETREATING
 object TestH: WithAssertionsDATC {
-    val origin = T(0.c, 0)
-
     @Test
     fun `6_H_1 TEST CASE, NO SUPPORTS DURING RETREAT`() { // Modified due to involving sea regions
         val testGame = """
@@ -28,12 +24,7 @@ object TestH: WithAssertionsDATC {
         |F Aegean Sea Supports F Ionian Sea - Greece
         |""".parse().adjudicateAsDATC()
 
-        assertThat(testGame.requiredRetreats)
-            .matches(
-                { it.any { (piece, _, _) -> piece == origin F TRI } }, "F Tri must retreat"
-            ).matches(
-                { it.any { (piece, _, _) -> piece == origin F GRE } }, "F Gre must retreat"
-            )
+        assertThat(testGame.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(GRE, TRI))
 
         """
         |Austria:
