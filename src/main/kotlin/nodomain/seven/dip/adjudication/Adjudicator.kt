@@ -1,11 +1,12 @@
 package nodomain.seven.dip.adjudication
 
-import nodomain.seven.dip.orders.HoldOrder
-import nodomain.seven.dip.orders.MoveOrder
-import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.SupportOrder
+import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.Location
+
+operator fun Map<Piece, Player>.get(location: Location): Player? {
+    return this.asSequence().find { (piece, _) -> piece.location == location }?.value
+}
 
 sealed interface ComputableMoveResult {
     val moveOrder: MoveOrder?
@@ -31,7 +32,7 @@ value class Bounce(override val location: Location): MoveResult {
     override val moveOrder: MoveOrder? get() = null
 }
 
-class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Location, Player>) {
+class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Piece, Player>) {
     private inner class MoveAnalyse(val order: MoveOrder) {
         var strengthExcludingVictim: Int = 1
         var strength: Int = 1

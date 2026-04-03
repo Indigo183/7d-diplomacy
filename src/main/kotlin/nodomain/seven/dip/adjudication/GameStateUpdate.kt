@@ -81,7 +81,7 @@ fun Game.adjudicateMoves() {
         val adjudicator = Adjudicator(
             moves.filter { it.flare == flare },
             supports,
-            pieces.mapKeys { (piece, _) -> piece.location }
+            pieces
         )
         adjudicators[flare] = adjudicator
         println("INFO: with results: ${adjudicator.moveResults}")
