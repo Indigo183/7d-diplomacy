@@ -1,6 +1,7 @@
 
 package nodomain.seven.dip.datc
 
+import nodomain.seven.dip.orders.RetreatOrder
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
 import kotlin.test.Test
@@ -34,13 +35,13 @@ object TestH: WithAssertionsDATC {
 
         """
         |Austria:
-        |F Trieste - Albania
+        |A Trieste - Albania
         |A Greece Supports F Trieste - Albania
         |
         |Turkey:
-        |F Serbia - Albania
+        |A Serbia - Albania
         |The Austrian support order is illegal. Both dislodged fleets are disbanded.
-        |""".parse().adjudicateAsDATC(game = testGame)
+        |""".parse().mapValues { it.value.filterIsInstance<RetreatOrder>() }.adjudicateRetreatsAsDATC(testGame)
     }
 
     @Test
