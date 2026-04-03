@@ -27,7 +27,7 @@ import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
 import kotlin.collections.plusAssign
 
-typealias Setup = Map<Province, Player>
+typealias Setup = Map<Piece, Player>
 
 interface WithAssertionsDATC: WithAssertions {
     companion object {
@@ -41,7 +41,7 @@ interface WithAssertionsDATC: WithAssertions {
 
     fun Map<Player, List<Order>>.adjudicateAsDATC(
         setup: ()->Setup = {impliedSetup()},
-        game: Game = Game(setup().mapKeys { (province, _) -> origin A province }),
+        game: Game = Game(setup()),
         expectAllOrderToBeValid: Boolean = true
     ): Game {
         assertThat(game.gameState).isEqualTo(GameState.MOVES)
@@ -77,7 +77,7 @@ interface WithAssertionsDATC: WithAssertions {
     }
 
     fun Map<Player, List<Order>>.impliedSetup(): Setup =
-        asSequence().flatMap { (player, orders) -> orders.map { it.from.province to player } }.toMap()
+        asSequence().flatMap { (player, orders) -> orders.map { it.piece to player } }.toMap()
 
     val Game.pieces: Map<Province, Player>? get() =
         getBoard(BoardIndex(1.c))?.pieces?.mapKeys { (piece, _) -> piece.location.province }
