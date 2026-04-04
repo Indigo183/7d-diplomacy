@@ -1,5 +1,7 @@
 package nodomain.seven.dip.orders
 
+import nodomain.seven.dip.game.GameState
+import nodomain.seven.dip.game.GameState.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.Provinces
@@ -76,6 +78,12 @@ class Parser(
 
         override fun invoke(parser: Parser): ParsingHelper<Owned<Order>> = parser.getFormatter()
     }
+    enum class FullNationalisedFormat(val getFormatter: Parser.() -> DiplomacyParser<Owned<Order>, Owned<RetreatOrder>, Owned<BuildOrder>>):
+            (Parser) -> DiplomacyParser<Owned<Order>, Owned<RetreatOrder>, Owned<BuildOrder>> {
+        DATC({ datcParser(this.OrderDATC(), this.BuildDATC()) });
+
+        override fun invoke(parser: Parser) = parser.getFormatter()
+    }
 
     fun parseOrderSet(from: String, format: (Parser) -> ParsingHelper<Order>, delimiter: String = "\n\n"): List<Order> =
         from.split(delimiter).flatMap(format(this)::parseOrders)
@@ -88,6 +96,17 @@ class Parser(
 
     sealed interface ParsingHelper<T> {
         fun parseOrders(from: String, separatedBy: String = "\n"): List<T>
+    }
+
+    data class DiplomacyParser<T, R, S>(
+        val orderParser: ParsingHelper<T>,
+        val buildParser: ParsingHelper<S>,
+        val retreatParser: ParsingHelper<R>) {
+        fun parseOrders(string: String, gameState: GameState) = when(gameState) {
+            MOVES -> orderParser.parseOrders(string)
+            RETREATS -> retreatParser.parseOrders(string)
+            BUILDS -> buildParser.parseOrders(string)
+        }
     }
 
     private interface Formatted<T>: ParsingHelper<T> {
@@ -188,6 +207,7 @@ class Parser(
         }
     }
 
+    private fun datcParser(orderDATC: OrderDATC, buildDATC: BuildDATC) = DiplomacyParser(orderDATC, buildDATC, RetreatDATC(orderDATC, buildDATC))
 
     private inner class National(val basedOn: Formatted<Order>): Formatted<Owned<Order>> {
         override fun parseOrderInPieces(queue: Queue<String>): Owned<Order> {
