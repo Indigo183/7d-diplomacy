@@ -64,7 +64,7 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     }
     return if (
         (latestChild === null && newChild.pieces != board.pieces)
-        || (latestChild !== null && newChild.pieces != latestChild.originalPieces) // latestChild may have had builds
+        || (latestChild !== null && newChild.pieces != latestChild.originalPieces) // latestChild may have had retreats or builds
     ) newChild else null
 }
 
