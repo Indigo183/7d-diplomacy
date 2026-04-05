@@ -6,12 +6,12 @@ import kotlin.enums.enumEntries
 // The "action" being done, without a piece to order it
 sealed interface Action
 
-sealed interface Imputable {
+sealed interface Inputtable {
     val piece: Piece
 }
 
 // An action and the piece ordering it
-sealed class Order(override val piece: Piece, val symbol: String): Imputable {
+sealed class Order(override val piece: Piece, val symbol: String): Inputtable {
     abstract val action: Action
 
     override fun equals(other: Any?): Boolean =
@@ -53,7 +53,7 @@ class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " 
 // Timeplane specifier shorthand
 fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex = BoardIndex(boardIndex, timeplane)
 
-sealed interface Adjustment:  Imputable
+sealed interface Adjustment:  Inputtable
 
 sealed interface BuildOrder: Adjustment
 sealed interface RetreatOrder: Adjustment {

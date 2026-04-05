@@ -5,7 +5,7 @@ import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.game.RequiredRetreat
 import nodomain.seven.dip.orders.BuildOrder
-import nodomain.seven.dip.orders.Imputable
+import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser.FullNationalisedFormat.DATC
 import nodomain.seven.dip.orders.Piece
@@ -34,7 +34,7 @@ interface WithAssertionsDATC: WithAssertions {
         val origin = T(0.c, 0)
     }
 
-    data class ParsedDATC(val ordersByPlayer: Map<Player, List<Imputable>>, val currentGameState: GameState)
+    data class ParsedDATC(val ordersByPlayer: Map<Player, List<Inputtable>>, val currentGameState: GameState)
 
     fun String.parse(gameState: GameState = GameState.MOVES) =
         ParsedDATC(parser.parseOrderSet(this.trimMargin(), DATC, gameState), gameState)
@@ -68,7 +68,7 @@ interface WithAssertionsDATC: WithAssertions {
         return game
     }
 
-    fun Map<Player, List<Imputable>>.impliedSetup(): Setup =
+    fun Map<Player, List<Inputtable>>.impliedSetup(): Setup =
         asSequence().flatMap { (player, orders) -> orders.map { it.piece to player } }.toMap()
 
     val Game.pieces: Map<Province, Player>? get() =

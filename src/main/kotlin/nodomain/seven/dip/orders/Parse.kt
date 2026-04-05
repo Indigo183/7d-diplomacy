@@ -96,7 +96,7 @@ class Parser(
     fun parseOrderSet(
         from: String, format: (Parser) -> OwnedDiplomacyParser,
         gameState: GameState = MOVES, delimiter: String = "\n\n"
-    ): Map<Player, List<Imputable>> =
+    ): Map<Player, List<Inputtable>> =
         from.split(delimiter)
             .flatMap { format(this).parseOrders(it, gameState) }
             .groupBy({(_, player) -> player },  {(order, _) -> order})
