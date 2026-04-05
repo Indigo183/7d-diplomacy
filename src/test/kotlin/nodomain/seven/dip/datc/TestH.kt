@@ -1,7 +1,6 @@
 package nodomain.seven.dip.datc
 
 import nodomain.seven.dip.game.GameState.*
-import nodomain.seven.dip.orders.HoldOrder
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
 import nodomain.seven.dip.provinces.StandardPlayer.*
@@ -38,8 +37,7 @@ object TestH: WithAssertionsDATC {
         |F Greece - Albania
         |""".parse(RETREATS).adjudicateAsDATC(game = game)
 
-        assertThat(game.pieces)
-            .doesNotContainKey(ALB)
+        assertThat(game.pieces).doesNotContainKey(ALB)
     }
 
     @Test
@@ -115,8 +113,14 @@ object TestH: WithAssertionsDATC {
         |F Ankara Hold
         |""".parse().adjudicateAsDATC()
 
-        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(NWY, EDI, HOL))
+        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(ANK))
 
+        """
+        |Turkey:
+        |F Ankara - Black Sea
+        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+
+        assertThat(game.pieces).doesNotContainKey(BLA)
     }
 
     @Test
@@ -134,8 +138,14 @@ object TestH: WithAssertionsDATC {
         |A Vienna Hold
         |""".parse().adjudicateAsDATC()
 
-        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(NWY, EDI, HOL))
+        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(VIE))
 
+        """
+        |Italy:
+        |A Vienna - Bohemia
+        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+
+        assertThat(game.pieces).doesNotContainKey(BOH)
     }
 
     @Test
@@ -154,7 +164,7 @@ object TestH: WithAssertionsDATC {
         |A Bohemia Hold
         |""".parse().adjudicateAsDATC()
 
-        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(NWY, EDI, HOL))
+        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(VIE, BOH))
 
         """
         |Italy:
@@ -162,9 +172,7 @@ object TestH: WithAssertionsDATC {
         |A Vienna - Tyrolia
         |""".parse(RETREATS).adjudicateAsDATC(game = game)
 
-        assertThat(game.pieces)
-            .doesNotContainKey(NTH)
-            .doesNotContainEntry(HOL, Russia)
+        assertThat(game.pieces).doesNotContainKey(TYR)
     }
 
     @Test
@@ -197,9 +205,7 @@ object TestH: WithAssertionsDATC {
         |F Holland - North Sea
         |""".parse(RETREATS).adjudicateAsDATC(game = game)
 
-        assertThat(game.pieces)
-            .doesNotContainKey(NTH)
-            .doesNotContainEntry(HOL, Russia)
+        assertThat(game.pieces).doesNotContainKey(NTH)
     }
 
     @Test
@@ -218,7 +224,17 @@ object TestH: WithAssertionsDATC {
         |A Prussia - Berlin
         |""".parse().adjudicateAsDATC()
 
-        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(NWY, EDI, HOL))
+        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(PRU, KIE))
+
+        """
+        |Germany:
+        |F Kiel - Berlin
+        |
+        |Russia:
+        |Remove A Prussia
+        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+
+        assertThat(game.pieces).containsEntry(BER, Germany)
 
     }
 
@@ -238,7 +254,7 @@ object TestH: WithAssertionsDATC {
         |A Silesia Supports A Warsaw - Prussia
         |""".parse().adjudicateAsDATC()
 
-        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(NWY, EDI, HOL))
+        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(KIE, PRU))
 
         """
         |England:
@@ -248,9 +264,7 @@ object TestH: WithAssertionsDATC {
         |A Prussia - Berlin
         |""".parse(RETREATS).adjudicateAsDATC(game = game)
 
-        assertThat(game.pieces)
-            .doesNotContainKey(NTH)
-            .doesNotContainEntry(HOL, Russia)
+        assertThat(game.pieces).containsEntry(BER, Germany)
     }
 
     //6.H.11. TEST CASE, RETREAT WHEN DISLODGED BY ADJACENT CONVOY
@@ -276,7 +290,7 @@ object TestH: WithAssertionsDATC {
         |A Marseilles - Burgundy
         |""".parse().adjudicateAsDATC()
 
-        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(NWY, EDI, HOL))
+        assertThat(game.requiredRetreats.locations).containsExactlyInAnyOrder(*retreatsIn(PIC, BUR))
 
         """
         |England:
@@ -286,9 +300,7 @@ object TestH: WithAssertionsDATC {
         |A Burgundy - Belgium
         |""".parse(RETREATS).adjudicateAsDATC(game = game)
 
-        assertThat(game.pieces)
-            .doesNotContainKey(NTH)
-            .doesNotContainEntry(HOL, Russia)
+        assertThat(game.pieces).doesNotContainKey(BEL)
     }
 
     //6.H.15. TEST CASE, NO COASTAL CRAWL IN RETREAT
