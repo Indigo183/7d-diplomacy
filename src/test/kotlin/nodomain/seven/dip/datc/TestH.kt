@@ -1,8 +1,10 @@
 package nodomain.seven.dip.datc
 
+import nodomain.seven.dip.game.GameState.*
 import nodomain.seven.dip.orders.RetreatOrder
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
+import nodomain.seven.dip.provinces.StandardPlayer.*
 import kotlin.test.Test
 
 //6.H. TEST CASES, RETREATING
@@ -33,7 +35,11 @@ object TestH: WithAssertionsDATC {
         |
         |Turkey:
         |F Greece - Albania
-        |""".parse().mapValues { it.value.filterIsInstance<RetreatOrder>() }.adjudicateRetreatsAsDATC(testGame)
+        |""".parse(RETREATS).adjudicateAsDATC(game = testGame)
+
+        assertThat(testGame.pieces)
+            .doesNotContainEntry(ALB, Austria)
+            .doesNotContainEntry(ALB, Turkey)
     }
 
     @Test
