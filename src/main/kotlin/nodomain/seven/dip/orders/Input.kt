@@ -12,7 +12,7 @@ import nodomain.seven.dip.provinces.Player
  * 5. no involved board indexes reference Limbo (i.e. boardIndex.timeplane is never null)
  * 6. the ordered unit is on an active board
  */
-fun Game.isValid(order: Order, player: Player? = null): Boolean {
+private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean {
     order.from.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.from.boardIndex) ?: return false // 1 (partly)
     if (!board.isActive) return false // 6
@@ -44,7 +44,7 @@ fun Game.isValid(order: Order, player: Player? = null): Boolean {
  * 2. the retreat is on the list of required retreats
  * 3. if the retreat is a move, the destination is locally adjacent
  */
-fun Game.isValid(order: RetreatOrder, player: Player? = null): Boolean {
+private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null): Boolean {
     order.flare ?: return false // 1
     if (requiredRetreats.none { (piece, flare, retreatPlayer) ->
         // Check that the retreat is required
@@ -64,7 +64,7 @@ fun Game.isValid(order: RetreatOrder, player: Player? = null): Boolean {
  * 5. the adjustment is the correct type (if any) based on adjustment count
  * 6. the player owns the (centre / unit) being (built in / disbanded) respectively
  */
-fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
+private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Boolean {
     val location = order.piece.location
     location.boardIndex.timeplane ?: return false // 2
     if (!location.boardIndex.coordinate.isEven()) return false // 3
@@ -78,6 +78,15 @@ fun Game.isValid(order: BuildOrder, player: Player? = null): Boolean {
         count < 0 -> order is Disband // 5
                 && player == board.pieces[location] // 6
         else -> false // 5
+    }
+}
+
+fun Game.isValid(order: Any, player: Player? = null): Boolean {
+    return when (order) {
+        is Order -> isValidForMoves(order, player)
+        is RetreatOrder -> isValidForRetreats(order, player)
+        is BuildOrder -> isValidForBuilds(order, player)
+        else -> throw IllegalArgumentException("expected an order")
     }
 }
 
