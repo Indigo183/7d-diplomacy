@@ -4,14 +4,13 @@ import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.game.RequiredRetreat
-import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.BuildOrder
+import nodomain.seven.dip.orders.Imputable
 import nodomain.seven.dip.orders.Order
-import nodomain.seven.dip.orders.Parser.NationalisedFormat.DATC
+import nodomain.seven.dip.orders.Parser.FullNationalisedFormat.DATC
 import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.orders.RetreatOrder
 import nodomain.seven.dip.orders.T
-import nodomain.seven.dip.orders.TemporalFlare
 import nodomain.seven.dip.orders.get
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
@@ -26,7 +25,6 @@ import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
-import kotlin.collections.plusAssign
 
 typealias Setup = Map<Piece, Player>
 
@@ -36,48 +34,41 @@ interface WithAssertionsDATC: WithAssertions {
         val origin = T(0.c, 0)
     }
 
-    fun String.parse(): Map<Player, List<Order>> =
-        parser.parseOrderSet(this.trimMargin(), DATC)
+    data class ParsedDATC(val ordersByPlayer: Map<Player, List<Imputable>>, val currentGameState: GameState)
+
+    fun String.parse(gameState: GameState = GameState.MOVES) =
+        ParsedDATC(parser.parseOrderSet(this.trimMargin(), DATC, gameState), gameState)
 
 
-    fun Map<Player, List<Order>>.adjudicateAsDATC(
-        setup: ()->Setup = {impliedSetup()},
+    fun ParsedDATC.adjudicateAsDATC(
+        setup: ()->Setup = {ordersByPlayer.impliedSetup()},
         game: Game = Game(setup()),
         expectAllOrderToBeValid: Boolean = true
     ): Game {
-        assertThat(game.gameState).isEqualTo(GameState.MOVES)
-        if (expectAllOrderToBeValid)
-            forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
-        forEach { (player, orders) -> game.input(orders, player) }
+        assertThat(game.gameState).isEqualTo(currentGameState)
+        if (expectAllOrderToBeValid) {
+            ordersByPlayer.forEach { (player, orders) ->
+                assertThat(orders).allMatch {
+                    when (currentGameState) {
+                        GameState.MOVES -> game.isValid(it as Order, player)
+                        GameState.RETREATS -> game.isValid(it as RetreatOrder, player)
+                        GameState.BUILDS -> game.isValid(it as BuildOrder, player)
+                    }
+                }
+            }
+        }
+        ordersByPlayer.forEach { (player, orders) ->
+            when (currentGameState) {
+                GameState.MOVES -> game.input(orders.filterIsInstance<Order>(), player)
+                GameState.RETREATS -> game.inputRetreats(orders.filterIsInstance<RetreatOrder>(), player)
+                GameState.BUILDS -> game.inputBuilds(orders.filterIsInstance<BuildOrder>(), player)
+            }
+        }
         game.adjudicate()
         return game
     }
 
-    fun Map<Player, List<RetreatOrder>>.adjudicateRetreatsAsDATC(
-        game: Game,
-        expectAllOrderToBeValid: Boolean = true
-    ): Game {
-        assertThat(game.gameState).isEqualTo(GameState.RETREATS)
-        if (expectAllOrderToBeValid)
-            forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
-        forEach { (player, orders) -> game.inputRetreats(orders, player) }
-        game.adjudicate()
-        return game
-    }
-
-    fun Map<Player, List<BuildOrder>>.adjudicateBuildsAsDATC(
-        game: Game,
-        expectAllOrderToBeValid: Boolean = true
-    ): Game {
-        assertThat(game.gameState).isEqualTo(GameState.BUILDS)
-        if (expectAllOrderToBeValid)
-            forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
-        forEach { (player, orders) -> game.inputBuilds(orders, player) }
-        game.adjudicate()
-        return game
-    }
-
-    fun Map<Player, List<Order>>.impliedSetup(): Setup =
+    fun Map<Player, List<Imputable>>.impliedSetup(): Setup =
         asSequence().flatMap { (player, orders) -> orders.map { it.piece to player } }.toMap()
 
     val Game.pieces: Map<Province, Player>? get() =
@@ -95,10 +86,5 @@ interface WithAssertionsDATC: WithAssertions {
 
     fun retreatsIn(vararg province: Province): Array<Location> {
         return province.map { origin[it] }.toTypedArray()
-    }
-    fun retreatsIn(vararg pair: Pair<Piece, Player>): List<Triple<Piece, TemporalFlare, Player>> {
-        val list: MutableList<Triple<Piece, TemporalFlare, Player>> = mutableListOf()
-        for ((piece, player) in pair) list += Triple(piece, TemporalFlare.RIGHT, player)
-        return list
     }
 }

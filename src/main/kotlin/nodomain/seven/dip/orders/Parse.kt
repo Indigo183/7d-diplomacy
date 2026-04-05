@@ -78,8 +78,7 @@ class Parser(
 
         override fun invoke(parser: Parser): ParsingHelper<Owned<Order>> = parser.getFormatter()
     }
-    enum class FullNationalisedFormat(val getFormatter: Parser.() -> DiplomacyParser<Owned<Order>, Owned<RetreatOrder>, Owned<BuildOrder>>):
-            (Parser) -> DiplomacyParser<Owned<Order>, Owned<RetreatOrder>, Owned<BuildOrder>> {
+    enum class FullNationalisedFormat(val getFormatter: Parser.() -> OwnedDiplomacyParser): (Parser) -> OwnedDiplomacyParser {
         DATC({ datcParser(this.OrderDATC(), this.BuildDATC()) });
 
         override fun invoke(parser: Parser) = parser.getFormatter()
@@ -94,14 +93,23 @@ class Parser(
             .groupBy({(_, player) -> player },  {(order, _) -> order})
     }
 
+    fun parseOrderSet(
+        from: String, format: (Parser) -> OwnedDiplomacyParser,
+        gameState: GameState = MOVES, delimiter: String = "\n\n"
+    ): Map<Player, List<Imputable>> =
+        from.split(delimiter)
+            .flatMap { format(this).parseOrders(it, gameState) }
+            .groupBy({(_, player) -> player },  {(order, _) -> order})
+
+
     sealed interface ParsingHelper<T> {
         fun parseOrders(from: String, separatedBy: String = "\n"): List<T>
     }
 
-    data class DiplomacyParser<T, R, S>(
-        val orderParser: ParsingHelper<T>,
-        val buildParser: ParsingHelper<S>,
-        val retreatParser: ParsingHelper<R>) {
+    data class OwnedDiplomacyParser (
+        val orderParser: ParsingHelper<Owned<Order>>,
+        val buildParser: ParsingHelper<Owned<BuildOrder>>,
+        val retreatParser: ParsingHelper<Owned<RetreatOrder>>) {
         fun parseOrders(string: String, gameState: GameState) = when(gameState) {
             MOVES -> orderParser.parseOrders(string)
             RETREATS -> retreatParser.parseOrders(string)
@@ -207,7 +215,7 @@ class Parser(
         }
     }
 
-    private fun datcParser(orderDATC: OrderDATC, buildDATC: BuildDATC) = DiplomacyParser(orderDATC, buildDATC, RetreatDATC(orderDATC, buildDATC))
+    private fun datcParser(orderDATC: OrderDATC, buildDATC: BuildDATC) = OwnedDiplomacyParser(orderDATC, buildDATC, RetreatDATC(orderDATC, buildDATC))
 
     private inner class National(val basedOn: Formatted<Order>): Formatted<Owned<Order>> {
         override fun parseOrderInPieces(queue: Queue<String>): Owned<Order> {
