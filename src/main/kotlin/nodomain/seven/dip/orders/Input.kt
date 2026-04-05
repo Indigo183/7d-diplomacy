@@ -89,6 +89,7 @@ fun Game.isValid(order: Inputtable, player: Player? = null): Boolean {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 fun Game.input(orders: List<Inputtable>, player: Player? = null) {
     when (gameState) {
         GameState.MOVES -> if (orders.all { it is Order }) addOrders((orders as List<Order>).filter {
