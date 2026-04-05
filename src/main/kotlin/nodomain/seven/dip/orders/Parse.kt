@@ -96,10 +96,11 @@ class Parser(
     fun parseOrderSet(
         from: String, format: (Parser) -> OwnedDiplomacyParser,
         gameState: GameState = MOVES, delimiter: String = "\n\n"
-    ): Map<Player, List<Inputtable>> =
-        from.split(delimiter)
-            .flatMap { format(this).parseOrders(it, gameState) }
-            .groupBy({(_, player) -> player },  {(order, _) -> order})
+    ): Map<Player, List<Inputtable>> {
+        val split = from.split(delimiter)
+        return split.flatMap { format(this).parseOrders(it, gameState) }
+            .groupBy({ (_, player) -> player }, { (order, _) -> order })
+    }
 
 
     sealed interface ParsingHelper<T> {
@@ -206,6 +207,12 @@ class Parser(
     }
 
     private inner class RetreatDATC(val orderDATC: OrderDATC, val buildDATC: BuildDATC): DATC<Owned<RetreatOrder>>() {
+        override fun parseHeader(asString: String) {
+            super.parseHeader(asString)
+            orderDATC.parseHeader(asString)
+            buildDATC.parseHeader(asString)
+        }
+
         @Suppress("UNCHECKED_CAST")
         override fun parseOrderInPieces(queue: Queue<String>): Owned<RetreatOrder> {
             return when (queue.peek().first().uppercaseChar()) {
