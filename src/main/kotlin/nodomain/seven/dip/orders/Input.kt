@@ -3,6 +3,7 @@ package nodomain.seven.dip.orders
 import nodomain.seven.dip.provinces.isAdjacentTo
 import nodomain.seven.dip.game.*
 import nodomain.seven.dip.provinces.Player
+import nodomain.seven.dip.utils.warnFalse
 
 /** Checks that:
  * 1. the ordered unit exists
@@ -90,25 +91,21 @@ fun Game.isValid(order: Inputtable, player: Player? = null): Boolean {
 }
 
 @Suppress("UNCHECKED_CAST")
-fun Game.input(orders: List<Inputtable>, player: Player? = null) {
-    when (gameState) {
-        GameState.MOVES -> if (orders.all { it is Order }) addOrders((orders as List<Order>).filter {
-            isValid(it, player) || run {
-                println("WARNING: invalid order:\n$it")
-                false
-            }
-        }) else println("WARNING: gameState is $gameState, not moves")
-        GameState.RETREATS -> if (orders.all { it is RetreatOrder }) addAdjustments((orders as List<RetreatOrder>).filter {
-            isValid(it, player) || run {
-                println("WARNING: invalid retreat:\n$it")
-                false
-            }
-        }) else println("WARNING: gameState is $gameState, not retreats")
-        GameState.BUILDS -> if (orders.all { it is BuildOrder }) addAdjustments((orders as List<BuildOrder>).filter {
-            isValid(it, player) || run {
-                println("WARNING: invalid retreat:\n$it")
-                false
-            }
-        }) else println("WARNING: gameState is $gameState, not builds")
+fun <T: Inputtable> Game.input(orders: List<T>, player: Player? = null) {
+    try {
+        when (gameState) {
+            GameState.MOVES -> addOrders((orders as List<Order>).filter {
+                isValidForMoves(it, player) || warnFalse("WARNING: invalid order:\n$it")
+            })
+            GameState.RETREATS -> addAdjustments((orders as List<RetreatOrder>).filter {
+                isValidForRetreats(it, player) || warnFalse("WARNING: invalid retreat:\n$it")
+            })
+            GameState.BUILDS -> addAdjustments((orders as List<BuildOrder>).filter {
+                isValidForBuilds(it, player) || warnFalse("WARNING: invalid build:\n$it")
+            })
+        }
+    } catch (e: ClassCastException) {
+        println("WARNING: gameState is $gameState")
+        throw IllegalArgumentException(e)
     }
 }

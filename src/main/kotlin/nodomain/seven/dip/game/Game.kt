@@ -84,7 +84,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     }
 
     // Add new orders to the map of orders
-    fun Game.addOrders(newOrders: List<Order>) {
+    fun addOrders(newOrders: List<Order>) {
         // TODO: For future optimisation
         currentOrders = newOrders
 

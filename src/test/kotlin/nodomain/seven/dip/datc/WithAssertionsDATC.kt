@@ -44,17 +44,8 @@ interface WithAssertionsDATC: WithAssertions {
         expectAllOrderToBeValid: Boolean = true
     ): Game {
         assertThat(game.gameState).isEqualTo(currentGameState)
-        if (expectAllOrderToBeValid) {
-            ordersByPlayer.forEach { (player, orders) ->
-                assertThat(orders).allMatch {
-                    when (currentGameState) {
-                        GameState.MOVES -> game.isValid(it as Order, player)
-                        GameState.RETREATS -> game.isValid(it as RetreatOrder, player)
-                        GameState.BUILDS -> game.isValid(it as BuildOrder, player)
-                    }
-                }
-            }
-        }
+        if (expectAllOrderToBeValid)
+            ordersByPlayer.forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
         ordersByPlayer.forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
         return game
