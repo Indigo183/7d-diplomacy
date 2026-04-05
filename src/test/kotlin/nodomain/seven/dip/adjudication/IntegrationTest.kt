@@ -31,7 +31,7 @@ object IntegrationTest {
         ))
         game.adjudicate()
 
-        game.inputBuilds(listOf(Build(T(-1+i, 0) A CAT)))
+        game.input(listOf(Build(T(-1+i, 0) A CAT)))
         game.adjudicate()
 
         // Wheel

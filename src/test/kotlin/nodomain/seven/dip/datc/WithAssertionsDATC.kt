@@ -14,8 +14,6 @@ import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.orders.get
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
-import nodomain.seven.dip.orders.inputBuilds
-import nodomain.seven.dip.orders.inputRetreats
 import nodomain.seven.dip.orders.isValid
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
@@ -57,13 +55,7 @@ interface WithAssertionsDATC: WithAssertions {
                 }
             }
         }
-        ordersByPlayer.forEach { (player, orders) ->
-            when (currentGameState) {
-                GameState.MOVES -> game.input(orders.filterIsInstance<Order>(), player)
-                GameState.RETREATS -> game.inputRetreats(orders.filterIsInstance<RetreatOrder>(), player)
-                GameState.BUILDS -> game.inputBuilds(orders.filterIsInstance<BuildOrder>(), player)
-            }
-        }
+        ordersByPlayer.forEach { (player, orders) -> game.input(orders, player) }
         game.adjudicate()
         return game
     }

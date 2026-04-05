@@ -81,38 +81,33 @@ private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Bo
     }
 }
 
-fun Game.isValid(order: Any, player: Player? = null): Boolean {
+fun Game.isValid(order: Inputtable, player: Player? = null): Boolean {
     return when (order) {
         is Order -> isValidForMoves(order, player)
         is RetreatOrder -> isValidForRetreats(order, player)
         is BuildOrder -> isValidForBuilds(order, player)
-        else -> throw IllegalArgumentException("expected an order")
     }
 }
 
-fun Game.input(orders: List<Order>, player: Player? = null) {
-    if (gameState == GameState.MOVES) addOrders(orders.filter {
-        isValid(it, player) || run {
-            println("WARNING: invalid order:\n$it")
-            false
-        }
-    }) else println("WARNING: gameState is $gameState, not moves")
-}
-
-fun Game.inputRetreats(retreats: List<RetreatOrder>, player: Player? = null) {
-    if (gameState == GameState.RETREATS) addAdjustments(retreats.filter {
-        isValid(it, player) || run {
-            println("WARNING: invalid retreat:\n$it")
-            false
-        }
-    }) else println("WARNING: gameState is $gameState, not retreats")
-}
-
-fun Game.inputBuilds(builds: List<BuildOrder>, player: Player? = null) {
-    if (gameState == GameState.BUILDS) addAdjustments(builds.filter {
-        isValid(it, player) || run {
-            println("WARNING: invalid build:\n$it")
-            false
-        }
-    }) else println("WARNING: gameState is $gameState, not builds")
+fun Game.input(orders: List<Inputtable>, player: Player? = null) {
+    when (gameState) {
+        GameState.MOVES -> if (orders.all { it is Order }) addOrders((orders as List<Order>).filter {
+            isValid(it, player) || run {
+                println("WARNING: invalid order:\n$it")
+                false
+            }
+        }) else println("WARNING: gameState is $gameState, not moves")
+        GameState.RETREATS -> if (orders.all { it is RetreatOrder }) addAdjustments((orders as List<RetreatOrder>).filter {
+            isValid(it, player) || run {
+                println("WARNING: invalid retreat:\n$it")
+                false
+            }
+        }) else println("WARNING: gameState is $gameState, not retreats")
+        GameState.BUILDS -> if (orders.all { it is BuildOrder }) addAdjustments((orders as List<BuildOrder>).filter {
+            isValid(it, player) || run {
+                println("WARNING: invalid retreat:\n$it")
+                false
+            }
+        }) else println("WARNING: gameState is $gameState, not builds")
+    }
 }
