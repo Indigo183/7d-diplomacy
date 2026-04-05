@@ -84,8 +84,8 @@ private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Bo
 fun Game.isValid(order: Inputtable, player: Player? = null): Boolean {
     return when (gameState) {
         GameState.MOVES -> order is Order && isValidForMoves(order, player)
-        GameState.BUILDS -> order is RetreatOrder && isValidForRetreats(order, player)
-        GameState.RETREATS -> order is BuildOrder && isValidForBuilds(order, player)
+        GameState.RETREATS -> order is RetreatOrder && isValidForRetreats(order, player)
+        GameState.BUILDS -> order is BuildOrder && isValidForBuilds(order, player)
     }
 }
 
