@@ -40,7 +40,7 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
 
         val entry = pieces.getEntry(move.moveOrder.action.to)
         if (entry !== null)
-            requiredRetreats += RequiredRetreat(entry.key, move.moveOrder.flare!!, entry.value)
+            requiredRetreats += RequiredRetreat(entry.first, move.moveOrder.flare!!, entry.second)
 
         // Map of pieces now requires knowledge of Army/Fleet status
         val (movingPiece, owner) = getBoard(move.moveOrder.piece.location.boardIndex)?.pieces?.getEntry(move.moveOrder.from)
