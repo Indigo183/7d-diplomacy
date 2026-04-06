@@ -16,14 +16,14 @@ fun MutableMap<Piece, Player>.remove(location: Location) {
     remove(keys.find { it.location == location})
 }
 
-operator fun MutableMap<Piece, Player>.get(location: Location): Player? {
-    return this.asSequence().find { (piece, _) -> piece.location == location }?.value
+operator fun Map<Piece, Player>.get(location: Location): Player? {
+    return get(Army(location)) ?: get(Fleet(location))
 }
 
-fun MutableMap<Piece, Player>.getEntry(piece: Piece): Pair<Piece, Player>? {
+fun Map<Piece, Player>.getEntry(piece: Piece): Pair<Piece, Player>? {
     return piece to (get(piece) ?: return null)
 }
-fun MutableMap<Piece, Player>.getEntry(location: Location) =
+fun Map<Piece, Player>.getEntry(location: Location) =
     getEntry(Army(location)) ?: getEntry(Fleet(location))
 
 data class RequiredRetreat(val piece: Piece, val  temporalFlare: TemporalFlare, val  player: Player)
