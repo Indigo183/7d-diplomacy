@@ -5,7 +5,7 @@ import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.Location
 
 operator fun Map<Piece, Player>.get(location: Location): Player? {
-    return this.asSequence().find { (piece, _) -> piece.location == location }?.value
+    return get(Army(location)) ?: get(Fleet(location))
 }
 
 sealed interface ComputableMoveResult {
