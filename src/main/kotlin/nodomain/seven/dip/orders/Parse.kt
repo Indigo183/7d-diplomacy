@@ -54,7 +54,7 @@ fun interface PartiallyParsed<out R> {
     fun provideComplete(): R
 }
 
-fun <R> Queue<String>.take(asR: (String) -> PartiallyParsed<R>): R {
+private fun <R> Queue<String>.take(asR: (String) -> PartiallyParsed<R>): R {
     val partiallyParsed = asR(remove())
     while (!partiallyParsed.isComplete()) {
         partiallyParsed.feed(remove())
