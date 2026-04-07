@@ -33,7 +33,7 @@ value class Bounce(override val location: Location): MoveResult {
 }
 
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Piece, Player>) {
-    private inner class MoveAnalyse(val order: MoveOrder) {
+    private inner class MoveAnalysis(val order: MoveOrder) {
         var strengthExcludingVictim: Int = 1
         var strength: Int = 1
         val against: Player? = piecesIn[order.action.to]
@@ -45,7 +45,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         override fun toString(): String = "$order with strength $strength ($strengthExcludingVictim without target)"
     }
 
-    private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
+    private val byOrigin = moves.associateBy(Order::from, ::MoveAnalysis)
     private val byDestination = byOrigin.values.groupBy { it.order.action.to }.toMutableMap()
     val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.from]?.asSequence()
@@ -85,13 +85,13 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private fun PreResult.updatesDueToDislodgement(): PreResult {
         for (dislodgement in dislodgements) {
-            dislodgedMovesDontEffectTheProvinceTheyWareDislodgedFrom(dislodgement)
-            dislodgedSupportsDontEffectTheProvinceTheyWareDislodgedFrom(dislodgement)
+            dislodgedMovesDontEffectTheProvinceTheyWereDislodgedFrom(dislodgement)
+            dislodgedSupportsDontEffectTheProvinceTheyWereDislodgedFrom(dislodgement)
         }
         return this
     }
 
-    private fun PreResult.dislodgedMovesDontEffectTheProvinceTheyWareDislodgedFrom(dislodgingMove: MoveOrder) {
+    private fun PreResult.dislodgedMovesDontEffectTheProvinceTheyWereDislodgedFrom(dislodgingMove: MoveOrder) {
         val dislodgedMove = byOrigin[dislodgingMove.action.to] ?: return
         if (dislodgedMove.order.action.to != dislodgingMove.from || byDestination[dislodgingMove.from]!!.size > 1)
             return
@@ -104,7 +104,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             set(dislodgingMove.from, newResult)
     }
 
-    private fun PreResult.dislodgedSupportsDontEffectTheProvinceTheyWareDislodgedFrom(dislodgingMove: MoveOrder) {
+    private fun PreResult.dislodgedSupportsDontEffectTheProvinceTheyWereDislodgedFrom(dislodgingMove: MoveOrder) {
         val dislodgedSupport = nonCutSupports.find { it.from == dislodgingMove.action.to } ?: return
         if (dislodgedSupport.action.order !is MoveOrder || dislodgedSupport.action.order.action.to != dislodgingMove.from) return
         byOrigin[dislodgedSupport.action.order.from]?.strength--
@@ -121,7 +121,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             .toMap(mutableMapOf())
     }
 
-    private fun strongestMove(destination: Location, orders: List<MoveAnalyse>): ComputableMoveResult? {
+    private fun strongestMove(destination: Location, orders: List<MoveAnalysis>): ComputableMoveResult? {
         val topStrength = orders.maxOf { it.strength }
         if (orders.isNotEmpty() && topStrength == 0) return null
         val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
@@ -142,7 +142,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     private fun MoveOrder.dependOnDestination(): ComputableMoveResult = // this method assumes the destination to be occupied
         (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order) ?: Bounce(action.to)
 
-    private fun holdStrength(destination: Location, against: MoveAnalyse): Int {
+    private fun holdStrength(destination: Location, against: MoveAnalysis): Int {
         return when (val moveAtDestination = byOrigin[destination]) {
             null -> nonCutSupports.count { it.action.order is HoldOrder && it.action.order.from == destination } + 1
             else if (moveAtDestination.order.action.to == against.order.from) -> moveAtDestination.strength
