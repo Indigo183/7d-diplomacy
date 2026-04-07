@@ -138,28 +138,30 @@ fun Game.adjudicateMoves() {
 fun Game.adjudicateRetreats() {
     // TODO: make sure retreats aren't readjudicated
     // To check for bounces of retreats
-    val retreats: MutableMap<Location, Boolean> = mutableMapOf()
+    val retreatDestinations: MutableMap<Location, Boolean> = mutableMapOf()
 
     // Retreats take place on the parent board
     for (retreatDestination in adjustments.filterIsInstance<MoveOrder>().map { it.action.to }) {
         // Cycles from null to true to false
-        retreats[retreatDestination] = retreats[retreatDestination] === null
+        retreatDestinations[retreatDestination] = retreatDestinations[retreatDestination] === null
     }
 
-    for ((retreatingPiece, retreatFlare, player) in requiredRetreats.filter {
-        retreats[it.piece.location] ?: false
+    for (retreat in adjustments.filterIsInstance<MoveOrder>().filter {
+        retreatDestinations[it.action.to] ?: false
     }) {
-        val board = getBoard(retreatingPiece.location.boardIndex)!!
+        val board = getBoard(retreat.piece.location.boardIndex)!!
         val latestChild = board.children.last {
-            it.boardIndex.coordinate - board.boardIndex.coordinate == retreatFlare.direction
+            it.boardIndex.coordinate - board.boardIndex.coordinate == retreat.flare!!.direction
         }
         // Can be assumed due to retreat filtering
-        val retreat = locationsOfAdjustments[retreatingPiece.location]!! as MoveOrder
+        val retreat = locationsOfAdjustments[retreat.piece.location]!! as MoveOrder
         // Check for any move to retreat destination, successful or not
         // Also check latestChild for any piece already there
-        if (adjudicators[retreatFlare]!!.moveResults.none { it.location == retreat.action.to }
+        if (adjudicators[retreat.flare!!]!!.moveResults.none { it.location == retreat.action.to }
             && latestChild.pieces[retreat.action.to] === null)
-            latestChild.pieces[retreatingPiece moveTo retreat.action.to] = player
+            latestChild.pieces[retreat.piece moveTo retreat.action.to] = requiredRetreats.find {
+                it.piece.location == retreat.from
+            }!!.player
     }
 
     requiredRetreats.clear()

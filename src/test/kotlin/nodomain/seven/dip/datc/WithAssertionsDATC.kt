@@ -6,6 +6,7 @@ import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.game.RequiredRetreat
 import nodomain.seven.dip.orders.BuildOrder
 import nodomain.seven.dip.orders.Inputtable
+import nodomain.seven.dip.orders.InvalidGameStateException
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser.FullNationalisedFormat.DATC
 import nodomain.seven.dip.orders.Piece
@@ -46,7 +47,11 @@ interface WithAssertionsDATC: WithAssertions {
         assertThat(game.gameState).isEqualTo(currentGameState)
         if (expectAllOrderToBeValid)
             ordersByPlayer.forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
-        ordersByPlayer.forEach { (player, orders) -> game.input(orders, player) }
+        ordersByPlayer.forEach { (player, orders) -> try {
+            game.input(orders, player)
+        } catch (e: InvalidGameStateException) {
+            println("WARNING: $player has NMR'd: $e")
+        } }
         game.adjudicate()
         return game
     }

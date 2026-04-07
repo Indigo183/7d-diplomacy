@@ -90,19 +90,21 @@ fun Game.isValid(order: Inputtable, player: Player? = null): Boolean {
     }
 }
 
+class InvalidGameStateException(override val message: String? = null) : RuntimeException()
+
 @Suppress("UNCHECKED_CAST")
 fun Game.input(orders: List<Inputtable>, player: Player? = null) {
     when (gameState) {
         GameState.MOVES -> if (orders.all { it is Order }) addOrders((orders as List<Order>).filter {
             isValidForMoves(it, player) || warnFalse("WARNING: invalid order:\n$it")
-        }) else println("WARNING: gameState is $gameState, not moves")
+        }) else throw InvalidGameStateException("gameState is MOVES")
 
         GameState.RETREATS -> if (orders.all { it is RetreatOrder }) addAdjustments((orders as List<RetreatOrder>).filter {
             isValidForRetreats(it, player) || warnFalse("WARNING: invalid retreat:\n$it")
-        }) else println("WARNING: gameState is $gameState, not retreats")
+        }) else throw InvalidGameStateException("gameState is RETREATS")
 
         GameState.BUILDS -> if (orders.all { it is BuildOrder }) addAdjustments((orders as List<BuildOrder>).filter {
             isValidForBuilds(it, player) || warnFalse("WARNING: invalid build:\n$it")
-        }) else println("WARNING: gameState is $gameState, not builds")
+        }) else throw InvalidGameStateException("gameState is BUILDS")
     }
 }
