@@ -46,7 +46,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
     }
 
     private val byOrigin = moves.associateBy(Order::from, ::MoveAnalyse)
-    private val byDestination = byOrigin.values.groupBy { it.order.action.to }
+    private val byDestination = byOrigin.values.groupBy { it.order.action.to }.toMutableMap()
     val nonCutSupports = supports.asSequence().filterNot { support ->
         byDestination[support.from]?.asSequence()
             ?.filter {support.action.order !is MoveOrder || support.action.order.action.to != it.order.from}
@@ -93,9 +93,13 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private fun PreResult.dislodgedMovesDontEffectTheProvinceTheyWareDislodgedFrom(dislodgingMove: MoveOrder) {
         val dislodgedMove = byOrigin[dislodgingMove.action.to] ?: return
-        if (dislodgedMove.order.action.to != dislodgingMove.from || byDestination[dislodgingMove.from]!!.size <= 1) return
+        if (dislodgedMove.order.action.to != dislodgingMove.from || byDestination[dislodgingMove.from]!!.size > 1)
+            return
         dislodgedMove.strength = 0
-        val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)
+        val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!) ?: run {
+            remove(dislodgingMove.from)
+            return
+        }
         if (newResult !is Bounce)
             set(dislodgingMove.from, newResult)
     }
@@ -104,7 +108,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         val dislodgedSupport = nonCutSupports.find { it.from == dislodgingMove.action.to } ?: return
         if (dislodgedSupport.action.order !is MoveOrder || dislodgedSupport.action.order.action.to != dislodgingMove.from) return
         byOrigin[dislodgedSupport.action.order.from]?.strength--
-        val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)
+        val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!) ?: return
         set(dislodgingMove.from, newResult)
     }
 
@@ -113,12 +117,13 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
             .filter { it.action.order is MoveOrder && it.action.order == byOrigin[it.action.order.from]?.order }
             .forEach { byOrigin[it.action.order.from]?.increaseStrength(piecesIn[it.from]!!) }
         return byDestination.asSequence()
-            .map { (destination, orders) -> destination to strongestMove(destination,  orders) }
+            .map { (destination, orders) -> destination to strongestMove(destination,  orders)!! }
             .toMap(mutableMapOf())
     }
 
-    private fun strongestMove(destination: Location, orders: List<MoveAnalyse>): ComputableMoveResult {
+    private fun strongestMove(destination: Location, orders: List<MoveAnalyse>): ComputableMoveResult? {
         val topStrength = orders.maxOf { it.strength }
+        if (orders.isNotEmpty() && topStrength == 0) return null
         val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
             orders.maxBy { it.strength } else return Bounce(destination)
         return when (piecesIn[destination]) {
