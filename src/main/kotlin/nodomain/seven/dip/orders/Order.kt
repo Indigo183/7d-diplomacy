@@ -61,10 +61,10 @@ sealed interface RetreatOrder: Adjustment {
 }
 
 class Build(override val piece: Piece): BuildOrder {
-    override fun toString(): String = "+ $piece"
+    override fun toString(): String = "Build $piece"
 }
 class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder {
-    override fun toString(): String = "- $piece"
+    override fun toString(): String = "Disband $piece"
 
     infix fun i(timeFlare: Int) = Disband(piece, enumEntries<TemporalFlare>()[timeFlare % 4])
 }
