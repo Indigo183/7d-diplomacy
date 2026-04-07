@@ -35,7 +35,7 @@ object TestH: WithAssertionsDATC {
         |
         |Turkey:
         |F Greece - Albania
-        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+        |""".parse(RETREATS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces).doesNotContainKey(ALB)
     }
@@ -68,7 +68,7 @@ object TestH: WithAssertionsDATC {
         |Russia:
         |F Edinburgh - North Sea
         |F Holland Supports F Edinburgh - North Sea
-        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+        |""".parse(RETREATS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces)
             .doesNotContainKey(NTH)
@@ -95,7 +95,7 @@ object TestH: WithAssertionsDATC {
         |England:
         |A Holland - Belgium
         |F North Sea - Norwegian Sea
-        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+        |""".parse(RETREATS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces)
             .containsEntry(BEL, England)
