@@ -262,7 +262,7 @@ object TestH: WithAssertionsDATC {
         |
         |Germany:
         |A Prussia - Berlin
-        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+        |""".parse(RETREATS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces).containsEntry(BER, Germany)
     }
