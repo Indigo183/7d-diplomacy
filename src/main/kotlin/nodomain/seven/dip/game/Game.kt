@@ -26,7 +26,11 @@ fun Map<Piece, Player>.getEntry(piece: Piece): Pair<Piece, Player>? {
 fun Map<Piece, Player>.getEntry(location: Location) =
     getEntry(Army(location)) ?: getEntry(Fleet(location))
 
-data class RequiredRetreat(val piece: Piece, val  temporalFlare: TemporalFlare, val  player: Player)
+data class RequiredRetreat(
+    val piece: Piece,
+    val temporalFlare: TemporalFlare,
+    val player: Player,
+    val disallowed: Location)
 
 enum class GameState {
     MOVES,

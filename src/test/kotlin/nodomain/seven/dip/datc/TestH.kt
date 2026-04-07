@@ -118,7 +118,7 @@ object TestH: WithAssertionsDATC {
         """
         |Turkey:
         |F Ankara - Black Sea
-        |""".parse(RETREATS).adjudicateAsDATC(game = game)
+        |""".parse(RETREATS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces).doesNotContainKey(BLA)
     }

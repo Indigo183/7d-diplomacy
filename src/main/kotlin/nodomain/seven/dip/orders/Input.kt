@@ -47,9 +47,13 @@ private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean 
  */
 private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null): Boolean {
     order.flare ?: return false // 1
-    if (requiredRetreats.none { (piece, flare, retreatPlayer) ->
-        // Check that the retreat is required
-        piece == order.piece && flare == order.flare && (player ?: retreatPlayer) == retreatPlayer
+    if (requiredRetreats.none { (piece, flare, retreatPlayer, disallowed) ->
+        // Check that the retreat is required...
+        piece == order.piece
+                && flare == order.flare
+                && (player ?: retreatPlayer) == retreatPlayer
+                // ...and allowed
+                && (order !is MoveOrder || disallowed != order.action.to)
     }) return false // 2
     return (order !is MoveOrder || (
         order.piece.location.boardIndex == order.action.to.boardIndex
