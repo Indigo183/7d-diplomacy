@@ -95,7 +95,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         val dislodgedMove = byOrigin[dislodgingMove.action.to] ?: return
         if (dislodgedMove.order.action.to != dislodgingMove.from) return
         dislodgedMove.strength = 0
-        when (val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)){
+        when (val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!)) {
             null -> remove(dislodgingMove.from)
             !is Bounce -> set(dislodgingMove.from, newResult)
             else -> {}
