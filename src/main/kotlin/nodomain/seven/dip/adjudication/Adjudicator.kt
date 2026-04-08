@@ -93,7 +93,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
 
     private fun PreResult.dislodgedMovesDontEffectTheProvinceTheyWereDislodgedFrom(dislodgingMove: MoveOrder) {
         val dislodgedMove = byOrigin[dislodgingMove.action.to] ?: return
-        if (dislodgedMove.order.action.to != dislodgingMove.from || byDestination[dislodgingMove.from]!!.size > 1)
+        if (dislodgedMove.order.action.to != dislodgingMove.from)
             return
         dislodgedMove.strength = 0
         val newResult = strongestMove(dislodgingMove.from, byDestination[dislodgingMove.from]!!) ?: run {
