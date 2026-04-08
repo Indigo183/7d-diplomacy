@@ -78,7 +78,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piec
         return when (val dependency = this[dependantMove.dependsOn.action.to]?.ifCompatibleWith(dependantMove.moveOrder)) {
             is Bounce, null -> Bounce(origin.action.to)
             is SuccessfulMove -> origin.(MoveResult.succeed)()
-            is DependantMove if (origin.from == dependantMove.dependsOn.action.to) -> return origin.(MoveResult.succeed)()
+            is DependantMove if (origin.from == dependantMove.dependsOn.action.to) -> origin.(MoveResult.succeed)()
             is DependantMove -> this.analyseDependency(dependency, origin)
         }
     }
