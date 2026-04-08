@@ -10,7 +10,7 @@ import kotlin.test.Test
 //6.H. TEST CASES, RETREATING
 object TestH: WithAssertionsDATC {
     @Test
-    fun `6_H_1 TEST CASE, NO SUPPORTS DURING RETREAT`() { // Modified due to involving sea regions
+    fun `6_H_1 TEST CASE, NO SUPPORTS DURING RETREAT`() {
         val game = """
         |Austria:
         |F Trieste Hold
