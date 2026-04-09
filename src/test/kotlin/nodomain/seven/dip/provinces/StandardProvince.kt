@@ -52,6 +52,13 @@ sealed interface StandardProvince: Province{
     }
 }
 
+abstract class StandardCoastalPart(override val province: StandardCoast, val coast: String) : StandardProvince, CoastalPart {
+    override val nameWordCount: Int get() = province.nameWordCount
+    override val isSupplyCentre: Boolean get() = province.isSupplyCentre
+    override val name: String get() = "${province.name} $coast"
+    override fun hasInlandBorderWith(coast: Coast): Boolean = province.isAdjacent(coast) && !isAdjacent(coast)
+}
+
 enum class StandardSea(override val nameWordCount: Int): Sea, StandardProvince {
     BAR(2) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, NWG, NWY) } },
     NWG(2) { override val adjacency: Set<StandardProvince> by lazy { setOf(BAR, NWY, NAO, CLY, EDI, NTH) } },
@@ -78,7 +85,16 @@ enum class StandardSea(override val nameWordCount: Int): Sea, StandardProvince {
 
 enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardProvince {
     POR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, MAO) } },
-    SPA(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS, MAO, WES, LYO) } },
+    SPA(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS, MAO, WES, LYO) }
+        val nc = object: StandardCoastalPart(province, "nc") {
+            override val adjacency: Set<StandardProvince> by lazy { setOf(POR, GAS, MAO) }
+        }
+        val sc = object: StandardCoastalPart(province, "sc") {
+            override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, MAO, WES, LYO) }
+        }
+        override val coastalParts: List<CoastalPart> get() = listOf(nc, sc)
+    },
     BRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, PAR, GAS, MAO, ENG) } },
     BEL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, BUR, RUH, HOL, ENG,  NTH) } },
     HOL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BEL, KIE, RUH, NTH, HEL) } },
@@ -87,11 +103,29 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     DEN(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(KIE, SWE, HEL, SKA, NTH, BAL) } },
     SWE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(DEN, NWY, FIN, SKA, BAL, BOT) } },
     NWY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, FIN, STP, NTH, SKA, NWG, BAR) } },
-    STP(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) }
-                override val nameWordCount: Int = 2 },
+    STP(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) }
+        override val nameWordCount: Int = 2
+        val nc = object: StandardCoastalPart(province, "nc") {
+            override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, BAR) }
+        }
+        val sc = object: StandardCoastalPart(province, "sc") {
+            override val adjacency: Set<StandardProvince> by lazy { setOf(FIN, LVN, BOT) }
+        }
+        override val coastalParts: List<CoastalPart> get() = listOf(nc, sc)
+    },
     SEV(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, UKR, RUM, ARM, BLA) } },
     CON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ANK, SMY, BUL, BLA, AEG) } },
-    BUL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE, BLA, AEG) } },
+    BUL(true) {
+        override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE, BLA, AEG) }
+        val ec = object: StandardCoastalPart(province, "nc") {
+            override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, BLA) }
+        }
+        val sc = object: StandardCoastalPart(province, "sc") {
+            override val adjacency: Set<StandardProvince> by lazy { setOf(CON, GRE, AEG) }
+        }
+        override val coastalParts: List<CoastalPart> get() = listOf(ec, sc)
+    },
     RUM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAL, UKR, SEV, BUL, SER, BUD, BLA) } },
     GRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BUL, SER, ALB, AEG, ION) } },
     TRI(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ALB, SER, BUD, VIE, VEN, TYR, ADR) } },
@@ -141,6 +175,7 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
 
     override fun hasInlandBorderWith(coast: Coast): Boolean = false
     override val nameWordCount: Int = 1
+    override val province: StandardCoast get() = this
 }
 
 enum class StandardInLand(override val isSupplyCentre: Boolean): InLand, StandardProvince {

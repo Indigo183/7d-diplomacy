@@ -38,7 +38,7 @@ private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean 
         }
         is HoldOrder -> return true // hold orders do not have a destination, thus 4 is trivial
     }
-    return order.piece.location.isAdjacentTo(destination, forPiece = order.piece) // 4
+    return destination.isAdjacentTo(order.piece) // 4
 }
 
 /** Checks that:
@@ -58,7 +58,7 @@ private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null)
     }) return false // 2
     return (order !is MoveOrder || (
         order.piece.location.boardIndex == order.action.to.boardIndex
-            && (order.piece.location.province isAdjacentTo order.action.to.province).forUnit(order.piece)
+            && (order.action.to.province isAdjacentFor order.piece)
     )) // 3
 }
 

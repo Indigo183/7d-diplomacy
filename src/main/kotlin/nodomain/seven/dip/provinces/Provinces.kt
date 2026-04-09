@@ -9,11 +9,10 @@ import kotlin.enums.enumEntries
 interface Province {
     infix fun isAdjacent(other: Province): Boolean
 
-    infix fun isAdjacentTo(other: Province): Adjacency {
-        return Adjacency { when (it) {
-            is Army -> isAdjacentForArmies(other)
-            is Fleet -> isAdjacentForFleets(other)
-            null -> isAdjacent(other) }
+    infix fun isAdjacentFor(other: Piece): Boolean {
+        return when (other) {
+            is Army -> other.location.province.isAdjacentForArmies(this)
+            is Fleet -> other.location.province.isAdjacentForFleets(this)
         }
     }
 
@@ -31,6 +30,7 @@ interface Province {
         }
     }
 
+    val province: Province get() = this
     val isSupplyCentre: Boolean;
     val name: String
 }
@@ -46,6 +46,16 @@ interface Coast: Province {
         if (other is Coast && hasInlandBorderWith(other)) return false
         return super.isAdjacentForFleets(other)
     }
+
+    fun hasCoastalParts() = coastalParts == null
+
+    val coastalParts: List<CoastalPart>? get() = null
+}
+
+interface CoastalPart: Coast {
+    override val province: Coast
+
+    override val coastalParts: List<CoastalPart>? get() = province.coastalParts
 }
 
 interface Sea: Province {
