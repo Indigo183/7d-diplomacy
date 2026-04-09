@@ -20,7 +20,7 @@ data class ComplexNumber(val real: Int, val imaginary: Int) {
     operator fun minus(other: ComplexNumber) =
         ComplexNumber(this.real - other.real,  this.imaginary - other.imaginary)
 
-    fun isEven(): Boolean = real + imaginary % 2 == 0
+    fun isEven(): Boolean = (real + imaginary) % 2 == 0
 
     override fun toString(): String {
         if (imaginary == 0) return "$real"
