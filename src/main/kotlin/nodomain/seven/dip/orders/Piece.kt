@@ -19,6 +19,9 @@ sealed interface Piece {
         return SupportOrder(this, Supports(if (order.action is Supports) order.piece.holds else order))
     }
 
+    operator fun unaryPlus(): Build = Build(this)
+    operator fun unaryMinus(): Disband = Disband(this)
+
     // Creates a new piece of the same type but with the new location
     infix fun moveTo(destination: Location): Piece = when (this) {
         is Army -> Army(destination)
