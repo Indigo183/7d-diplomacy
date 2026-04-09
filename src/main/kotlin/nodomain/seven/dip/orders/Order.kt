@@ -8,6 +8,8 @@ sealed interface Action
 
 sealed interface Inputtable {
     val piece: Piece
+    val from: Location
+        get() = piece.location
 }
 
 // An action and the piece ordering it
@@ -19,9 +21,6 @@ sealed class Order(override val piece: Piece, val symbol: String): Inputtable {
 
     override fun toString(): String = "$piece$symbol$action"
     override fun hashCode(): Int = piece.hashCode() * 31 + action.hashCode()
-
-
-    val from: Location = piece.location
 }
 
 // The temporal direction in which a move occurs
@@ -53,7 +52,7 @@ class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " 
 // Timeplane specifier shorthand
 fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex = BoardIndex(boardIndex, timeplane)
 
-sealed interface Adjustment:  Inputtable
+sealed interface Adjustment: Inputtable
 
 sealed interface BuildOrder: Adjustment
 sealed interface RetreatOrder: Adjustment {
