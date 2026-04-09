@@ -39,6 +39,10 @@ enum class GameState {
 }
 
 class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
+    // The current "turn" in terms of move phases only
+    var turn = 1
+        private set
+
     // All orders, past and present
     private val orders: MutableMap<Location, Order> = mutableMapOf()
     val moves: List<MoveOrder>
@@ -132,7 +136,10 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     fun advanceState() {
         gameState = when (gameState) {
             GameState.MOVES -> GameState.RETREATS
-            GameState.RETREATS -> GameState.BUILDS
+            GameState.RETREATS -> {
+                turn++
+                GameState.BUILDS
+            }
             GameState.BUILDS -> GameState.MOVES
         }
     }
