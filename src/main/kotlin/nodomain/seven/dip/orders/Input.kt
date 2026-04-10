@@ -2,6 +2,7 @@ package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.provinces.isAdjacentTo
 import nodomain.seven.dip.game.*
+import nodomain.seven.dip.provinces.Coast
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.warnFalse
 
@@ -70,6 +71,7 @@ private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null)
  * 6. the player owns the (centre / unit) being (built in / disbanded) respectively
  * 7. if building, the centre is a home centre
  * 8. if building, the centre is vacant
+ * 9. if building a fleet, the centre is a coast
  */
 private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Boolean {
     val location = order.piece.location
@@ -84,6 +86,7 @@ private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Bo
                 && player == board.centres[location.province] // 6
                 && player.homeCentres.contains(location.province) // 7
                 && board.pieces[location] === null // 8
+                && location.province is Coast
         count < 0 -> order is Disband // 5
                 && player == board.pieces[location] // 6
         else -> false // 5
