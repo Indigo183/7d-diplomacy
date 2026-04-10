@@ -261,7 +261,7 @@ object DefaultNotation: Notation {
 
     override fun asBuildAction(string: String): (Piece) -> BuildOrder = when (string.lowercase()) {
         "+", "build" -> ::Build
-        "-", "disband","remove" -> ::Disband
+        "-", "disband", "remove" -> ::Disband
         else -> throw IncompatibleParserException()
     }
 }
