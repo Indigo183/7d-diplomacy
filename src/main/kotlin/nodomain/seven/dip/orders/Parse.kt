@@ -206,7 +206,7 @@ class Parser(
     private inner class BuildDATC: DATC<BuildOrder>() {
         override fun parseUnownedOrderInPieces(queue: Queue<String>): BuildOrder {
             return queue.withFirst(notation::asBuildAction)
-                .combiningNext(notation::asUnitType) { unitType, action -> { province: Province -> action(unitType(Location(province, origin)))}}
+                .combiningNext(notation::asUnitType) { unitType, action -> { province: Province -> action(unitType(Location(province, T(1.c, 0))))}}
                 .combiningManyInto(asProvince) {province, action -> (action(province))}
         }
     }

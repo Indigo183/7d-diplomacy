@@ -136,11 +136,11 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     fun advanceState() {
         gameState = when (gameState) {
             GameState.MOVES -> GameState.RETREATS
-            GameState.RETREATS -> {
+            GameState.RETREATS -> GameState.BUILDS
+            GameState.BUILDS -> {
                 turn++
-                GameState.BUILDS
+                GameState.MOVES
             }
-            GameState.BUILDS -> GameState.MOVES
         }
     }
 }
