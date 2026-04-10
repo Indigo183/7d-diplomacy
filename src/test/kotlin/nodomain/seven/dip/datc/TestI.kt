@@ -45,4 +45,31 @@ object TestI: WithAssertionsDATC {
             .containsKey(KIE)
             .doesNotContainKey(MUN)
     }
+
+    @Test
+    fun `6_I_2 TEST CASE, FLEETS CANNOT BE BUILD IN LAND AREAS`() {
+        val game = """
+        |Russia:
+        |F St Petersburg - Gulf of Bothnia
+        |A Moscow - St Petersburg
+        |A Warsaw Holds
+        |F Sevastopol Holds
+        |""".parse().adjudicateAsDATC()
+        """
+        |Russia:
+        |F Gulf of Bothnia - Sweden
+        |A St Petersburg Holds
+        |A Warsaw Holds
+        |F Sevastopol Holds
+        |""".parse().adjudicateAsDATC(game = game)
+
+        assertThat(game.gameState).isEqualTo(BUILDS)
+
+        """
+        |Russia:
+        |Build F Moscow
+        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+
+        assertThat(game.pieces).doesNotContainKey(MOS)
+    }
 }
