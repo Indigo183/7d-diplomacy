@@ -26,10 +26,13 @@ typealias PreResult = MutableMap<Location, ComputableMoveResult>
 
 data class DependantMove(override val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult
 @JvmInline
-value class SuccessfulMove(override val moveOrder: MoveOrder): MoveResult
+value class SuccessfulMove(override val moveOrder: MoveOrder): MoveResult {
+    override fun toString(): String = "$moveOrder succeeds"
+}
 @JvmInline
 value class Bounce(override val location: Location): MoveResult {
     override val moveOrder: MoveOrder? get() = null
+    override fun toString(): String = "bounce in $location"
 }
 
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, val piecesIn: Map<Piece, Player>) {
