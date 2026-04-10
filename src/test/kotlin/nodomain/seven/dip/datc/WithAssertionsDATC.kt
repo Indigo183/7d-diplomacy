@@ -51,7 +51,7 @@ interface WithAssertionsDATC: WithAssertions {
     infix fun SupportOrder.shift(num: Int): SupportOrder =
         SupportOrder(piece moveTo from + num.c, Supports((action.order shift num) as Order))
     infix fun Build.shift(num: Int): Build = +(piece moveTo from + num.c)
-    infix fun Disband.shift(num: Int): Disband = -(piece moveTo from + num.c)
+    infix fun Disband.shift(num: Int): Disband = -(piece moveTo from + num.c) withFlare flare
     infix fun Inputtable.shift(num: Int): Inputtable {
         return when (this) {
             is HoldOrder -> this shift num

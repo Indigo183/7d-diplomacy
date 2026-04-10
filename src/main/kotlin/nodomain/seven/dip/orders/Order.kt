@@ -66,4 +66,6 @@ class Disband(override val piece: Piece, override val flare: TemporalFlare? = nu
     override fun toString(): String = "Disband $piece"
 
     infix fun i(timeFlare: Int) = Disband(piece, enumEntries<TemporalFlare>()[timeFlare % 4])
+
+    infix fun withFlare(flare: TemporalFlare?) = Disband(piece, flare = flare)
 }
