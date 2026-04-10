@@ -4,7 +4,9 @@ import nodomain.seven.dip.utils.*
 import kotlin.enums.enumEntries
 
 // The "action" being done, without a piece to order it
-sealed interface Action
+sealed interface Action {
+    fun asLocal(): String = toString()
+}
 
 sealed interface Inputtable {
     val piece: Piece
@@ -15,11 +17,20 @@ sealed interface Inputtable {
 // An action and the piece ordering it
 sealed class Order(override val piece: Piece, val symbol: String): Inputtable {
     abstract val action: Action
+    fun asLocal(): String = toString()   
 
     override fun equals(other: Any?): Boolean =
         other is Order && other.from == from && other.action == action
 
-    override fun toString(): String = "$piece$symbol$action"
+    override fun toString(): String = if ((action is Moves && from.boardIndex == (action as Moves).to.boardIndex) ||
+                (action is Supports && from.boardIndex == (action as Supports).order.from.boardIndex && (
+                    (action as Supports).order.action !is Moves
+                        || from.boardIndex == ((action as Supports).order.action as Moves).to.boardIndex
+            ))) {
+                "${piece.asLocal()}$symbol${action.asLocal()}"
+            } else {
+                "$piece$symbol$action"
+            }
     override fun hashCode(): Int = piece.hashCode() * 31 + action.hashCode()
 }
 
@@ -31,13 +42,18 @@ enum class TemporalFlare(val direction: ComplexNumber) {
     DOWN (-i);
 }
 
-data object Holds: Action
+data object Holds: Action {
+    override fun toString(): String = "H"
+}
 class HoldOrder(piece: Piece): Order(piece, " ") {
     override val action: Holds = Holds
 }
 
 @JvmInline
-value class Moves(val to: Location): Action
+value class Moves(val to: Location): Action {
+    override fun toString(): String = "$to"
+    override fun asLocal(): String = "${to.province}"
+}
 class MoveOrder(piece: Piece, override val action: Moves, override var flare: TemporalFlare? = null): RetreatOrder, Order(piece, " - ") {
     infix fun i(timeFlare: Int): MoveOrder {
         flare = enumEntries<TemporalFlare>()[timeFlare % 4]
@@ -46,7 +62,10 @@ class MoveOrder(piece: Piece, override val action: Moves, override var flare: Te
 }
 
 @JvmInline
-value class Supports(val order: Order): Action
+value class Supports(val order: Order): Action {
+    override fun toString(): String = "$order"
+    override fun asLocal(): String = order.asLocal()
+}
 class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " S ")
 
 // Timeplane specifier shorthand

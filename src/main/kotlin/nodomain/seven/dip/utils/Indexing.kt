@@ -13,4 +13,5 @@ data class BoardIndex(val coordinate: ComplexNumber, var timeplane: Int? = 0) {
 // Location of a unit/province
 data class Location(val province: Province, val boardIndex: BoardIndex) {
     operator fun plus(other: ComplexNumber): Location = Location(province, boardIndex + other)
+    override fun toString(): String = "$boardIndex $province"
 }

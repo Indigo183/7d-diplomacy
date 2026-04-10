@@ -6,6 +6,7 @@ import nodomain.seven.dip.provinces.Province
 
 sealed interface Piece {
     val location: Location
+    fun asLocal(): String
 
     val holds: HoldOrder
         get() = HoldOrder(this)
@@ -35,11 +36,13 @@ operator fun BoardIndex.get(province: Province): Location = Location(province, t
 @JvmInline
 value class Army(override val location: Location): Piece {
     override fun toString(): String = "${location.boardIndex} A ${location.province}"
+    override fun asLocal(): String = "A ${location.province}"
 }
 infix fun BoardIndex.A(province: Province): Army = Army(Location(province, this))
 
 @JvmInline
 value class Fleet(override val location: Location): Piece {
     override fun toString(): String = "${location.boardIndex} F ${location.province}"
+    override fun asLocal(): String = "F ${location.province}"
 }
 infix fun BoardIndex.F(province: Province): Fleet = Fleet(Location(province, this))
