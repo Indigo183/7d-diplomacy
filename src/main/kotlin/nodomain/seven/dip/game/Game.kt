@@ -185,6 +185,7 @@ class Board(
             |    boardIndex: $boardIndex
             |    parent: ${parent?.boardIndex}
             |    pieces: $pieces
+            |    originalPieces: $originalPieces
             |    centres: $centres
             |}""".trimMargin() // JSON notation
         //|    parent: ${parent.toString().prependIndent("    ").drop(4)}
