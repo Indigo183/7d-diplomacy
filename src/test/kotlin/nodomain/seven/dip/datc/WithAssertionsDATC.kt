@@ -93,7 +93,9 @@ interface WithAssertionsDATC: WithAssertions {
         asSequence().flatMap { (player, orders) -> orders.map { it.piece to player } }.toMap()
 
     val Game.pieces: Map<Province, Player>? get() =
-        getBoard(BoardIndex(1.c))?.pieces?.mapKeys { (piece, _) -> piece.location.province }
+        getBoard(BoardIndex((
+            if (gameState == GameState.MOVES) turn - 1 else turn
+        ).c))?.pieces?.mapKeys { (piece, _) -> piece.location.province }
 
     fun Game.andAssertThatNothingMoved(): Game {
         assertThat(pieces).satisfiesAnyOf(

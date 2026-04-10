@@ -221,7 +221,11 @@ class Parser(
         override fun parseUnownedOrderInPieces(queue: Queue<String>): RetreatOrder {
             return when (queue.peek().first().uppercaseChar()) {
                 'A', 'F' -> orderDATC.parseUnownedOrderInPieces(queue) as MoveOrder
-                else -> (buildDATC.parseUnownedOrderInPieces(queue) as Disband) i 0
+                // "Un-shifts" build shifting
+                else -> {
+                    val shifted = buildDATC.parseUnownedOrderInPieces(queue) as Disband
+                    -(shifted.piece moveTo shifted.from - 1.c) i 0
+                }
             }
         }
     }
