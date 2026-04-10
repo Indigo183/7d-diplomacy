@@ -85,7 +85,7 @@ private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Bo
                 && player.homeCentres.contains(location.province) // 7
                 && board.pieces[location] === null // 8
         count < 0 -> order is Disband // 5
-                && player?.equals(board.pieces[location]) ?: true // 6
+                && player == board.pieces[location] // 6
         else -> false // 5
     }
 }
