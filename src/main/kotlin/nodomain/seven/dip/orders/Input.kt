@@ -68,6 +68,8 @@ private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null)
  * 4. the board is active
  * 5. the adjustment is the correct type (if any) based on adjustment count
  * 6. the player owns the (centre / unit) being (built in / disbanded) respectively
+ * 7. if building, the centre is a home centre
+ * 8. if building, the centre is vacant
  */
 private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Boolean {
     val location = order.piece.location
@@ -79,9 +81,11 @@ private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Bo
     val count = board.countBuilds(player)
     return when {
         count > 0 -> order is Build // 5
-                && player == board.centres[location.province] && board.pieces[location] === null // 6
+                && player == board.centres[location.province] // 6
+                && player.homeCentres.contains(location.province) // 7
+                && board.pieces[location] === null // 8
         count < 0 -> order is Disband // 5
-                && player == board.pieces[location] // 6
+                && player?.equals(board.pieces[location]) ?: true // 6
         else -> false // 5
     }
 }
