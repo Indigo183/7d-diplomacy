@@ -72,4 +72,32 @@ object TestI: WithAssertionsDATC {
 
         assertThat(game.pieces).doesNotContainKey(MOS)
     }
+
+    @Test
+    fun `6_I_3 TEST CASE, SUPPLY CENTER MUST BE EMPTY FOR BUILDING`() {
+        val game = """
+        |Germany:
+        |A Berlin - Munich
+        |A Munich - Kiel
+        |F Kiel - Berlin
+        |""".parse().adjudicateAsDATC()
+        """
+        |Germany:
+        |F Berlin Holds
+        |A Munich Holds
+        |A Kiel - Holland
+        |""".parse().adjudicateAsDATC(game = game)
+
+        assertThat(game.gameState).isEqualTo(BUILDS)
+
+        """
+        |Germany
+        |Build A Berlin
+        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+
+        assertThat(game.getBoard(T(2.c, 0))!!).matches {
+            // Move original pieces to new board to compare piece lists
+            it.pieces == it.originalPieces.mapKeys { (piece, _) -> piece moveTo piece.location + 1.c }
+        }
+    }
 }
