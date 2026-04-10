@@ -20,14 +20,14 @@ object TestI: WithAssertionsDATC {
     fun `6_I_1 TEST CASE, TOO MANY BUILD ORDERS`() {
         val game = """
         |Germany:
-        |A Berlin - Prussia
+        |A Warsaw - Prussia
         |A Munich - Silesia
         |F Kiel - Helgoland Bight
         |""".parse().adjudicateAsDATC()
         """
         |Germany:
-        |A Prussia - Warsaw
-        |A Silesia Supports A Prussia - Warsaw
+        |A Prussia - Berlin
+        |A Silesia Supports A Prussia - Berlin
         |F Helgoland Bight Holds
         |""".parse().adjudicateAsDATC(game = game)
 
@@ -40,7 +40,9 @@ object TestI: WithAssertionsDATC {
         |Build A Munich
         """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
-        println(game.pieces)
-        assertThat(game.pieces)//.containsKey(KIE)
+        assertThat(game.pieces)
+            .doesNotContainKey(WAR)
+            .containsKey(KIE)
+            .doesNotContainKey(MUN)
     }
 }
