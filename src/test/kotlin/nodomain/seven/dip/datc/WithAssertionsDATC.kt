@@ -44,7 +44,7 @@ interface WithAssertionsDATC: WithAssertions {
     data class ParsedDATC(val ordersByPlayer: Map<Player, List<Inputtable>>, val currentGameState: GameState)
 
     fun String.parse(gameState: GameState = GameState.MOVES) =
-        ParsedDATC(parser.parseOrderSet(trimMargin(), DATC, gameState), gameState)
+        ParsedDATC(parser.parseOrderSet(trimMargin(), DATC, gameState), gameState).also(::println)
 
     infix fun HoldOrder.shift(num: Int): HoldOrder = (piece moveTo from + num.c).holds
     infix fun MoveOrder.shift(num: Int): MoveOrder = MoveOrder(piece moveTo from + num.c, Moves(action.to + num.c), flare)

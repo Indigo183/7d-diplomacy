@@ -100,4 +100,38 @@ object TestI: WithAssertionsDATC {
             it.pieces == it.originalPieces.mapKeys { (piece, _) -> piece moveTo piece.location + 1.c }
         }
     }
+
+    // 6.I.4. TEST CASE, BOTH COASTS MUST BE EMPTY FOR BUILDING
+
+    @Test
+    fun `6_I_5 TEST CASE, BUILDING IN HOME SUPPLY CENTER THAT IS NOT OWNED`() {
+        val game = """
+        |Germany:
+        |A Munich - Kiel
+        |F Kiel - Holland
+        |
+        |Russia:
+        |Berlin - Prussia
+        |""".parse().adjudicateAsDATC()
+        """
+        |Germany:
+        |A Kiel - Berlin
+        |F Holland - Belgium
+        |
+        |Russia:
+        |Prussia - Berlin
+        |""".parse().adjudicateAsDATC(game = game)
+
+        assertThat(game.gameState).isEqualTo(BUILDS)
+
+        """
+        |Germany
+        |Build A Berlin
+        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+
+        assertThat(game.getBoard(T(2.c, 0))!!).matches {
+            // Move original pieces to new board to compare piece lists
+            it.pieces == it.originalPieces.mapKeys { (piece, _) -> piece moveTo piece.location + 1.c }
+        }
+    }
 }
