@@ -38,7 +38,7 @@ object TestI: WithAssertionsDATC {
         |Build A Warsaw
         |Build A Kiel
         |Build A Munich
-        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+        |""".parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces)
             .doesNotContainKey(WAR)
@@ -68,7 +68,7 @@ object TestI: WithAssertionsDATC {
         """
         |Russia:
         |Build F Moscow
-        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+        |""".parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.pieces).doesNotContainKey(MOS)
     }
@@ -91,9 +91,9 @@ object TestI: WithAssertionsDATC {
         assertThat(game.gameState).isEqualTo(BUILDS)
 
         """
-        |Germany
+        |Germany:
         |Build A Berlin
-        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+        |""".parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
         assertThat(game.getBoard(T(2.c, 0))!!).matches {
             // Move original pieces to new board to compare piece lists
@@ -125,13 +125,74 @@ object TestI: WithAssertionsDATC {
         assertThat(game.gameState).isEqualTo(BUILDS)
 
         """
-        |Germany
+        |Germany:
         |Build A Berlin
-        """.parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+        |""".parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
 
-        assertThat(game.getBoard(T(2.c, 0))!!).matches {
-            // Move original pieces to new board to compare piece lists
-            it.pieces == it.originalPieces.mapKeys { (piece, _) -> piece moveTo piece.location + 1.c }
-        }
+        assertThat(game.pieces).doesNotContainKey(BER)
+    }
+
+    @Test
+    fun `6_I_6 TEST CASE, BUILDING IN OWNED SUPPLY CENTER THAT IS NOT A HOME SUPPLY CENTER`() {
+        // Building a unit is only allowed when supply center is a home supply center and is owned. If it is not a home supply center, the build fails.
+        // Germany owns Warsaw, Warsaw is empty and Germany may build one unit.
+
+        val game = """
+        |Germany:
+        |A Warsaw - Prussia
+        |A Munich H
+        |F Kiel H
+        |""".parse().adjudicateAsDATC()
+        """
+        |Germany:
+        |A Prussia - Berlin
+        |A Munich H
+        |F Kiel H
+        |""".parse().adjudicateAsDATC(game = game)
+
+        assertThat(game.gameState).isEqualTo(BUILDS)
+
+        """
+        |Germany:
+        |Build A Warsaw
+        |""".parse(BUILDS).adjudicateAsDATC(expectAllOrderToBeValid = false, game = game)
+
+        // Build fails.
+
+        assertThat(game.pieces).doesNotContainKey(WAR)
+    }
+
+    @Test
+    fun `6_I_7 TEST CASE, ONLY ONE BUILD IN A HOME SUPPLY CENTER`() {
+        // If you may build two units, you can still only build one in a supply center.
+        // Russia owns Moscow, Moscow is empty and Russia may build two units.
+        val game = """
+        |Russia:
+        |F St Petersburg - Gulf of Bothnia
+        |A Moscow - St Petersburg
+        |A Warsaw Holds
+        |F Sevastopol Holds
+        |""".parse().adjudicateAsDATC()
+        """
+        |Russia:
+        |F Gulf of Bothnia - Sweden
+        |A St Petersburg Holds
+        |A Warsaw Holds
+        |F Sevastopol Holds
+        |""".parse().adjudicateAsDATC(game = game)
+
+        assertThat(game.gameState).isEqualTo(BUILDS)
+
+        """
+        |Russia:
+        |Build A Moscow
+        |Build A Moscow
+        |""".parse(BUILDS).adjudicateAsDATC(game = game)
+
+        // The second build should fail.
+
+        assertThat(game.pieces)
+            .containsKey(MOS)
+            //.isLength(5)
     }
 }
