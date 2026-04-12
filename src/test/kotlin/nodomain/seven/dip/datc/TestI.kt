@@ -166,6 +166,7 @@ object TestI: WithAssertionsDATC {
     fun `6_I_7 TEST CASE, ONLY ONE BUILD IN A HOME SUPPLY CENTER`() {
         // If you may build two units, you can still only build one in a supply center.
         // Russia owns Moscow, Moscow is empty and Russia may build two units.
+
         val game = """
         |Russia:
         |F St Petersburg - Gulf of Bothnia
@@ -193,6 +194,6 @@ object TestI: WithAssertionsDATC {
 
         assertThat(game.pieces)
             .containsKey(MOS)
-            //.isLength(5)
+            .hasSize(5)
     }
 }
