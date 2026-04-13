@@ -134,7 +134,8 @@ object TestI: WithAssertionsDATC {
 
     @Test
     fun `6_I_6 TEST CASE, BUILDING IN OWNED SUPPLY CENTER THAT IS NOT A HOME SUPPLY CENTER`() {
-        // Building a unit is only allowed when supply center is a home supply center and is owned. If it is not a home supply center, the build fails.
+        // Building a unit is only allowed when supply center is a home supply center and is owned. If it is not a home
+        // supply center, the build fails.
         // Germany owns Warsaw, Warsaw is empty and Germany may build one unit.
 
         val game = """
