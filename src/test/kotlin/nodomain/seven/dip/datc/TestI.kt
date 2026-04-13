@@ -111,7 +111,7 @@ object TestI: WithAssertionsDATC {
         |F Kiel - Holland
         |
         |Russia:
-        |Berlin - Prussia
+        |A Berlin - Prussia
         |""".parse().adjudicateAsDATC()
         """
         |Germany:
@@ -119,7 +119,7 @@ object TestI: WithAssertionsDATC {
         |F Holland - Belgium
         |
         |Russia:
-        |Prussia - Berlin
+        |A Prussia - Berlin
         |""".parse().adjudicateAsDATC(game = game)
 
         assertThat(game.gameState).isEqualTo(BUILDS)
