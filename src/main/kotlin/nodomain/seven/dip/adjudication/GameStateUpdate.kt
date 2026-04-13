@@ -31,12 +31,12 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
 
     // Remove pieces moving from board
     for (move in moveResults.asSequence().filterIsInstance<SuccessfulMove>()
-        .filter { it.moveOrder.from.boardIndex == board.boardIndex })
+        .filter { it.moveOrder.from.boardIndex == boardIndex })
         pieces.remove(move.moveOrder.from)
 
     // Add pieces moving to board
     for (move in moveResults.asSequence().filterIsInstance<SuccessfulMove>()
-        .filter { it.moveOrder.action.to.boardIndex == board.boardIndex }) {
+        .filter { it.moveOrder.action.to.boardIndex == boardIndex }) {
 
         val entry = pieces.getEntry(move.moveOrder.action.to)
         if (entry !== null)
@@ -51,18 +51,18 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     }
 
     // Propagate child up
-    var iter = board.boardIndex.timeplane!!
-    while (getBoard(BoardIndex(board.boardIndex.coordinate + direction.direction, iter)) !== null) iter++
+    var iter = boardIndex.timeplane!!
+    while (getBoard(BoardIndex(boardIndex.coordinate + direction.direction, iter)) !== null) iter++
 
     // Compare the new board with the last produced child
     val newChild = Board(
-        BoardIndex(board.boardIndex.coordinate + direction.direction, iter),
+        BoardIndex(boardIndex.coordinate + direction.direction, iter),
         board,
         pieces,
         centres,
     )
     val latestChild = board.children.lastOrNull {
-        it.boardIndex.coordinate - board.boardIndex.coordinate == direction.direction
+        it.boardIndex.coordinate - boardIndex.coordinate == direction.direction
     }
     return if (
         (latestChild === null && newChild.pieces != board.pieces)
