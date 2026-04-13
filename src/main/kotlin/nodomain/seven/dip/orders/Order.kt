@@ -67,11 +67,7 @@ value class Supports(val order: Order): Action {
     override fun asLocal(): String = order.asLocal()
 }
 class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " S ") {
-    override fun isLocal(): Boolean {
-        return from.boardIndex == action.order.from.boardIndex
-                && from.boardIndex == action.order.from.boardIndex
-                && action.order.isLocal()
-    }
+    override fun isLocal(): Boolean = from.boardIndex == action.order.from.boardIndex && action.order.isLocal()
 }
 
 // Timeplane specifier shorthand
