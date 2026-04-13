@@ -204,8 +204,8 @@ fun Game.adjudicateBuildsBoard(board: Board, adjustments: Map<Player, List<Adjus
             else -> continue // no valid adjustments for this player
         }.toMutableList()
 
-        if (count > 0 && validAdjustments.size > count.absoluteValue) // too many builds
-            validAdjustments = validAdjustments.take(count).toMutableList()
+        if (validAdjustments.size > count.absoluteValue) // too many builds or disbands
+            validAdjustments = validAdjustments.take(count.absoluteValue).toMutableList()
         // TODO: Civil Disorder (to any OWNED supply centre, not home)
         else if (count < 0 && validAdjustments.size < count.absoluteValue) // too few disbands
             validAdjustments += board.pieces.asSequence()
