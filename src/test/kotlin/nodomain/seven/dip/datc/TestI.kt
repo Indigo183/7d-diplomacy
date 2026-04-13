@@ -9,8 +9,6 @@ import kotlin.test.Test
 
 //6.I. TEST CASES, BUILDING
 object TestI: WithAssertionsDATC {
-    val origin = T(0.c, 0)
-
     @Test
     fun `6_I_1 TEST CASE, TOO MANY BUILD ORDERS`() {
         val game = """
