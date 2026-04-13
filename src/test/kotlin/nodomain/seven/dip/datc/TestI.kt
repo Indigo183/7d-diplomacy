@@ -1,14 +1,9 @@
 package nodomain.seven.dip.datc
 
-import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.GameState.*
-import nodomain.seven.dip.orders.A
-import nodomain.seven.dip.orders.F
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
-import nodomain.seven.dip.provinces.StandardPlayer.*
-import nodomain.seven.dip.provinces.StandardSea.*
 import nodomain.seven.dip.utils.c
 import kotlin.test.Test
 
