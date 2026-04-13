@@ -12,21 +12,18 @@ sealed interface Inputtable {
     val piece: Piece
     val from: Location
         get() = piece.location
+    fun isLocal(): Boolean = true
 }
 
 // An action and the piece ordering it
 sealed class Order(override val piece: Piece, val symbol: String): Inputtable {
     abstract val action: Action
-    fun asLocal(): String = toString()   
+    fun asLocal(): String = toString()
 
     override fun equals(other: Any?): Boolean =
         other is Order && other.from == from && other.action == action
 
-    override fun toString(): String = if ((action is Moves && from.boardIndex == (action as Moves).to.boardIndex) ||
-                (action is Supports && from.boardIndex == (action as Supports).order.from.boardIndex && (
-                    (action as Supports).order.action !is Moves
-                        || from.boardIndex == ((action as Supports).order.action as Moves).to.boardIndex
-            ))) {
+    override fun toString(): String = if (isLocal()) {
                 "${piece.asLocal()}$symbol${action.asLocal()}"
             } else {
                 "$piece$symbol$action"
@@ -59,6 +56,9 @@ class MoveOrder(piece: Piece, override val action: Moves, override var flare: Te
         flare = enumEntries<TemporalFlare>()[timeFlare % 4]
         return this
     }
+    override fun isLocal(): Boolean {
+        return from.boardIndex == action.to.boardIndex
+    }
 }
 
 @JvmInline
@@ -66,7 +66,13 @@ value class Supports(val order: Order): Action {
     override fun toString(): String = "$order"
     override fun asLocal(): String = order.asLocal()
 }
-class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " S ")
+class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " S ") {
+    override fun isLocal(): Boolean {
+        return from.boardIndex == action.order.from.boardIndex
+                && from.boardIndex == action.order.from.boardIndex
+                && action.order.isLocal()
+    }
+}
 
 // Timeplane specifier shorthand
 fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex = BoardIndex(boardIndex, timeplane)
@@ -79,10 +85,10 @@ sealed interface RetreatOrder: Adjustment {
 }
 
 class Build(override val piece: Piece): BuildOrder {
-    override fun toString(): String = "Build $piece"
+    override fun toString(): String = "Build ${piece.asLocal()}"
 }
 class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder {
-    override fun toString(): String = "Disband $piece"
+    override fun toString(): String = "Disband ${piece.asLocal()}"
 
     infix fun i(timeFlare: Int) = Disband(piece, enumEntries<TemporalFlare>()[timeFlare % 4])
 
