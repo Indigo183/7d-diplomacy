@@ -56,9 +56,7 @@ class MoveOrder(piece: Piece, override val action: Moves, override var flare: Te
         flare = enumEntries<TemporalFlare>()[timeFlare % 4]
         return this
     }
-    override fun isLocal(): Boolean {
-        return from.boardIndex == action.to.boardIndex
-    }
+    override fun isLocal() = from.boardIndex == action.to.boardIndex
 }
 
 @JvmInline
@@ -67,7 +65,7 @@ value class Supports(val order: Order): Action {
     override fun asLocal(): String = order.asLocal()
 }
 class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " S ") {
-    override fun isLocal(): Boolean = from.boardIndex == action.order.from.boardIndex && action.order.isLocal()
+    override fun isLocal() = from.boardIndex == action.order.from.boardIndex && action.order.isLocal()
 }
 
 // Timeplane specifier shorthand

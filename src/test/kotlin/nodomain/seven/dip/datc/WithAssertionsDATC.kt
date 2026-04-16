@@ -80,11 +80,13 @@ interface WithAssertionsDATC: WithAssertions {
         val ordersByPlayer = ordersByPlayer shift game.turn - 1
         if (expectAllOrderToBeValid)
             ordersByPlayer.forEach { (player, orders) -> assertThat(orders).allMatch { game.isValid(it, player) } }
-        ordersByPlayer.forEach { (player, orders) -> try {
-            game.input(orders, player)
-        } catch (e: InvalidGameStateException) {
-            println("WARNING: $player has NMR'd: $e")
-        } }
+        ordersByPlayer.forEach { (player, orders) ->
+            try {
+                game.input(orders, player)
+            } catch (e: InvalidGameStateException) {
+                println("WARNING: $player has NMR'd: $e")
+            }
+        }
         game.adjudicate()
         return game
     }
