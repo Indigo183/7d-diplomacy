@@ -1,6 +1,7 @@
 package nodomain.seven.dip.utils
 
 import kotlin.math.absoluteValue
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 // Used in ComplexNumber shorthand notation, e.g. `1 + 2*i`
 val i = ComplexNumber(0, 1)
@@ -20,6 +21,7 @@ data class ComplexNumber(val real: Int, val imaginary: Int) {
     operator fun minus(other: ComplexNumber) =
         ComplexNumber(this.real - other.real,  this.imaginary - other.imaginary)
 
+    @JsonIgnore
     fun isEven(): Boolean = (real + imaginary) % 2 == 0
 
     override fun toString(): String {

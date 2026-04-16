@@ -7,6 +7,7 @@ import nodomain.seven.dip.provinces.Province
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
+import com.fasterxml.jackson.annotation.JsonIgnore
 
 fun MutableMap<Piece, Player>.remove(province: Province) {
     keys.filter { it.location.province == province}.forEach { remove(it) }
@@ -51,6 +52,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
         get() = orders.values.filterIsInstance<SupportOrder>()
 
     // Most recent adjudication results
+    @JsonIgnore
     val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
 
     // All units requiring retreats
@@ -67,6 +69,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     }
 
     // For future optimisation of adjudication
+    @JsonIgnore
     var currentOrders: List<Order> = listOf()
 
     // Interior mutability
