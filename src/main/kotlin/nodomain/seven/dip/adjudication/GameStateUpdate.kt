@@ -57,13 +57,15 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     // Compare the new board with the last produced child
     val newChild = Board(
         BoardIndex(boardIndex.coordinate + direction.direction, iter),
-        board,
+        boardIndex,
         pieces,
         centres,
     )
+    // For nice syntax
+    fun BoardIndex.getBoard(game: Game): Board? = game.getBoard(this)
     val latestChild = board.children.lastOrNull {
-        it.boardIndex.coordinate - boardIndex.coordinate == direction.direction
-    }
+        it.coordinate - boardIndex.coordinate == direction.direction
+    }?.getBoard(this)
     return if (
         (latestChild === null && newChild.pieces != board.pieces)
         || (latestChild !== null && newChild.pieces != latestChild.originalPieces) // latestChild may have had retreats or builds
@@ -100,14 +102,14 @@ fun Game.adjudicateMoves() {
     // Add children
     for ((_, children) in children.groupBy { it.boardIndex }) {
         // The origin board can never create a board bounce out of its children
-        if (children.size == 1) addChild(children[0].parent!!, children[0])
+        if (children.size == 1) addChild(getBoard(children[0].parent!!)!!, children[0])
         else {
             val childrenAndStrengths: MutableList<Pair<Board, Int>> = mutableListOf()
             for (child in children) childrenAndStrengths += Pair(
                 child,
                 moves.asSequence().filter {
-                    it.action.to.boardIndex == child.parent!!.boardIndex
-                            && it.flare!!.direction == child.boardIndex.coordinate - child.parent.boardIndex.coordinate
+                    it.action.to.boardIndex == child.parent!!
+                            && it.flare!!.direction == child.boardIndex.coordinate - child.parent.coordinate
                             && adjudicators[it.flare]!!.moveResults.contains(SuccessfulMove(it))
                 }.sumOf {
                     adjudicators[it.flare]!!.nonCutSupports.filter { support ->
@@ -124,11 +126,11 @@ fun Game.adjudicateMoves() {
                 childrenAndStrengths.last { childrenAndStrengths.last() != it }.second))
             { // last != penultimate
                 val child = childrenAndStrengths.removeLast().first
-                addChild(child.parent!!, child)
+                addChild(getBoard(child.parent!!)!!, child)
             }
             for ((child, _) in childrenAndStrengths) {
                 child.boardIndex.timeplane = null
-                addChild(child.parent!!, child)
+                addChild(getBoard(child.parent!!)!!, child)
             }
         }
     }
@@ -152,9 +154,9 @@ fun Game.adjudicateRetreats() {
         retreatDestinations[it.action.to] ?: false
     }) {
         val board = getBoard(retreat.piece.location.boardIndex)!!
-        val latestChild = board.children.last {
-            it.boardIndex.coordinate - board.boardIndex.coordinate == retreat.flare!!.direction
-        }
+        val latestChild = getBoard(board.children.last {
+            it.coordinate - board.boardIndex.coordinate == retreat.flare!!.direction
+        })!!
         // Can be assumed due to retreat filtering
         val retreat = locationsOfAdjustments[retreat.piece.location]!! as MoveOrder
         // Check for any move to retreat destination, successful or not

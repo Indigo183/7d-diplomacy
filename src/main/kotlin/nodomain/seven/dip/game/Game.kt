@@ -119,8 +119,10 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
 
     // Add child directly
     fun addChild(parent: Board, child: Board) {
-        if (child.parent !== parent) throw IllegalArgumentException("`child.parent` is not equal to `parent`")
-        parent.children += child
+        if (child.parent !== parent.boardIndex) throw IllegalArgumentException(
+            "`child.parent.boardIndex` is not equal to `parent`"
+        )
+        parent.children += child.boardIndex
         if (child.boardIndex.timeplane !== null) {
             // Propagate child up
             var iter = child.boardIndex.timeplane!!
@@ -156,7 +158,7 @@ fun Timeplane.boards() = values
 
 class Board(
     var boardIndex: BoardIndex,
-    val parent: Board? = null, // null represents the origin board
+    val parent: BoardIndex? = null, // null represents the origin board
 
     val originalPieces: Map<Piece, Player>,
     val centres: MutableMap<Province, Player> = originalPieces.mapKeys {
@@ -164,7 +166,7 @@ class Board(
     }.toMutableMap()
 ) {
     var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
-    val children = mutableListOf<Board>()
+    val children = mutableListOf<BoardIndex>()
     var isActive = true
         private set
 
@@ -189,7 +191,7 @@ class Board(
             |Board {
             |    isActive: $isActive
             |    boardIndex: $boardIndex
-            |    parent: ${parent?.boardIndex}
+            |    parent: $parent
             |    pieces: $pieces
             |    originalPieces: $originalPieces
             |    centres: $centres
