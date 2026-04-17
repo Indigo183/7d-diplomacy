@@ -3,7 +3,7 @@
 [web.app]
 
 # HTML title tag content
-title = "7D Diplomacy With Multiverse Time Travel"
+title = "7D Diplomacy With Multitime Travel"
 
 # include `assets` in web platform
 [web.resource]
