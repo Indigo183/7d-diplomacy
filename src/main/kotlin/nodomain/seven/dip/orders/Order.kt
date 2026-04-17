@@ -1,5 +1,6 @@
 package nodomain.seven.dip.orders
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.utils.*
 import kotlin.enums.enumEntries
 
@@ -10,6 +11,7 @@ sealed interface Action {
 
 sealed interface Inputtable {
     val piece: Piece
+    @get:JsonIgnore
     val from: Location
         get() = piece.location
     fun isLocal(): Boolean = true

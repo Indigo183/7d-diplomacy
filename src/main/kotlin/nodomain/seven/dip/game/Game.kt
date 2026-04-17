@@ -8,6 +8,8 @@ import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import com.fasterxml.jackson.annotation.JsonIgnoreType
 
 fun MutableMap<Piece, Player>.remove(province: Province) {
     keys.filter { it.location.province == province}.forEach { remove(it) }
@@ -46,13 +48,14 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
 
     // All orders, past and present
     private val orders: MutableMap<Location, Order> = mutableMapOf()
+    @get:JsonIgnore
     val moves: List<MoveOrder>
         get() = orders.values.filterIsInstance<MoveOrder>()
+    @get:JsonIgnore
     val supports: List<SupportOrder>
         get() = orders.values.filterIsInstance<SupportOrder>()
 
     // Most recent adjudication results
-    @JsonIgnore
     val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
 
     // All units requiring retreats

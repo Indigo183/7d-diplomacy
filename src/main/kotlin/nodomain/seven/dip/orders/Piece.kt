@@ -1,5 +1,6 @@
 package nodomain.seven.dip.orders
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.provinces.Province
@@ -8,6 +9,7 @@ sealed interface Piece {
     val location: Location
     fun asLocal(): String
 
+    @get:JsonIgnore
     val holds: HoldOrder
         get() = HoldOrder(this)
 
