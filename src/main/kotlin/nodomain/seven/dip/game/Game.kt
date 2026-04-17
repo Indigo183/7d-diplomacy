@@ -62,7 +62,9 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
     val requiredRetreats: MutableList<RequiredRetreat> = mutableListOf()
 
     // All inputted retreats/builds
+    @JsonIgnore
     val locationsOfAdjustments: MutableMap<Location, Adjustment> = mutableMapOf() // Stores both retreats and builds
+    @get:JsonIgnore
     val adjustments: Collection<Adjustment>
         get() = locationsOfAdjustments.values
 
