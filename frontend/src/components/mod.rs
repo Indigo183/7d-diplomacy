@@ -4,8 +4,8 @@
 //!
 //! NOTE: Echo component has been removed due to no longer being a fullstack application.
 
-mod hero;
-pub use hero::Hero;
+mod main_menu;
+pub use main_menu::MainMenu;
 
 // mod echo;
 // pub use echo::Echo;
