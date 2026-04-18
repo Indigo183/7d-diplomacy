@@ -1,11 +1,10 @@
+use crate::Route;
 use dioxus::prelude::*;
 
 const HEADER_SVG: Asset = asset!("/assets/header.svg");
 
 #[component]
 pub fn MainMenu() -> Element {
-    let mut last_pressed = use_signal(|| "Select an option");
-
     rsx! {
         // We can create elements inside the rsx macro with the element name followed by a block of attributes and children.
         div {
@@ -15,14 +14,9 @@ pub fn MainMenu() -> Element {
             img { src: HEADER_SVG, id: "header" }
             div { id: "menu-buttons",
                 // The RSX macro also supports text nodes surrounded by quotes
-                button { onclick: move |_event| last_pressed.set("Selected: Resume Game"), "Resume Game" }
-                button { onclick: move |_event| last_pressed.set("Selected: Join New Game"), "Join New Game" }
-                button { onclick: move |_event| last_pressed.set("Selected: Host New Game"), "Host New Game" }
-            }
-            div {
-                h1 {
-                    "{last_pressed}"
-                }
+                Link { to: Route::HostNewGame {}, "Resume Game" }
+                Link { to: Route::HostNewGame {}, "Join New Game" }
+                Link { to: Route::HostNewGame {}, "Host New Game" }
             }
         }
     }
