@@ -11,9 +11,10 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
 }
 
-#menu-buttons {
+#menu-options {
     width: 400px;
     text-align: center;
     font-size: x-large;
@@ -22,8 +23,9 @@ body {
     flex-direction: column;
 }
 
-#menu-buttons a {
+#menu-options a, input {
     color: white;
+    text-align: center;
     text-decoration: none;
     margin-top: 20px;
     margin: 10px 0px;
@@ -32,7 +34,7 @@ body {
     padding: 10px;
 }
 
-#menu-buttons a:hover {
+#menu-options a:hover {
     background-color: #1f1f1f;
     cursor: pointer;
 }

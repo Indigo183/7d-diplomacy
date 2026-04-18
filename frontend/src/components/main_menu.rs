@@ -12,10 +12,10 @@ pub fn MainMenu() -> Element {
             id: "menu",
             // After all attributes are defined, we can define child elements and components
             img { src: HEADER_SVG, id: "header" }
-            div { id: "menu-buttons",
+            div { id: "menu-options",
                 // The RSX macro also supports text nodes surrounded by quotes
-                Link { to: Route::HostNewGame {}, "Resume Game" }
-                Link { to: Route::HostNewGame {}, "Join New Game" }
+                Link { to: Route::ResumeGame {}, "Resume Game" }
+                Link { to: Route::JoinNewGame {}, "Join New Game" }
                 Link { to: Route::HostNewGame {}, "Host New Game" }
             }
         }
