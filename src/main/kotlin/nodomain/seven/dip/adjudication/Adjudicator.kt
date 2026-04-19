@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.Location
+import java.io.Serializable
 
 operator fun Map<Piece, Player>.get(location: Location): Player? {
     return get(Army(location)) ?: get(Fleet(location))
@@ -36,7 +37,7 @@ value class Bounce(override val location: Location): MoveResult {
     override fun toString(): String = "bounce in $location"
 }
 
-class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgnore val piecesIn: Map<Piece, Player>) {
+class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgnore val piecesIn: Map<Piece, Player>): Serializable {
     private inner class MoveAnalysis(val order: MoveOrder) {
         var strengthExcludingVictim: Int = 1
         var strength: Int = 1

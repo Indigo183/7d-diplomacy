@@ -2,6 +2,7 @@ package nodomain.seven.dip.utils
 
 import kotlin.math.absoluteValue
 import com.fasterxml.jackson.annotation.JsonIgnore
+import java.io.Serializable
 
 // Used in ComplexNumber shorthand notation, e.g. `1 + 2*i`
 val i = ComplexNumber(0, 1)
@@ -10,7 +11,7 @@ val i = ComplexNumber(0, 1)
 val Int.c get() = ComplexNumber(this, 0)
 
 // Used to indicate the location of a board on a timeplane
-data class ComplexNumber(val real: Int, val imaginary: Int) {
+data class ComplexNumber(val real: Int, val imaginary: Int): Serializable {
     operator fun plus(other: ComplexNumber) =
         ComplexNumber(this.real + other.real, this.imaginary + other.imaginary)
     operator fun times(other: ComplexNumber) =

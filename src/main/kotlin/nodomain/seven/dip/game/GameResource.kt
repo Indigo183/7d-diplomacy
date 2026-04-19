@@ -44,10 +44,6 @@ fun newTestGame(): Game {
     return game
 }
 
-object GameDAO {
-    var currentGame = newTestGame()
-}
-
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
 class GameResource {

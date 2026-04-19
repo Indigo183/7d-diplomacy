@@ -10,6 +10,7 @@ import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonIgnoreType
+import java.io.Serializable
 
 fun MutableMap<Piece, Player>.remove(province: Province) {
     keys.filter { it.location.province == province}.forEach { remove(it) }
@@ -41,7 +42,7 @@ enum class GameState {
     BUILDS,
 }
 
-class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
+class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
     // The current "turn" in terms of move phases only
     var turn = 1
         private set
@@ -166,7 +167,7 @@ class Board(
     val centres: MutableMap<Province, Player> = originalPieces.mapKeys {
         (piece, _) -> piece.location.province
     }.toMutableMap()
-) {
+): Serializable {
     var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
     val children = mutableListOf<BoardIndex>()
     var isActive = true

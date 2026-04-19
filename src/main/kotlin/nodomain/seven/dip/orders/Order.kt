@@ -2,14 +2,15 @@ package nodomain.seven.dip.orders
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.utils.*
+import java.io.Serializable
 import kotlin.enums.enumEntries
 
 // The "action" being done, without a piece to order it
-sealed interface Action {
+sealed interface Action: Serializable {
     fun asLocal(): String = toString()
 }
 
-sealed interface Inputtable {
+sealed interface Inputtable: Serializable {
     val piece: Piece
     @get:JsonIgnore
     val from: Location
