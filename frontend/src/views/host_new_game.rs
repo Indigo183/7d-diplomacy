@@ -10,7 +10,11 @@ pub fn HostNewGame() -> Element {
             id: "menu",
             img { src: HEADER_SVG, id: "header" }
             div { id: "menu-options",
-                input { placeholder: "name" }
+                input { placeholder: "game name" }
+                select {
+                    option { "Strict" }
+                    option { "Loose" }
+                }
             }
         }
     }

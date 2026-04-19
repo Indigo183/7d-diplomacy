@@ -1,44 +1,51 @@
 body {
-    background-color: #0f1116;
-    color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+  background-color: #0f1116;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 20px;
+}
+
+.option-colour {
+  background-color: #0f1116;
+  color: #ffffff;
 }
 
 #menu {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 #menu-options {
-    width: 400px;
-    text-align: center;
-    font-size: x-large;
-    color: white;
-    display: flex;
-    flex-direction: column;
+  width: 400px;
+  text-align: center;
+  font-size: x-large;
+  color: white;
+  display: flex;
+  flex-direction: column;
 }
 
-#menu-options a, input {
-    color: white;
-    text-align: center;
-    text-decoration: none;
-    margin-top: 20px;
-    margin: 10px 0px;
-    border: white 1px solid;
-    border-radius: 5px;
-    padding: 10px;
+#menu-options a,
+input,
+option {
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 20px;
+  margin: 10px 0px;
+  border: white 1px solid;
+  border-radius: 5px;
+  padding: 10px;
 }
 
 #menu-options a:hover {
-    background-color: #1f1f1f;
-    cursor: pointer;
+  background-color: #1f1f1f;
+  cursor: pointer;
 }
 
 #header {
-    max-width: 1200px;
+  max-width: 1200px;
 }
