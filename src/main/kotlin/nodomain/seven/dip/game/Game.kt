@@ -1,6 +1,5 @@
 package nodomain.seven.dip.game
 
-import nodomain.seven.dip.adjudication.Adjudicator
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
@@ -8,8 +7,6 @@ import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonIgnoreType
 import nodomain.seven.dip.adjudication.AdjudicationResult
 import java.io.Serializable
 
@@ -44,6 +41,10 @@ enum class GameState {
 }
 
 class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
+    companion object {
+        const val serialVersionUID: Long = 1
+    }
+
     // The current "turn" in terms of move phases only
     var turn = 1
         private set
