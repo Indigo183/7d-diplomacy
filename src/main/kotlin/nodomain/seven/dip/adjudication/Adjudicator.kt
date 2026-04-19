@@ -10,7 +10,7 @@ operator fun Map<Piece, Player>.get(location: Location): Player? {
     return get(Army(location)) ?: get(Fleet(location))
 }
 
-sealed interface ComputableMoveResult {
+sealed interface ComputableMoveResult: Serializable {
     val moveOrder: MoveOrder?
     val location: Location get() = moveOrder!!.action.to
 
@@ -37,7 +37,13 @@ value class Bounce(override val location: Location): MoveResult {
     override fun toString(): String = "bounce in $location"
 }
 
-class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgnore val piecesIn: Map<Piece, Player>): Serializable {
+data class AdjudicationResult(
+    val nonCutSupports: List<SupportOrder>,
+    val dislodgements: MutableList<MoveOrder>,
+    val moveResults: List<MoveResult>
+): Serializable
+
+class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgnore val piecesIn: Map<Piece, Player>) {
     private inner class MoveAnalysis(val order: MoveOrder) {
         var strengthExcludingVictim: Int = 1
         var strength: Int = 1
@@ -66,6 +72,8 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgn
      *  The list may contain additional bounces in occupied provinces
      */
     val moveResults = computeMovesAndBounces()
+
+    fun result() = AdjudicationResult(nonCutSupports,  dislodgements,  moveResults)
 
     private fun computeMovesAndBounces(): List<MoveResult> {
         val withDependantMove = initialMoveResults().updatesDueToDislodgement()

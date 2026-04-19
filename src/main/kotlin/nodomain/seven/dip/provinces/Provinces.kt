@@ -83,7 +83,7 @@ interface Provinces<T: Province> {
 }
 
 
-interface Player {
+interface Player: Serializable {
 	val homeCentres: List<Province>;
 }
 

@@ -10,6 +10,7 @@ import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonIgnoreType
+import nodomain.seven.dip.adjudication.AdjudicationResult
 import java.io.Serializable
 
 fun MutableMap<Piece, Player>.remove(province: Province) {
@@ -57,7 +58,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
         get() = orders.values.filterIsInstance<SupportOrder>()
 
     // Most recent adjudication results
-    val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
+    val adjudicators: MutableMap<TemporalFlare, AdjudicationResult> = mutableMapOf()
 
     // All units requiring retreats
     val requiredRetreats: MutableList<RequiredRetreat> = mutableListOf()
