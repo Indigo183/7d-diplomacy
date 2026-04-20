@@ -34,6 +34,9 @@ fun setupJWT(filePath: Path) {
 
 @ApplicationScoped
 class JWTKeyProvider {
+    init {
+        if (!Files.exists(filePath)) setupJWT(filePath)
+    }
     @Produces
     val key: SecretKey = ObjectInputStream(BufferedInputStream(FileInputStream(
         filePath.resolve(Paths.get("security", "JWT_key.ser")).toFile()
