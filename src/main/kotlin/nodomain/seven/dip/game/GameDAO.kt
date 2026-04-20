@@ -5,14 +5,13 @@ import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.orders.input
-import nodomain.seven.dip.provinces.Romans.BRU
-import nodomain.seven.dip.provinces.Romans.CAE
-import nodomain.seven.dip.provinces.Romans.CAT
-import nodomain.seven.dip.provinces.Romans.POM
+import nodomain.seven.dip.provinces.Romans.*
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.c
+import nodomain.seven.dip.utils.filePath
 import nodomain.seven.dip.utils.i
 import nodomain.seven.dip.utils.plus
+import nodomain.seven.dip.utils.setupJWT
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.FileInputStream
@@ -23,10 +22,8 @@ import java.nio.file.Files
 import kotlin.io.path.Path
 
 object GameDAO {
-    val filePath = Path(System.getProperty("user.home"), ".7dip")
-
     init {
-        if (!Files.exists(filePath)) Files.createDirectories(filePath)
+        if (!Files.exists(filePath)) setupJWT(filePath)
         if (!Files.exists(filePath.resolve(Path("testGame", "gameObject.ser")))) {
             storeGame("testGame", newTestGame())
         }
