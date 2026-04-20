@@ -1,42 +1,65 @@
 body {
-    background-color: #0f1116;
-    color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 20px;
+  background-color: #0f1116;
+  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 20px;
 }
 
-#menu {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+.menu {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
-#menu-buttons {
-    width: 400px;
-    text-align: center;
-    font-size: x-large;
-    color: white;
-    display: flex;
-    flex-direction: column;
+.menu-options {
+  width: 400px;
+  text-align: center;
+  font-size: x-large;
+  color: white;
+  display: flex;
+  flex-direction: column;
 }
 
-#menu-buttons a {
-    color: white;
-    text-decoration: none;
-    margin-top: 20px;
-    margin: 10px 0px;
-    border: white 1px solid;
-    border-radius: 5px;
-    padding: 10px;
+.menu-options a,
+.menu-options button,
+.menu-options input {
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  margin-top: 20px;
+  margin: 10px 0px;
+  border: white 1px solid;
+  border-radius: 10px;
+  padding: 10px;
 }
 
-#menu-buttons a:hover {
-    background-color: #1f1f1f;
-    cursor: pointer;
+.menu-options a:hover,
+.menu-options button:hover {
+  background-color: #1f1f1f;
+  cursor: pointer;
+}
+
+#adjacencies {
+  display: flex;
+}
+
+#left {
+  flex: 1 1 auto;
+  margin-right: 2px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+
+#right {
+  flex: 1 1 auto;
+  margin-left: 2px;
+  border-top-left-radius: 0px;
+  border-bottom-left-radius: 0px;
 }
 
 #header {
-    max-width: 1200px;
+  max-width: 1200px;
 }
