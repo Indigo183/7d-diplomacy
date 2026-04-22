@@ -1,9 +1,9 @@
 // The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
 // need dioxus
-use dioxus::{
-    desktop::{Config, WindowBuilder},
-    prelude::*,
-};
+use dioxus::prelude::*;
+
+#[cfg(feature = "desktop")]
+use dioxus::desktop::{Config, WindowBuilder};
 
 use views::*;
 
@@ -52,9 +52,8 @@ const FAVICON: Asset = asset!("/assets/favicon.ico");
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
 const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
 
+#[cfg(feature = "desktop")]
 fn main() {
-    // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
-    // you have enabled
     dioxus::LaunchBuilder::new()
         .with_cfg(
             Config::default().with_menu(None).with_window(
@@ -65,6 +64,13 @@ fn main() {
             ),
         )
         .launch(App);
+}
+
+#[cfg(feature = "web")]
+fn main() {
+    // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
+    // you have enabled
+    launch(App);
 }
 
 /// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function

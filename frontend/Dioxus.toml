@@ -1,4 +1,6 @@
 [application]
+name = "7D Diplomacy With Multitime Travel"
+default_platform = "desktop"
 
 [web.app]
 

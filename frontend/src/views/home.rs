@@ -5,6 +5,10 @@ use dioxus::prelude::*;
 #[component]
 pub fn Home() -> Element {
     rsx! {
+        div {
+        style: "animation: spin 2s linear infinite;",
+        "Hello"
+    }
         MainMenu {}
     }
 }
