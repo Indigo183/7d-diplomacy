@@ -1,5 +1,6 @@
 use crate::Route;
 use dioxus::prelude::*;
+use dioxus_motion::prelude::*;
 
 const NAVBAR_CSS: Asset = asset!("/assets/styling/navbar.css");
 
@@ -27,6 +28,6 @@ pub fn Navbar() -> Element {
 
         // The `Outlet` component is used to render the next component inside the layout. In this case, it will render either
         // the [`Home`] or [`Blog`] component depending on the current route.
-        Outlet::<Route> {}
+        AnimatedOutlet::<Route> {}
     }
 }

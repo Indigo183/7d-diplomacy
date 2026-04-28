@@ -1,6 +1,7 @@
 // The dioxus prelude contains a ton of common items used in dioxus apps. It's a good idea to import wherever you
 // need dioxus
 use dioxus::prelude::*;
+use dioxus_motion::prelude::*;
 
 #[cfg(feature = "desktop")]
 use dioxus::desktop::{Config, WindowBuilder};
@@ -17,7 +18,7 @@ mod views;
 /// 
 /// Each variant represents a different URL pattern that can be matched by the router. If that pattern is matched,
 /// the components for that route will be rendered.
-#[derive(Debug, Clone, Routable, PartialEq)]
+#[derive(Debug, Clone, Routable, PartialEq, MotionTransitions)]
 #[rustfmt::skip]
 enum Route {
     // The layout attribute defines a wrapper for all routes under the layout. Layouts are great for wrapping
@@ -26,6 +27,7 @@ enum Route {
         // The route attribute defines the URL pattern that a specific route matches. If that pattern matches the URL,
         // the component for that route will be rendered. The component name that is rendered defaults to the variant name.
         #[route("/")]
+        #[transition(SlideRightFade)]
         Home {},
 
         // The route attribute can include dynamic parameters that implement [`std::str::FromStr`] and [`std::fmt::Display`] with the `:` syntax.
@@ -33,15 +35,19 @@ enum Route {
         #[route("/blog/:id")]
         // Fields of the route variant will be passed to the component as props. In this case, the blog component must accept
         // an `id` prop of type `i32`.
+        #[transition(SlideRightFade)]
         Blog { id: i32 },
 
         #[route("/open")]
+        #[transition(SlideLeftFade)]
         ResumeGame {},
 
         #[route("/new/join")]
+        #[transition(SlideLeftFade)]
         JoinNewGame {},
 
         #[route("/new/host")]
+        #[transition(SlideLeft)]
         HostNewGame {},
 }
 
