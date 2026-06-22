@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone, Copy)]
 enum Adjacencies {
     Strict,
     Loose,
@@ -16,8 +16,10 @@ impl std::fmt::Display for Adjacencies {
     }
 }
 
-fn create_new_game() -> Result<(), &'static str> {
-    // Err("error")
+fn validate_new_game(name: &str, adjacencies: Adjacencies) -> Result<(), &'static str> {
+    if name == "TEST" {
+        return Err("game \"TEST\" already exists");
+    }
     Ok(())
 }
 
@@ -28,7 +30,11 @@ const HEADER_SVG: Asset = asset!("/assets/header.svg");
 pub fn HostNewGame() -> Element {
     let mut name = use_signal(|| String::new());
     let mut adjacencies = use_signal(|| Adjacencies::NotSelected);
-    let mut creating: Signal<Option<Result<(), &'static str>>> = use_signal(|| None);
+    let mut config: Signal<Option<Result<(), &'static str>>> = use_signal(|| None);
+
+    let input_is_valid =
+        move || *adjacencies.read() != Adjacencies::NotSelected && !name().is_empty();
+    let is_loading = move || config() == Some(Ok(()));
 
     rsx! {
         div {
@@ -40,6 +46,7 @@ pub fn HostNewGame() -> Element {
                     placeholder: "Game Name",
                     value: "{name().to_ascii_uppercase()}", // avoids flashing lowercase
                     oninput: move |event| name.set(event.value().to_ascii_uppercase()),
+                    disabled: is_loading(),
                 }
                 div {
                     id: "adjacencies",
@@ -49,6 +56,7 @@ pub fn HostNewGame() -> Element {
                             "background-color: darkslategray;"
                         },
                         onclick: move |_event| adjacencies.set(Adjacencies::Strict),
+                        disabled: is_loading(),
                         "Strict"
                     }
                     button {
@@ -57,32 +65,23 @@ pub fn HostNewGame() -> Element {
                             "background-color: darkslategray;"
                         },
                         onclick: move |_event| adjacencies.set(Adjacencies::Loose),
+                        disabled: is_loading(),
                         "Loose"
                     }
                 }
                 button {
-                    color: match *creating.read() {
-                        Some(Ok(_)) => "gray",
-                        Some(Err(_)) => "red",
-                        None if *adjacencies.read() == Adjacencies::NotSelected || name().is_empty() => "gray",
-                        _ => "white",
+                    color: if let Some(Err(_)) = config() { "red" },
+                    onclick: move |_event| if input_is_valid() && !is_loading() {
+                        config.set(Some(validate_new_game(&name(), *adjacencies.read())));
                     },
-                    // if let Adjacencies::NotSelected = *adjacencies.read() { "gray" }
-                    // else if name().is_empty() { "gray" },
-                    onclick: move |_event| if *adjacencies.read() != Adjacencies::NotSelected && !name().is_empty() {
-                        creating.set(Some(create_new_game()));
-                    },
-                    match creating() {
+                    disabled: !input_is_valid() || is_loading(),
+                    match config() {
                         None => "Submit",
                         Some(Err(err)) => err,
                         Some(Ok(())) => "Creating..."
                     }
                 }
             }
-            // div {
-            //     p { "NAME: \"{name}\"" }
-            //     p { "ADJACENCIES: {adjacencies}" }
-            // }
         }
     }
 }

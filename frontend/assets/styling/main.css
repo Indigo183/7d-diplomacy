@@ -36,10 +36,15 @@ body {
     padding: 10px;
 }
 
-.menu-options a:hover,
-.menu-options button:hover {
+.menu-options a:not([disabled="true"]):hover,
+.menu-options input:not([disabled="true"]):hover,
+.menu-options button:not([disabled="true"]):hover {
     background-color: #1f1f1f;
     cursor: pointer;
+}
+
+*[disabled="true"] {
+    color: gray !important;
 }
 
 #adjacencies {
