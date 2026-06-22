@@ -1,5 +1,6 @@
 use dioxus::prelude::*;
 
+#[derive(PartialEq)]
 enum Adjacencies {
     Strict,
     Loose,
@@ -15,6 +16,11 @@ impl std::fmt::Display for Adjacencies {
     }
 }
 
+fn create_new_game() -> Result<(), &'static str> {
+    // Err("error")
+    Ok(())
+}
+
 const HEADER_SVG: Asset = asset!("/assets/header.svg");
 
 /// The menu for hosting a new game locally.
@@ -22,6 +28,7 @@ const HEADER_SVG: Asset = asset!("/assets/header.svg");
 pub fn HostNewGame() -> Element {
     let mut name = use_signal(|| String::new());
     let mut adjacencies = use_signal(|| Adjacencies::NotSelected);
+    let mut creating: Signal<Option<Result<(), &'static str>>> = use_signal(|| None);
 
     rsx! {
         div {
@@ -37,37 +44,45 @@ pub fn HostNewGame() -> Element {
                 div {
                     id: "adjacencies",
                     button {
-                        id: "left",
+                        id: "left-button",
                         style: if let Adjacencies::Strict = *adjacencies.read() {
-                            "background-color: #203030;"
+                            "background-color: darkslategray;"
                         },
                         onclick: move |_event| adjacencies.set(Adjacencies::Strict),
                         "Strict"
                     }
                     button {
-                        id: "right",
+                        id: "right-button",
                         style: if let Adjacencies::Loose = *adjacencies.read() {
-                            "background-color: #203030;"
+                            "background-color: darkslategray;"
                         },
                         onclick: move |_event| adjacencies.set(Adjacencies::Loose),
                         "Loose"
                     }
                 }
                 button {
-                    color: if let Adjacencies::NotSelected = *adjacencies.read() { "gray" }
-                    else if name().is_empty() { "gray" },
-                    onclick: match *adjacencies.read() {
-                        Adjacencies::NotSelected => |_event| println!("no"),
-                        _ if name().is_empty() => |_event| println!("no"),
-                        _ => |_event| println!("yes"),
+                    color: match *creating.read() {
+                        Some(Ok(_)) => "gray",
+                        Some(Err(_)) => "red",
+                        None if *adjacencies.read() == Adjacencies::NotSelected || name().is_empty() => "gray",
+                        _ => "white",
                     },
-                    "Submit"
+                    // if let Adjacencies::NotSelected = *adjacencies.read() { "gray" }
+                    // else if name().is_empty() { "gray" },
+                    onclick: move |_event| if *adjacencies.read() != Adjacencies::NotSelected && !name().is_empty() {
+                        creating.set(Some(create_new_game()));
+                    },
+                    match creating() {
+                        None => "Submit",
+                        Some(Err(err)) => err,
+                        Some(Ok(())) => "Creating..."
+                    }
                 }
             }
-            div {
-                p { "NAME: \"{name}\"" }
-                p { "ADJACENCIES: {adjacencies}" }
-            }
+            // div {
+            //     p { "NAME: \"{name}\"" }
+            //     p { "ADJACENCIES: {adjacencies}" }
+            // }
         }
     }
 }
