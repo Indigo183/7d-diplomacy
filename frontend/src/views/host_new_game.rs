@@ -16,9 +16,18 @@ impl std::fmt::Display for Adjacencies {
     }
 }
 
+fn sanitise(input: String) -> String {
+    input
+        .to_ascii_lowercase()
+        .chars()
+        .map(|c| if c == ' ' { '-' } else { c })
+        .filter(|&c| c.is_ascii_alphanumeric() || c == '-')
+        .collect()
+}
+
 fn validate_new_game(name: &str, adjacencies: Adjacencies) -> Result<(), &'static str> {
-    if name == "TEST" {
-        return Err("game \"TEST\" already exists");
+    if name == "test" {
+        return Err("game \"test\" already exists");
     }
     Ok(())
 }
@@ -44,8 +53,9 @@ pub fn HostNewGame() -> Element {
                 class: "menu-options",
                 input {
                     placeholder: "Game Name",
-                    value: "{name().to_ascii_uppercase()}", // avoids flashing lowercase
-                    oninput: move |event| name.set(event.value().to_ascii_uppercase()),
+                    value: name(),
+                    text_transform: "lowercase",
+                    oninput: move |event| name.set(sanitise(event.value())),
                     disabled: is_loading(),
                 }
                 div {
