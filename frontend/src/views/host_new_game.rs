@@ -48,6 +48,8 @@ pub fn HostNewGame() -> Element {
     rsx! {
         div {
             class: "menu",
+            onmousedown: move |_event| if let Some(Err(_)) = config() { config.set(None) },
+            onkeydown: move |_event| if let Some(Err(_)) = config() { config.set(None) },
             img { src: HEADER_SVG, id: "header" }
             div {
                 class: "menu-options",
