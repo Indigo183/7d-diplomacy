@@ -1,52 +1,76 @@
 # TODOs
 
+Note: Ideas that have not been discussed and confirmed to be wanted features should be *italicised*.
+
 ## Frontend
 
-- Dynamically hide the window title bar based on whether or not you're a tiling window manager user (stinky)
-- Make it not cooked on web
-- ADD A GODVERDOMME BACK BUTTON TO THIS INTERFACE PLEASE
+- [ ] Dynamically hide the window title bar based on whether or not you're a tiling window manager user (stinky)
+- [ ] Make it not cooked on web
+- [ ] ADD A GODVERDOMME BACK BUTTON TO THIS INTERFACE PLEASE
 
 ### Landing Page
-- Home/landing page
+- [ ] Join New Game button
+- [ ] Host New Game Button
+- [ ] List of games
+    - [ ] Resume button in leiu temp. 
+    - [ ] Automatically add joined games to the list
+    - [ ] Way of removing games from the list
+    - [ ] Archiving games so that you can see the results from local caches of them?
 
-### Game Creation Page
-- Creating a new game
-- Create local copy of a game
-- Create a copy in the backend
-- Cache it
+### Host New Game Page
+- [ ] Creating a new game
+    - [ ] Text fields 
+- [ ] Create local (cached) copy of a game
+- [ ] Create a copy in the backend
 
 ### Join Game Page
-- Join a game
-- password protection for players (backend integration)
+- [ ] Text field for web adress
+- [ ] Country selection field (*post-connect*)
+    - [ ] Ability to join random unclaimed country
+    - [ ] Password protection for players (backend integration)
 
 ### Main Game Interface
-- Having 2D interactive boards
-- Layer changing
-- Axis changing
-- 3D isometric views
-- Luggian buttons at the bottom, hotkeys
+- [ ] Having 2D interactive boards
+    - [ ] Hover to reveal *province name and abbrev*
+    - [ ] Clicking on boards to enter orders
+    - [ ] Arrows for orders
+- [ ] Layer changing
+- [ ] Axis changing
+- [ ] 3D isometric views
+- [ ] Usual buttons at the bottom for order entry
+- [ ] Ghost board
 
 ### Player List
-- List of all the powers
-- Number of centres controlled (and victory condition)
-- Pictoral representation of owned centres
-    - Hovering returns board indices
+- [ ] List of all the powers
+- [ ] Number of centres controlled (and victory condition)
+- [ ] Pictoral representation of owned centres
+    - [ ] Hovering displays board indices
+    - [ ] Clicking zooms to the board? 
 
 ### Order Entry
-- Use the buttons
-- Use hotkeys
-- Text order input
-    - Order text editor?
-    - LSP for order entry
-- Text export of orders for logs
-- Quick copy of entered orders
+- [ ] Use the buttons
+- [ ] Use hotkeys
+- [ ] Text order input
+    - [ ] Order text editor
+    - [ ] LSP for order entry
+- [ ] Text export of orders for logs
+- [ ] Quick copy of entered orders
+- [ ] 
 
 ### Order Submission
-- Submit ordedrs
-- Resubmit different orders to change them
-- Undo previous submissions (backend integration)
-    - Stack-based?
+- [ ] Submit ordedrs
+- [ ] Resubmit different orders to change them
+- [ ] Undo previous submissions (backend integration)
+    - [ ] *Stack-based in backend*
+
+### *Sandbox mode*
+- [ ] *Add a separate sandbox mode*
+- [ ] *Allow for order entry for any units*
+- [ ] *Allow for the server to be asked to adjudicate a position?*
+- [ ] *Sandbox ghost board?*
 
 ## Backend
 
-- Integrate some of Ludo's order logger code to generate order logs?
+- [ ] Integrate some of Ludo's order logger code to generate order logs?
+- [ ] Add passwords for joining countries
+- [ ] *Add order stack for each player*
