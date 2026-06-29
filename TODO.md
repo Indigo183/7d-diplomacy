@@ -27,7 +27,11 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Text field for web adress
 - [ ] Country selection field (*post-connect*)
     - [ ] Ability to join random unclaimed country
-    - [ ] Password protection for players (backend integration)
+    - [ ] Password protection for players
+        - [ ] *Password per player/per country*
+    - [ ] GMs can see and set passwords
+- [ ] Spectator account
+- [ ] GM account
 
 ### Main Game Interface
 - [ ] Having 2D interactive boards
@@ -45,29 +49,35 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Number of centres controlled (and victory condition)
 - [ ] Pictoral representation of owned centres
     - [ ] Hovering displays board indices
-    - [ ] Clicking zooms to the board? 
+    - [ ] Clicking a province cycles through eachg timeline on which it's owned and auto-zooms to it
 
 ### Order Entry
 - [ ] Use the buttons
 - [ ] Use hotkeys
 - [ ] Text order input
     - [ ] Order text editor
-    - [ ] LSP for order entry
+    - [ ] Interaction between board order entry and the text editor
+    - [ ] Undo history (if clicking on the board adds an order, )
+    - [ ] LSP-like thingamajig to aid order entry
+    - [ ] Clicking on an order to highlight it
+- [ ] Allow for comments
 - [ ] Text export of orders for logs
-- [ ] Quick copy of entered orders
-- [ ] 
+- [ ] Quick copy entered orders
 
 ### Order Submission
 - [ ] Submit ordedrs
 - [ ] Resubmit different orders to change them
 - [ ] Undo previous submissions (backend integration)
+    - [ ] *Diff display for past sets of orders*
     - [ ] *Stack-based in backend*
 
 ### *Sandbox mode*
 - [ ] *Add a separate sandbox mode*
 - [ ] *Allow for order entry for any units*
-- [ ] *Allow for the server to be asked to adjudicate a position?*
-- [ ] *Sandbox ghost board?*
+- [ ] *Allow for the server to be asked to adjudicate a position*
+    - [ ] *This is stupid, the frontend should be able to adjudicate offline without depending on Indigo's uptime. Rust reqeite of teh adjudicator anyone?*
+- [ ] *Sandbox ghost board*
+- [ ] *Save/load sandbox states*
 
 ## Backend
 
