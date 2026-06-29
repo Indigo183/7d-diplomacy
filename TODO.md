@@ -75,7 +75,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] *Add a separate sandbox mode*
 - [ ] *Allow for order entry for any units*
 - [ ] *Allow for the server to be asked to adjudicate a position*
-    - [ ] *This is stupid, the frontend should be able to adjudicate offline without depending on Indigo's uptime. Rust reqeite of teh adjudicator anyone?*
+    - [ ] *This is stupid, the frontend should be able to adjudicate offline without depending on Indigo's uptime. Rust rewrite of the adjudicator anyone?*
 - [ ] *Sandbox ghost board*
 - [ ] *Save/load sandbox states*
 
