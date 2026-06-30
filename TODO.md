@@ -7,10 +7,12 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Dynamically hide the window title bar based on whether or not you're a tiling window manager user (stinky)
 - [ ] Make it not cooked on web
 - [ ] ADD A GODVERDOMME BACK BUTTON TO THIS INTERFACE PLEASE
+- [ ] Get some consistent styling done
+    - [ ] Make some nice components to share between places
 
 ### Landing Page
-- [ ] Join New Game button
-- [ ] Host New Game Button
+- [x] Join New Game button
+- [x] Host New Game Button
 - [ ] List of games
     - [ ] Resume button in leiu temp. 
     - [ ] Automatically add joined games to the list
@@ -43,6 +45,8 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] 3D isometric views
 - [ ] Usual buttons at the bottom for order entry
 - [ ] Ghost board
+- [ ] Hover provinces for full province name and abreviation tooltip
+- [ ] Hover orders for order tooltip
 
 ### Player List
 - [ ] List of all the powers
