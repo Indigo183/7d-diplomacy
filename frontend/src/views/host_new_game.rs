@@ -38,6 +38,7 @@ const HEADER_SVG: Asset = asset!("/assets/header.svg");
 #[component]
 pub fn HostNewGame() -> Element {
     let mut name = use_signal(|| String::new());
+    let mut title = use_signal(|| String::new());
     let mut adjacencies = use_signal(|| Adjacencies::NotSelected);
     let mut config: Signal<Option<Result<(), &'static str>>> = use_signal(|| None);
 
@@ -53,6 +54,11 @@ pub fn HostNewGame() -> Element {
             img { src: HEADER_SVG, id: "header" }
             div {
                 class: "menu-options",
+                input {
+                    placeholder: "Game Title",
+                    oninput: move |event| title.set(event.value()),
+                    disabled: is_loading(),
+                }
                 input {
                     placeholder: "Game Name",
                     value: name(),
