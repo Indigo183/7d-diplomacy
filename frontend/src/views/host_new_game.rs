@@ -108,7 +108,6 @@ pub fn HostNewGame() -> Element {
                             if let Ok(_) = status {
                                 let result = create_new_game(id(), name(), *adjacencies.read()).await;
                                 if let Ok(route) = result {
-                                    dbg!(&route);
                                     use_navigator().push(route);
                                 } else {
                                     config.set(Some(Err(result.unwrap_err())));
