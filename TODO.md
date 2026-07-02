@@ -14,7 +14,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [x] Join New Game button
 - [x] Host New Game Button
 - [ ] *List of games*
-    - [ ] Resume button in leiu temp. 
+    - [ ] Resume button in lieu of temp. 
     - [ ] Automatically add joined games to the list
     - [ ] Way of removing games from the list
     - [ ] Archiving games so that you can see the results from local caches of them?
@@ -26,7 +26,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Create a copy in the backend
 
 ### Join New Game Page
-- [x] Text field for web adress
+- [x] Text field for web address
 - [ ] Country selection field (*post-connect*)
     - [ ] Ability to join random unclaimed country
     - [ ] Password protection for players
@@ -45,15 +45,15 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] 3D isometric views
 - [ ] Usual buttons at the bottom for order entry
 - [ ] Ghost board
-- [ ] Hover provinces for full province name and abreviation tooltip
+- [ ] Hover provinces for full province name and abbreviation tooltip
 - [ ] Hover orders for order tooltip
 
 ### Player List
 - [ ] List of all the powers
 - [ ] Number of centres controlled (and victory condition)
-- [ ] Pictoral representation of owned centres
+- [ ] Pictorial representation of owned centres
     - [ ] Hovering displays board indices
-    - [ ] Clicking a province cycles through eachg timeline on which it's owned and auto-zooms to it
+    - [ ] Clicking a province cycles through each timeline on which it's owned and auto-zooms to it
 
 ### Order Entry
 - [ ] Use the buttons
@@ -69,13 +69,13 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Quick copy entered orders
 
 ### Order Submission
-- [ ] Submit ordedrs
+- [ ] Submit orders
 - [ ] Resubmit different orders to change them
 - [ ] Undo previous submissions (backend integration)
     - [ ] *Diff display for past sets of orders*
     - [ ] *Stack-based in backend*
 
-### *Sandbox mode*
+### *Sandbox Mode*
 - [ ] *Add a separate sandbox mode*
 - [ ] *Allow for order entry for any units*
 - [ ] *Allow for the server to be asked to adjudicate a position*
