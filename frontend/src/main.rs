@@ -35,8 +35,8 @@ enum Route {
         // an `id` prop of type `i32`.
         Blog { id: i32 },
 
-        #[route("/open")]
-        ResumeGame {},
+        #[route("/open/:id")]
+        ResumeGame { id: String },
 
         #[route("/new/join")]
         JoinNewGame {},
