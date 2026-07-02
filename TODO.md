@@ -13,7 +13,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 ### Landing Page
 - [x] Join New Game button
 - [x] Host New Game Button
-- [ ] List of games
+- [ ] *List of games*
     - [ ] Resume button in leiu temp. 
     - [ ] Automatically add joined games to the list
     - [ ] Way of removing games from the list
@@ -21,17 +21,17 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 
 ### Host New Game Page
 - [ ] Creating a new game
-    - [ ] Text fields 
+    - [x] Text fields 
 - [ ] Create local (cached) copy of a game
 - [ ] Create a copy in the backend
 
-### Join Game Page
-- [ ] Text field for web adress
+### Join New Game Page
+- [x] Text field for web adress
 - [ ] Country selection field (*post-connect*)
     - [ ] Ability to join random unclaimed country
     - [ ] Password protection for players
         - [ ] *Password per player/per country*
-    - [ ] GMs can see and set passwords
+    - [ ] *GMs can see and set passwords*
 - [ ] Spectator account
 - [ ] GM account
 
