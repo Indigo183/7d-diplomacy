@@ -82,12 +82,12 @@ pub fn HostNewGame() -> Element {
             div {
                 class: "menu-options",
                 input {
-                    placeholder: "Game Title",
+                    placeholder: "Game Name",
                     oninput: move |event| name.set(event.value()),
                     disabled: is_loading(),
                 }
                 input {
-                    placeholder: "Game Name",
+                    placeholder: "Game ID",
                     value: id(),
                     text_transform: "lowercase",
                     oninput: move |event| id.set(sanitise(event.value())),
