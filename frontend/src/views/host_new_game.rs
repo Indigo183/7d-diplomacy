@@ -27,21 +27,21 @@ fn sanitise(input: String) -> String {
         .collect()
 }
 
-fn validate_game_name(name: &str) -> Result<(), &'static str> {
-    if name == "test" {
-        return Err("game \"test\" already exists");
+fn validate_game_id(id: &str) -> Result<(), &'static str> {
+    if id == "select-game" {
+        return Err("game id \"select-game\" is invalid");
     }
     Ok(())
 }
 
 async fn create_new_game(
     name: String,
-    title: String,
+    id: String,
     adjacencies: Adjacencies,
 ) -> Result<Route, &'static str> {
     smol::Timer::after(std::time::Duration::from_secs(5)).await;
-    println!("{title}\n{name}\n{adjacencies:?}");
-    Ok(Route::ResumeGame {})
+    println!("{name}\n{id}\n{adjacencies:?}");
+    Ok(Route::ResumeGame { id: id })
 }
 
 const HEADER_SVG: Asset = asset!("/assets/header.svg");
@@ -50,12 +50,12 @@ const HEADER_SVG: Asset = asset!("/assets/header.svg");
 #[component]
 pub fn HostNewGame() -> Element {
     let mut name = use_signal(|| String::new());
-    let mut title = use_signal(|| String::new());
+    let mut id = use_signal(|| String::new());
     let mut adjacencies = use_signal(|| Adjacencies::NotSelected);
     let mut config: Signal<Option<Result<(), &'static str>>> = use_signal(|| None);
 
     let input_is_valid =
-        move || *adjacencies.read() != Adjacencies::NotSelected && !name().is_empty();
+        move || *adjacencies.read() != Adjacencies::NotSelected && !id().is_empty();
     let is_loading = move || config() == Some(Ok(()));
 
     rsx! {
@@ -68,14 +68,14 @@ pub fn HostNewGame() -> Element {
                 class: "menu-options",
                 input {
                     placeholder: "Game Title",
-                    oninput: move |event| title.set(event.value()),
+                    oninput: move |event| name.set(event.value()),
                     disabled: is_loading(),
                 }
                 input {
                     placeholder: "Game Name",
-                    value: name(),
+                    value: id(),
                     text_transform: "lowercase",
-                    oninput: move |event| name.set(sanitise(event.value())),
+                    oninput: move |event| id.set(sanitise(event.value())),
                     disabled: is_loading(),
                 }
                 div {
@@ -103,11 +103,12 @@ pub fn HostNewGame() -> Element {
                     color: if let Some(Err(_)) = config() { "red" },
                     onclick: move |_event| async move {
                         if input_is_valid() && !is_loading() {
-                            let status = validate_game_name(&name());
+                            let status = validate_game_id(&id());
                             config.set(Some(status));
                             if let Ok(_) = status {
-                                let result = create_new_game(name(), title(), *adjacencies.read()).await;
+                                let result = create_new_game(id(), name(), *adjacencies.read()).await;
                                 if let Ok(route) = result {
+                                    dbg!(&route);
                                     use_navigator().push(route);
                                 } else {
                                     config.set(Some(Err(result.unwrap_err())));
