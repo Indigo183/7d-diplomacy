@@ -1,3 +1,7 @@
+use std::env;
+use std::fs;
+use std::path;
+
 use crate::Route;
 
 use dioxus::prelude::*;
@@ -27,11 +31,22 @@ fn sanitise(input: String) -> String {
         .collect()
 }
 
-fn validate_game_id(id: &str) -> Result<(), &'static str> {
+fn validate_game_id(id: &str) -> Result<(), String> {
     if id == "select-game" {
-        return Err("game id \"select-game\" is invalid");
+        return Err(String::from("game id `select-game` is invalid"));
     }
-    Ok(())
+    let game_directory = env::home_dir()
+        .expect("cannot detect user's home directory")
+        .join(".7dip");
+    let game_cache_directory = game_directory.join("joined-games/");
+    let game_storage_directory = game_directory.join("hosted-games/");
+    if fs::exists(game_cache_directory.join(id)).expect("could not access file")
+        || fs::exists(game_storage_directory.join(id)).expect("could not access file")
+    {
+        Err(format!("game id `{id}` already exists"))
+    } else {
+        Ok(())
+    }
 }
 
 async fn create_new_game(
@@ -52,7 +67,7 @@ pub fn HostNewGame() -> Element {
     let mut name = use_signal(|| String::new());
     let mut id = use_signal(|| String::new());
     let mut adjacencies = use_signal(|| Adjacencies::NotSelected);
-    let mut config: Signal<Option<Result<(), &'static str>>> = use_signal(|| None);
+    let mut config: Signal<Option<Result<(), String>>> = use_signal(|| None);
 
     let input_is_valid =
         move || *adjacencies.read() != Adjacencies::NotSelected && !id().is_empty();
@@ -104,22 +119,23 @@ pub fn HostNewGame() -> Element {
                     onclick: move |_event| async move {
                         if input_is_valid() && !is_loading() {
                             let status = validate_game_id(&id());
-                            config.set(Some(status));
+                            config.set(Some(status.clone()));
+
                             if let Ok(_) = status {
                                 let result = create_new_game(name(), id(), *adjacencies.read()).await;
                                 if let Ok(route) = result {
                                     use_navigator().push(route);
                                 } else {
-                                    config.set(Some(Err(result.unwrap_err())));
+                                    config.set(Some(Err(String::from(result.unwrap_err()))));
                                 }
                             }
                         }
                     },
                     disabled: !input_is_valid() || is_loading(),
                     match config() {
-                        None => "Submit",
+                        None => String::from("Submit"),
                         Some(Err(err)) => err,
-                        Some(Ok(())) => "Creating..."
+                        Some(Ok(())) => String::from("Creating..."),
                     }
                 }
             }
