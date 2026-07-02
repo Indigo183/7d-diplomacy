@@ -1,6 +1,8 @@
+use crate::Route;
+
 use dioxus::prelude::*;
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Debug)]
 enum Adjacencies {
     Strict,
     Loose,
@@ -25,11 +27,21 @@ fn sanitise(input: String) -> String {
         .collect()
 }
 
-fn validate_new_game(name: &str, adjacencies: Adjacencies) -> Result<(), &'static str> {
+fn validate_game_name(name: &str) -> Result<(), &'static str> {
     if name == "test" {
         return Err("game \"test\" already exists");
     }
     Ok(())
+}
+
+async fn create_new_game(
+    name: String,
+    title: String,
+    adjacencies: Adjacencies,
+) -> Result<Route, &'static str> {
+    smol::Timer::after(std::time::Duration::from_secs(5)).await;
+    println!("{title}\n{name}\n{adjacencies:?}");
+    Ok(Route::ResumeGame {})
 }
 
 const HEADER_SVG: Asset = asset!("/assets/header.svg");
@@ -89,8 +101,19 @@ pub fn HostNewGame() -> Element {
                 }
                 button {
                     color: if let Some(Err(_)) = config() { "red" },
-                    onclick: move |_event| if input_is_valid() && !is_loading() {
-                        config.set(Some(validate_new_game(&name(), *adjacencies.read())));
+                    onclick: move |_event| async move {
+                        if input_is_valid() && !is_loading() {
+                            let status = validate_game_name(&name());
+                            config.set(Some(status));
+                            if let Ok(_) = status {
+                                let result = create_new_game(name(), title(), *adjacencies.read()).await;
+                                if let Ok(route) = result {
+                                    use_navigator().push(route);
+                                } else {
+                                    config.set(Some(Err(result.unwrap_err())));
+                                }
+                            }
+                        }
                     },
                     disabled: !input_is_valid() || is_loading(),
                     match config() {

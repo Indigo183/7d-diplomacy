@@ -178,9 +178,6 @@
   .lowercase {
     text-transform: lowercase;
   }
-  .uppercase {
-    text-transform: uppercase;
-  }
 }
 @property --tw-rotate-x {
   syntax: "*";
