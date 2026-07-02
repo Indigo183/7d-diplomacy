@@ -85,6 +85,8 @@ interface Provinces<T: Province> {
 
 interface Player: Serializable {
 	val homeCentres: List<Province>;
+
+    val name: String;
 }
 
 inline fun <reified T> setup(): Map<Piece, Player> where T : Player, T : Enum<T> =

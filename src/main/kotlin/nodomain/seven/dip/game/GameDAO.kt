@@ -1,6 +1,8 @@
 package nodomain.seven.dip.game
 
 import nodomain.seven.dip.adjudication.adjudicate
+import nodomain.seven.dip.api.SignUps
+import nodomain.seven.dip.api.User
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.T
@@ -36,13 +38,22 @@ object GameDAO {
         }
     }
 
+    fun loadSignUps(name: String): SignUps {
+        val saveGamePath = filePath.resolve(name).resolve("signUps.ser")
+        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
+            it.readObject() as SignUps
+        }
+    }
+
     fun existingGame(name: String) = Files.exists(filePath.resolve(name))
 
-    fun storeGame(name: String, game: Game) {
+    fun storeGame(name: String, game: Game, signUps: SignUps? = null) {
         val gamePath = filePath.resolve(name)
         Files.createDirectory(gamePath)
         Files.createFile(gamePath.resolve("gameObject.ser"))
         ObjectOutputStream(BufferedOutputStream(FileOutputStream(gamePath.resolve("gameObject.ser").toFile()))).use { it.writeObject(game) }
+        Files.createFile(gamePath.resolve("signUps.ser"))
+        ObjectOutputStream(BufferedOutputStream(FileOutputStream(gamePath.resolve("signUps.ser").toFile()))).use { it.writeObject(signUps) }
     }
 }
 
