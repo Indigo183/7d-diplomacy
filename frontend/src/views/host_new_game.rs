@@ -39,7 +39,7 @@ async fn create_new_game(
     id: String,
     adjacencies: Adjacencies,
 ) -> Result<Route, &'static str> {
-    smol::Timer::after(std::time::Duration::from_secs(5)).await;
+    smol::Timer::after(std::time::Duration::from_secs(2)).await;
     println!("{name}\n{id}\n{adjacencies:?}");
     Ok(Route::ResumeGame { id: id })
 }
@@ -106,7 +106,7 @@ pub fn HostNewGame() -> Element {
                             let status = validate_game_id(&id());
                             config.set(Some(status));
                             if let Ok(_) = status {
-                                let result = create_new_game(id(), name(), *adjacencies.read()).await;
+                                let result = create_new_game(name(), id(), *adjacencies.read()).await;
                                 if let Ok(route) = result {
                                     use_navigator().push(route);
                                 } else {
