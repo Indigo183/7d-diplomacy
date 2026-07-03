@@ -2,7 +2,6 @@ package nodomain.seven.dip.game
 
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.api.SignUps
-import nodomain.seven.dip.api.User
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.T
@@ -13,7 +12,7 @@ import nodomain.seven.dip.utils.c
 import nodomain.seven.dip.utils.filePath
 import nodomain.seven.dip.utils.i
 import nodomain.seven.dip.utils.plus
-import nodomain.seven.dip.utils.setupJWT
+import nodomain.seven.dip.utils.setupFiles
 import java.io.BufferedInputStream
 import java.io.BufferedOutputStream
 import java.io.FileInputStream
@@ -25,7 +24,7 @@ import kotlin.io.path.Path
 
 object GameDAO {
     init {
-        if (!Files.exists(filePath)) setupJWT(filePath)
+        if (!Files.exists(filePath)) setupFiles(filePath)
         if (!Files.exists(filePath.resolve(Path("testGame", "gameObject.ser")))) {
             storeGame("testGame", newTestGame())
         }

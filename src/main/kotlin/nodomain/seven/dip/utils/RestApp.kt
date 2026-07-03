@@ -23,7 +23,7 @@ class RestApp: Application()
 val filePath = Path(System.getProperty("user.home"), ".7dip")
 
 
-fun setupJWT(filePath: Path) {
+fun setupFiles(filePath: Path) {
     Files.createDirectories(filePath.resolve("security"))
     val jwtPath = filePath.resolve(Paths.get("security", "JWT_key.ser"))
     Files.createFile(jwtPath)
@@ -35,7 +35,7 @@ fun setupJWT(filePath: Path) {
 @ApplicationScoped
 class JWTKeyProvider {
     init {
-        if (!Files.exists(filePath)) setupJWT(filePath)
+        if (!Files.exists(filePath)) setupFiles(filePath)
     }
     @Produces
     val key: SecretKey = ObjectInputStream(BufferedInputStream(FileInputStream(
