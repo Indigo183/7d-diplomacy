@@ -42,13 +42,13 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
         gameResource.with(id, userName, password)
 
     @PUT
-    fun createAccount(@HeaderParam("UserName") userName: String,
-                      @HeaderParam("Password") password: String) {
-        if (! Regex("^(?=.{4,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName))
+    fun createAccount(@HeaderParam("UserName") userName: String?,
+                      @HeaderParam("Password") password: String?) {
+        if (! Regex("^(?=.{4,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
             throw BadRequestException("User name must be an alphanumerical kabab case string of at least 4 characters")
-        if (! Regex("^(?=.{8,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName))
+        if (! Regex("^(?=.{8,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
             throw BadRequestException("Password must be an alphanumerical kabab case string of at least 8 characters")
-        UserDao.signUp(User(userName, password))
+        UserDao.signUp(User(userName!!, password!!))
     }
 
     @GET
