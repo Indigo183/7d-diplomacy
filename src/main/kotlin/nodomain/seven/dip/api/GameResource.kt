@@ -20,20 +20,20 @@ import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.provinces.RomanPlayers
 import kotlin.enums.enumEntries
 
-fun preventReservedTerms(name: String) {
-    when(name) {
-        "security" -> throw BadRequestException("reserved term may not be used as game name")
+fun preventReservedTerms(id: String) {
+    when(id) {
+        "security" -> throw BadRequestException("reserved term may not be used as game id")
     }
 }
 
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
 class GamesResource @Inject constructor(val gameResource: GameResource) {
-    @Path("{name}")
-    fun game(@PathParam("gameID") name: String,
-             @HeaderParam("UserName") userName: String? = null,
-             @HeaderParam("Password") password: String? = null) =
-        gameResource.with(name, userName, password)
+    @Path("{id}")
+    fun game(@PathParam("id") id: String,
+             @HeaderParam("UserName") userName: String?,
+             @HeaderParam("Password") password: String?) =
+        gameResource.with(id, userName, password)
 
     @PUT
     fun createAccount(@HeaderParam("UserName") userName: String,
@@ -44,14 +44,14 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    fun createGame(@QueryParam("gameID") name: String, @HeaderParam("UserName") userName: String,
+    fun createGame(@QueryParam("id") id: String, @HeaderParam("UserName") userName: String,
                    @HeaderParam("Password") password: String): String {
-        preventReservedTerms(name)
-        if (GameDAO.existingGame(name)) throw BadRequestException("game by this name already exists")
+        preventReservedTerms(id)
+        if (GameDAO.existingGame(id)) throw BadRequestException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
         val signUps = SignUps(gm = User(userName, password), countries = enumEntries<RomanPlayers>())
-        GameDAO.storeGame(name, game, signUps)
+        GameDAO.storeGame(id, game, signUps)
         return ""
     }
 }
@@ -60,10 +60,10 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
 @Produces(MediaType.APPLICATION_JSON)
 class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     lateinit var user: User
-    lateinit var name: String
-    fun with(name: String, userName: String?, password: String?): GameResource {
-        preventReservedTerms(name)
-        this.name = name
+    lateinit var id: String
+    fun with(id: String, userName: String?, password: String?): GameResource {
+        preventReservedTerms(id)
+        this.id = id
         if (userName != null && password != null)
             this.user = User(userName, password)
         return this
@@ -71,15 +71,15 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
 
     @GET
     fun getGame() = try {
-        GameDAO.loadGame(name)
+        GameDAO.loadGame(id)
     } catch (_ : Exception) {
-        throw NotFoundException("no game exists by that name")
+        throw NotFoundException("no game exists with this id")
     }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     fun signUp(@QueryParam("country") country: String): String =
-        GameDAO.loadSignUps(name).signUp(user, country).name
+        GameDAO.loadSignUps(id).signUp(user, country).name
 
     @PATCH
     @Produces(MediaType.TEXT_PLAIN)
@@ -97,10 +97,10 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
 @Produces(MediaType.APPLICATION_JSON)
 class OrdersResource {
     lateinit var user: User
-    lateinit var name: String
-    fun with(name: String, user: User): OrdersResource {
-        preventReservedTerms(name)
-        this.name = name
+    lateinit var id: String
+    fun with(id: String, user: User): OrdersResource {
+        preventReservedTerms(id)
+        this.id = id
         this.user = user
         return this
     }
@@ -108,7 +108,7 @@ class OrdersResource {
 
     @GET
     fun getOrders(@PathParam("country") country: String): List<Order> =
-        user.orders[name] ?: listOf()
+        user.orders[id] ?: listOf()
 
     @POST
     fun postOrders(@PathParam("country") country: String, orders: String): List<Order> = listOf()
