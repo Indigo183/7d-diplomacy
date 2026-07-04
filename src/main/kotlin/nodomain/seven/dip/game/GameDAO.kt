@@ -1,5 +1,6 @@
 package nodomain.seven.dip.game
 
+import jakarta.ws.rs.NotFoundException
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.api.SignUps
 import nodomain.seven.dip.orders.A
@@ -20,6 +21,7 @@ import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 object GameDAO {
@@ -38,9 +40,13 @@ object GameDAO {
     }
 
     fun loadSignUps(name: String): SignUps {
-        val saveGamePath = filePath.resolve(name).resolve("signUps.ser")
-        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
-            it.readObject() as SignUps
+        try {
+            val saveGamePath = filePath.resolve(name).resolve("signUps.ser")
+            return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
+                it.readObject() as SignUps
+            }
+        } catch (_: Exception) {
+            throw NotFoundException("Game sign-up object cannot be located")
         }
     }
 
@@ -50,9 +56,35 @@ object GameDAO {
         val gamePath = filePath.resolve(name)
         Files.createDirectory(gamePath)
         Files.createFile(gamePath.resolve("gameObject.ser"))
-        ObjectOutputStream(BufferedOutputStream(FileOutputStream(gamePath.resolve("gameObject.ser").toFile()))).use { it.writeObject(game) }
+        saveGame(name, game)
         Files.createFile(gamePath.resolve("signUps.ser"))
-        ObjectOutputStream(BufferedOutputStream(FileOutputStream(gamePath.resolve("signUps.ser").toFile()))).use { it.writeObject(signUps) }
+        saveSignUps(name, signUps)
+    }
+
+    fun saveSignUps(name: String, signUps: SignUps?) {
+        val gamePath = filePath.resolve(name)
+        ObjectOutputStream(
+            BufferedOutputStream(
+                FileOutputStream(
+                    gamePath.resolve("signUps.ser").toFile()
+                )
+            )
+        ).use {
+            it.writeObject(signUps)
+        }
+    }
+
+    fun saveGame(name: String, game: Game) {
+        val gamePath = filePath.resolve(name)
+        ObjectOutputStream(
+            BufferedOutputStream(
+                FileOutputStream(
+                    gamePath.resolve("gameObject.ser").toFile()
+                )
+            )
+        ).use {
+            it.writeObject(game)
+        }
     }
 }
 

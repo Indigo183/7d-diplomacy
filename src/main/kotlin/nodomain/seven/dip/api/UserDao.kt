@@ -23,10 +23,13 @@ object UserDao {
         }
     }
 
+    fun find(user: User): Boolean = Files.exists(userDataPath.resolve("${user.name}.ser"))
+
     fun signUp(user: User) {
-        if (!Files.exists(userDataPath.resolve("${user.name}.ser"))) {
+        if (find(user)) {
             throw BadRequestException("User name already taken")
         }
+        Files.createFile(userDataPath.resolve("${user.name}.ser"))
         saveData(user)
     }
 
@@ -47,5 +50,11 @@ object UserDao {
             throw UnauthorizedException("Not authenticated")
         }
         return user
+    }
+
+    fun getUser(name: String): User {
+       return ObjectInputStream(BufferedInputStream(FileInputStream(userDataPath.resolve("$name.ser").toFile()))).use {
+            it.readObject() as User
+       }
     }
 }

@@ -2,12 +2,12 @@ package nodomain.seven.dip.api
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.ws.rs.BadRequestException
-import nodomain.seven.dip.orders.Order
+import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.provinces.Player
 import java.io.Serializable
 
 data class User(val name: String, val password: String,
-                @field:JsonIgnore val orders: MutableMap<String, List<Order>> = mutableMapOf()) : Serializable {
+                @field:JsonIgnore val orders: MutableMap<String, List<Inputtable>> = mutableMapOf()) : Serializable {
     override fun equals(other: Any?): Boolean {
         return other is User && other.name == name
     }
