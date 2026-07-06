@@ -2,22 +2,9 @@ use std::env;
 use std::fs;
 
 use crate::Route;
+use crate::settings::*;
 
 use dioxus::prelude::*;
-
-#[derive(PartialEq, Clone, Copy, Debug)]
-enum Adjacencies {
-    Strict,
-    Loose,
-}
-impl std::fmt::Display for Adjacencies {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Strict => write!(f, "Strict"),
-            Self::Loose => write!(f, "Loose"),
-        }
-    }
-}
 
 fn sanitise(input: String) -> String {
     input
@@ -52,7 +39,7 @@ async fn create_new_game(
     adjacencies: Adjacencies,
 ) -> Result<Route, &'static str> {
     smol::Timer::after(std::time::Duration::from_secs(2)).await;
-    println!("{name}\n{id}\n{adjacencies:?}");
+    println!("{name}\n{id}\n{adjacencies}");
     Ok(Route::ResumeGame { id: id })
 }
 
