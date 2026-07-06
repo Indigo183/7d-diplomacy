@@ -1,6 +1,5 @@
 use std::env;
 use std::fs;
-use std::path;
 
 use crate::Route;
 
@@ -10,14 +9,12 @@ use dioxus::prelude::*;
 enum Adjacencies {
     Strict,
     Loose,
-    NotSelected,
 }
 impl std::fmt::Display for Adjacencies {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Strict => write!(f, "Strict"),
             Self::Loose => write!(f, "Loose"),
-            Self::NotSelected => write!(f, ""),
         }
     }
 }
@@ -66,11 +63,10 @@ const HEADER_SVG: Asset = asset!("/assets/header.svg");
 pub fn HostNewGame() -> Element {
     let mut name = use_signal(|| String::new());
     let mut id = use_signal(|| String::new());
-    let mut adjacencies = use_signal(|| Adjacencies::NotSelected);
+    let mut adjacencies: Signal<Option<Adjacencies>> = use_signal(|| None);
     let mut config: Signal<Option<Result<(), String>>> = use_signal(|| None);
 
-    let input_is_valid =
-        move || *adjacencies.read() != Adjacencies::NotSelected && !id().is_empty();
+    let input_is_valid = move || adjacencies().is_some() && !id().is_empty();
     let is_loading = move || config() == Some(Ok(()));
 
     rsx! {
@@ -97,19 +93,19 @@ pub fn HostNewGame() -> Element {
                     id: "adjacencies",
                     button {
                         id: "left-button",
-                        style: if let Adjacencies::Strict = *adjacencies.read() {
+                        style: if let Some(Adjacencies::Strict) = *adjacencies.read() {
                             "background-color: darkslategray;"
                         },
-                        onclick: move |_event| adjacencies.set(Adjacencies::Strict),
+                        onclick: move |_event| adjacencies.set(Some(Adjacencies::Strict)),
                         disabled: is_loading(),
                         "Strict"
                     }
                     button {
                         id: "right-button",
-                        style: if let Adjacencies::Loose = *adjacencies.read() {
+                        style: if let Some(Adjacencies::Loose) = *adjacencies.read() {
                             "background-color: darkslategray;"
                         },
-                        onclick: move |_event| adjacencies.set(Adjacencies::Loose),
+                        onclick: move |_event| adjacencies.set(Some(Adjacencies::Loose)),
                         disabled: is_loading(),
                         "Loose"
                     }
@@ -122,7 +118,11 @@ pub fn HostNewGame() -> Element {
                             config.set(Some(status.clone()));
 
                             if let Ok(_) = status {
-                                let result = create_new_game(name(), id(), *adjacencies.read()).await;
+                                let result = create_new_game(
+                                    name(),
+                                    id(),
+                                    adjacencies().expect("should be checked by `input_is_valid()`"),
+                                ).await;
                                 if let Ok(route) = result {
                                     use_navigator().push(route);
                                 } else {
