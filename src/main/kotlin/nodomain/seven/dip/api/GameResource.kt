@@ -18,10 +18,12 @@ import jakarta.ws.rs.PUT
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import nodomain.seven.dip.adjudication.adjudicate
+import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
+import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
 import kotlin.enums.enumEntries
@@ -44,14 +46,14 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     @PUT
     fun createAccount(@HeaderParam("UserName") userName: String?,
                       @HeaderParam("Password") password: String?) {
-        if (! Regex("^(?=.{4,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
-            throw BadRequestException("User name must be an alphanumerical kabab case string of at least 4 characters")
-        if (! Regex("^(?=.{8,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
-            throw BadRequestException("Password must be an alphanumerical kabab case string of at least 8 characters")
+//        if (! Regex("^(?=.{4,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
+//            throw BadRequestException("User name must be an alphanumerical kabab case string of at least 4 characters")
+//        if (! Regex("^(?=.{8,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
+//            throw BadRequestException("Password must be an alphanumerical kabab case string of at least 8 characters")
         UserDao.signUp(User(userName!!, password!!))
     }
 
-    @GET
+    @GET //DO NOT USE YET. PROMISE FOR THE FUTURE
     fun getGameNames(user: User): Set<String> = UserDao.login(user).orders.keys
 
     @POST
@@ -100,7 +102,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     @PATCH
     fun adjudicate(): Game { // not atomized! not safe! very much not enterprise grade!
         val signUps = GameDAO.loadSignUps(id)
-        if (signUps.gm == UserDao.login(user))
+        if (signUps.gm.name != UserDao.login(user).name)
             throw UnauthorizedException("Only the GM of this game may adjudicate it!")
         val game = GameDAO.loadGame(id)
         signUps.players.forEach { (userName, country) ->
@@ -140,7 +142,8 @@ class OrdersResource {
     @POST
     fun postOrders(@PathParam("country") country: String, orders: String): List<Inputtable> {
         val gameState = GameDAO.loadGame(id).gameState
-        val player = GameDAO.loadSignUps(id).players[user.name] ?: throw UnauthorizedException("Not signed up as $country in $id")
+        val player = GameDAO.loadSignUps(id).players[user.name]
+            ?: throw UnauthorizedException("Not signed up as $country in $id")
         val parsedOrders: List<Inputtable> = try {
             getParser<RomanPlayers, Romans>()
                 .parseOrderSet(orders, Parser.FullNationalisedFormat.DATC, gameState)[player]
@@ -152,5 +155,4 @@ class OrdersResource {
         UserDao.saveData(user)
         return parsedOrders
     }
-
 }
