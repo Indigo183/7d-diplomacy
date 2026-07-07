@@ -7,8 +7,12 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+# frontend rendering stuff
 dioxus = { version = "0.7.9", features = ["router"] }
+# async stuff
 smol = "2.0.2"
+# json stuff
+serde_json = "1.0"
 
 [features]
 default = ["desktop"]
