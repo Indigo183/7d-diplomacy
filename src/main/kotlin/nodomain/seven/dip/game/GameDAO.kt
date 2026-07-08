@@ -21,7 +21,6 @@ import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.io.path.Path
 
 object GameDAO {
@@ -40,13 +39,9 @@ object GameDAO {
     }
 
     fun loadSignUps(name: String): SignUps {
-        try {
-            val saveGamePath = filePath.resolve(name).resolve("signUps.ser")
-            return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
-                it.readObject() as SignUps
-            }
-        } catch (_: Exception) {
-            throw NotFoundException("Game sign-up object cannot be located")
+        val saveGamePath = filePath.resolve(name).resolve("signUps.ser")
+        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
+            it.readObject() as SignUps
         }
     }
 
@@ -57,11 +52,13 @@ object GameDAO {
         Files.createDirectory(gamePath)
         Files.createFile(gamePath.resolve("gameObject.ser"))
         saveGame(name, game)
-        Files.createFile(gamePath.resolve("signUps.ser"))
-        saveSignUps(name, signUps)
+        if (signUps !== null) {
+            Files.createFile(gamePath.resolve("signUps.ser"))
+            saveSignUps(name, signUps)
+        }
     }
 
-    fun saveSignUps(name: String, signUps: SignUps?) {
+    fun saveSignUps(name: String, signUps: SignUps) {
         val gamePath = filePath.resolve(name)
         ObjectOutputStream(
             BufferedOutputStream(

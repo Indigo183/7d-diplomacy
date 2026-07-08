@@ -24,12 +24,13 @@ import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
-import nodomain.seven.dip.utils.UnprocessableEntryException
+import nodomain.seven.dip.utils.exceptions.ConflictException
+import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
 import kotlin.enums.enumEntries
 
 fun preventReservedTerms(id: String) {
     when(id) {
-        "security" -> throw BadRequestException("reserved term may not be used as game id")
+        "security", "users" -> throw BadRequestException("reserved term may not be used as game id")
     }
 }
 
@@ -60,7 +61,7 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     fun createGame(@QueryParam("id") id: String, @HeaderParam("UserName") userName: String,
                    @HeaderParam("Password") password: String): String {
         preventReservedTerms(id)
-        if (GameDAO.existingGame(id)) throw BadRequestException("game with this id already exists")
+        if (GameDAO.existingGame(id)) throw ConflictException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
         val signUps = SignUps(gm = UserDao.login(User(userName, password)), countries = enumEntries<RomanPlayers>())
@@ -92,7 +93,11 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     fun signUp(@QueryParam("country") country: String): String {
-        val signUps = GameDAO.loadSignUps(id)
+        val signUps = try {
+            GameDAO.loadSignUps(id)
+        } catch (_: Exception) {
+            throw NotFoundException("Game sign-up object cannot be located")
+        }
         val signedUpCountry = signUps.signUp(UserDao.login(user), country)
         GameDAO.saveSignUps(id, signUps)
         return signedUpCountry.name
@@ -100,7 +105,11 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
 
     @PATCH
     fun adjudicate(): Game { // not atomized! not safe! very much not enterprise grade!
-        val signUps = GameDAO.loadSignUps(id)
+        val signUps = try {
+            GameDAO.loadSignUps(id)
+        } catch (_: Exception) {
+            throw NotFoundException("Game sign-up object cannot be located")
+        }
         if (signUps.gm.name != UserDao.login(user).name)
             throw UnauthorizedException("Only the GM of this game may adjudicate it!")
         val game = GameDAO.loadGame(id)
@@ -147,8 +156,8 @@ class OrdersResource {
             getParser<RomanPlayers, Romans>()
                 .parseOrderSet(orders, format = Parser.FullNationalisedFormat.DATC, gameState = gameState)[player]
         } catch (e: Exception) {
-            throw BadRequestException("Incorrect format for the parser", e)
-        } ?: throw BadRequestException("No orders for $country ware found in your order set")
+            throw UnprocessableEntryException("Incorrect format for the parser", e)
+        } ?: listOf()
         user.orders[id] = parsedOrders
         UserDao.saveData(user)
         return parsedOrders

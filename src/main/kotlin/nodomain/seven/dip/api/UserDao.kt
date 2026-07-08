@@ -1,7 +1,7 @@
 package nodomain.seven.dip.api
 
-import io.quarkus.security.UnauthorizedException
-import jakarta.ws.rs.BadRequestException
+import nodomain.seven.dip.utils.exceptions.ConflictException
+import nodomain.seven.dip.utils.exceptions.UnauthenticatedException
 import nodomain.seven.dip.utils.filePath
 import nodomain.seven.dip.utils.setupFiles
 import java.io.BufferedInputStream
@@ -27,7 +27,7 @@ object UserDao {
 
     fun signUp(user: User) {
         if (find(user)) {
-            throw BadRequestException("User name already taken")
+            throw ConflictException("User name already taken")
         }
         Files.createFile(userDataPath.resolve("${user.name}.ser"))
         saveData(user)
@@ -41,13 +41,13 @@ object UserDao {
     fun login(logIn: User): User {
         val  userFile = userDataPath.resolve("${logIn.name}.ser")
         if (!Files.exists(userFile)) {
-            throw UnauthorizedException("Not authenticated")
+            throw UnauthenticatedException("Incorrect username or password")
         }
         val user = ObjectInputStream(BufferedInputStream(FileInputStream(userFile.toFile()))).use {
             it.readObject() as User
         }
         if (user.password != logIn.password) {
-            throw UnauthorizedException("Not authenticated")
+            throw UnauthenticatedException("Incorrect username or password")
         }
         return user
     }
