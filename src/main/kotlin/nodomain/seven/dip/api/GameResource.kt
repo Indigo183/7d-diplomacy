@@ -18,14 +18,13 @@ import jakarta.ws.rs.PUT
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import nodomain.seven.dip.adjudication.adjudicate
-import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
-import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
+import nodomain.seven.dip.utils.UnprocessableEntryException
 import kotlin.enums.enumEntries
 
 fun preventReservedTerms(id: String) {
@@ -46,11 +45,11 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     @PUT
     fun createAccount(@HeaderParam("UserName") userName: String?,
                       @HeaderParam("Password") password: String?) {
-//        if (! Regex("^(?=.{4,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
-//            throw BadRequestException("User name must be an alphanumerical kabab case string of at least 4 characters")
-//        if (! Regex("^(?=.{8,}$)[a-z0-9]+(?:-[a-z0-9]+)*$").matches(userName ?: ""))
-//            throw BadRequestException("Password must be an alphanumerical kabab case string of at least 8 characters")
-        UserDao.signUp(User(userName!!, password!!))
+        if (userName === null || userName.length < 4 || ! Regex("^[A-Za-z0-9-]+$").matches(userName))
+            throw UnprocessableEntryException("UserName must be an alphanumerical kabab case string of at least 4 characters")
+        if (password === null || password.length < 8 || ! Regex("^[A-Za-z0-9-]+$").matches(password))
+            throw UnprocessableEntryException("Password must be an alphanumerical kabab case string of at least 8 characters")
+        UserDao.signUp(User(userName, password))
     }
 
     @GET //DO NOT USE YET. PROMISE FOR THE FUTURE
@@ -146,11 +145,10 @@ class OrdersResource {
             ?: throw UnauthorizedException("Not signed up as $country in $id")
         val parsedOrders: List<Inputtable> = try {
             getParser<RomanPlayers, Romans>()
-                .parseOrderSet(orders, Parser.FullNationalisedFormat.DATC, gameState)[player]
-                ?: throw BadRequestException("No orders for $country ware found in your order set")
+                .parseOrderSet(orders, format = Parser.FullNationalisedFormat.DATC, gameState = gameState)[player]
         } catch (e: Exception) {
             throw BadRequestException("Incorrect format for the parser", e)
-        }
+        } ?: throw BadRequestException("No orders for $country ware found in your order set")
         user.orders[id] = parsedOrders
         UserDao.saveData(user)
         return parsedOrders
