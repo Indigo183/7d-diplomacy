@@ -20,7 +20,7 @@ import kotlin.io.path.Path
 @ApplicationPath("api")
 class RestApp: Application()
 
-val filePath = Path(System.getProperty("user.home"), ".7dip")
+var filePath = Path(System.getProperty("user.home"), ".7dip")
 
 
 fun setupFiles(filePath: Path) {
