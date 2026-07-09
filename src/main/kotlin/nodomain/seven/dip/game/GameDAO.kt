@@ -20,10 +20,12 @@ import java.io.FileOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.nio.file.Files
+import java.nio.file.Path
+import java.util.stream.Collectors.toList
 import kotlin.io.path.Path
 
 object GameDAO {
-    val gameDataPath = filePath.resolve("hostedGames")
+    val gameDataPath: Path = filePath.resolve("hostedGames")
 
     init {
         if (!Files.exists(filePath)) setupFiles(filePath)
@@ -46,6 +48,11 @@ object GameDAO {
             it.readObject() as SignUps
         }
     }
+
+    fun allGames(): List<String> = Files.walk(gameDataPath, 1)
+        .filter(Files::isDirectory)
+        .map { it.getName(it.nameCount - 1).toString() }
+        .collect(toList()).also { it.removeFirst() }
 
     fun existingGame(name: String) = Files.exists(gameDataPath.resolve(name))
 

@@ -54,7 +54,12 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     }
 
     @GET //DO NOT USE YET. PROMISE FOR THE FUTURE
-    fun getGameNames(user: User): Set<String> = UserDao.login(user).orders.keys
+    fun getGameNames(@HeaderParam("UserName") userName: String?,
+                     @HeaderParam("Password") password: String?): Collection<String> {
+        if (userName !== null)
+            return UserDao.login(User(userName, password!!)).orders.keys
+        return GameDAO.allGames()
+    }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
