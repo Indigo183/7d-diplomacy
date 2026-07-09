@@ -25,7 +25,7 @@ import java.util.stream.Collectors.toList
 import kotlin.io.path.Path
 
 object GameDAO {
-    val gameDataPath: Path = filePath.resolve("hostedGames")
+    val gameDataPath: Path = filePath.resolve("hosted-games")
 
     init {
         if (!Files.exists(filePath)) setupFiles(filePath)
