@@ -1,6 +1,5 @@
 package nodomain.seven.dip.game
 
-import jakarta.ws.rs.NotFoundException
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.api.SignUps
 import nodomain.seven.dip.orders.A
@@ -24,31 +23,34 @@ import java.nio.file.Files
 import kotlin.io.path.Path
 
 object GameDAO {
+    val gameDataPath = filePath.resolve("hostedGames")
+
     init {
         if (!Files.exists(filePath)) setupFiles(filePath)
-        if (!Files.exists(filePath.resolve(Path("testGame", "gameObject.ser")))) {
+        if (!Files.exists(gameDataPath)) Files.createDirectory(gameDataPath)
+        if (!Files.exists(gameDataPath.resolve(Path("testGame", "gameObject.ser")))) {
             storeGame("testGame", newTestGame())
         }
     }
 
     fun loadGame(name: String): Game {
-        val saveGamePath = filePath.resolve(name).resolve("gameObject.ser")
+        val saveGamePath = gameDataPath.resolve(name).resolve("gameObject.ser")
         return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
             it.readObject() as Game
         }
     }
 
     fun loadSignUps(name: String): SignUps {
-        val saveGamePath = filePath.resolve(name).resolve("signUps.ser")
+        val saveGamePath = gameDataPath.resolve(name).resolve("signUps.ser")
         return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
             it.readObject() as SignUps
         }
     }
 
-    fun existingGame(name: String) = Files.exists(filePath.resolve(name))
+    fun existingGame(name: String) = Files.exists(gameDataPath.resolve(name))
 
     fun storeGame(name: String, game: Game, signUps: SignUps? = null) {
-        val gamePath = filePath.resolve(name)
+        val gamePath = gameDataPath.resolve(name)
         Files.createDirectory(gamePath)
         Files.createFile(gamePath.resolve("gameObject.ser"))
         saveGame(name, game)
@@ -59,7 +61,7 @@ object GameDAO {
     }
 
     fun saveSignUps(name: String, signUps: SignUps) {
-        val gamePath = filePath.resolve(name)
+        val gamePath = gameDataPath.resolve(name)
         ObjectOutputStream(
             BufferedOutputStream(
                 FileOutputStream(
@@ -72,7 +74,7 @@ object GameDAO {
     }
 
     fun saveGame(name: String, game: Game) {
-        val gamePath = filePath.resolve(name)
+        val gamePath = gameDataPath.resolve(name)
         ObjectOutputStream(
             BufferedOutputStream(
                 FileOutputStream(
