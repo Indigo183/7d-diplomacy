@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.Location
+import java.io.Serializable
 
 operator fun Map<Piece, Player>.get(location: Location): Player? {
     return get(Army(location)) ?: get(Fleet(location))
 }
 
-sealed interface ComputableMoveResult {
+sealed interface ComputableMoveResult: Serializable {
     val moveOrder: MoveOrder?
     val location: Location get() = moveOrder!!.action.to
 
@@ -35,6 +36,12 @@ value class Bounce(override val location: Location): MoveResult {
     override val moveOrder: MoveOrder? get() = null
     override fun toString(): String = "bounce in $location"
 }
+
+data class AdjudicationResult(
+    val nonCutSupports: List<SupportOrder>,
+    val dislodgements: MutableList<MoveOrder>,
+    val moveResults: List<MoveResult>
+): Serializable
 
 class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgnore val piecesIn: Map<Piece, Player>) {
     private inner class MoveAnalysis(val order: MoveOrder) {
@@ -65,6 +72,8 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgn
      *  The list may contain additional bounces in occupied provinces
      */
     val moveResults = computeMovesAndBounces()
+
+    fun result() = AdjudicationResult(nonCutSupports,  dislodgements,  moveResults)
 
     private fun computeMovesAndBounces(): List<MoveResult> {
         val withDependantMove = initialMoveResults().updatesDueToDislodgement()

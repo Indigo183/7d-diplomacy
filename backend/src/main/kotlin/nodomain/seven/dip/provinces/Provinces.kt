@@ -2,11 +2,12 @@ package nodomain.seven.dip.provinces
 
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.utils.*
+import java.io.Serializable
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.enums.enumEntries
 
-interface Province {
+interface Province: Serializable {
     infix fun isAdjacent(other: Province): Boolean
 
     infix fun isAdjacentFor(other: Piece): Boolean {
@@ -82,8 +83,10 @@ interface Provinces<T: Province> {
 }
 
 
-interface Player {
+interface Player: Serializable {
 	val homeCentres: List<Province>;
+
+    val name: String;
 }
 
 inline fun <reified T> setup(): Map<Piece, Player> where T : Player, T : Enum<T> =

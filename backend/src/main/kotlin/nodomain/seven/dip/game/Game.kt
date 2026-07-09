@@ -1,6 +1,5 @@
 package nodomain.seven.dip.game
 
-import nodomain.seven.dip.adjudication.Adjudicator
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
@@ -8,8 +7,8 @@ import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.annotation.JsonIgnoreType
+import nodomain.seven.dip.adjudication.AdjudicationResult
+import java.io.Serializable
 
 fun MutableMap<Piece, Player>.remove(province: Province) {
     keys.filter { it.location.province == province}.forEach { remove(it) }
@@ -41,7 +40,11 @@ enum class GameState {
     BUILDS,
 }
 
-class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
+class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
+    companion object {
+        const val serialVersionUID: Long = 1
+    }
+
     // The current "turn" in terms of move phases only
     var turn = 1
         private set
@@ -56,7 +59,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()) {
         get() = orders.values.filterIsInstance<SupportOrder>()
 
     // Most recent adjudication results
-    val adjudicators: MutableMap<TemporalFlare, Adjudicator> = mutableMapOf()
+    val adjudicators: MutableMap<TemporalFlare, AdjudicationResult> = mutableMapOf()
 
     // All units requiring retreats
     val requiredRetreats: MutableList<RequiredRetreat> = mutableListOf()
@@ -166,7 +169,7 @@ class Board(
     val centres: MutableMap<Province, Player> = originalPieces.mapKeys {
         (piece, _) -> piece.location.province
     }.toMutableMap()
-) {
+): Serializable {
     var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
     val children = mutableListOf<BoardIndex>()
     var isActive = true

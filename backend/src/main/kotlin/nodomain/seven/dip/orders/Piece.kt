@@ -4,8 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.provinces.Province
+import java.io.Serializable
 
-sealed interface Piece {
+sealed interface Piece: Serializable {
     val location: Location
     fun asLocal(): String
 

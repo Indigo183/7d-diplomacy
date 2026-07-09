@@ -87,7 +87,7 @@ fun Game.adjudicateMoves() {
             supports,
             pieces
         )
-        adjudicators[flare] = adjudicator
+        adjudicators[flare] = adjudicator.result()
         println("INFO: with results: ${adjudicator.moveResults}")
         for (board in boards) {
             println("INFO: adjudicating board at ${board.boardIndex}")

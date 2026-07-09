@@ -1,0 +1,130 @@
+package nodomain.seven.dip.game
+
+import nodomain.seven.dip.adjudication.adjudicate
+import nodomain.seven.dip.api.SignUps
+import nodomain.seven.dip.orders.A
+import nodomain.seven.dip.orders.Build
+import nodomain.seven.dip.orders.T
+import nodomain.seven.dip.orders.input
+import nodomain.seven.dip.provinces.Romans.*
+import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.c
+import nodomain.seven.dip.utils.filePath
+import nodomain.seven.dip.utils.i
+import nodomain.seven.dip.utils.plus
+import nodomain.seven.dip.utils.setupFiles
+import java.io.BufferedInputStream
+import java.io.BufferedOutputStream
+import java.io.FileInputStream
+import java.io.FileOutputStream
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.stream.Collectors.toList
+import kotlin.io.path.Path
+
+object GameDAO {
+    val gameDataPath: Path = filePath.resolve("hostedGames")
+
+    init {
+        if (!Files.exists(filePath)) setupFiles(filePath)
+        if (!Files.exists(gameDataPath)) Files.createDirectory(gameDataPath)
+        if (!Files.exists(gameDataPath.resolve(Path("testGame", "gameObject.ser")))) {
+            storeGame("testGame", newTestGame())
+        }
+    }
+
+    fun loadGame(name: String): Game {
+        val saveGamePath = gameDataPath.resolve(name).resolve("gameObject.ser")
+        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
+            it.readObject() as Game
+        }
+    }
+
+    fun loadSignUps(name: String): SignUps {
+        val saveGamePath = gameDataPath.resolve(name).resolve("signUps.ser")
+        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
+            it.readObject() as SignUps
+        }
+    }
+
+    fun allGames(): List<String> = Files.walk(gameDataPath, 1)
+        .filter(Files::isDirectory)
+        .map { it.getName(it.nameCount - 1).toString() }
+        .collect(toList()).also { it.removeFirst() }
+
+    fun existingGame(name: String) = Files.exists(gameDataPath.resolve(name))
+
+    fun storeGame(name: String, game: Game, signUps: SignUps? = null) {
+        val gamePath = gameDataPath.resolve(name)
+        Files.createDirectory(gamePath)
+        Files.createFile(gamePath.resolve("gameObject.ser"))
+        saveGame(name, game)
+        if (signUps !== null) {
+            Files.createFile(gamePath.resolve("signUps.ser"))
+            saveSignUps(name, signUps)
+        }
+    }
+
+    fun saveSignUps(name: String, signUps: SignUps) {
+        val gamePath = gameDataPath.resolve(name)
+        ObjectOutputStream(
+            BufferedOutputStream(
+                FileOutputStream(
+                    gamePath.resolve("signUps.ser").toFile()
+                )
+            )
+        ).use {
+            it.writeObject(signUps)
+        }
+    }
+
+    fun saveGame(name: String, game: Game) {
+        val gamePath = gameDataPath.resolve(name)
+        ObjectOutputStream(
+            BufferedOutputStream(
+                FileOutputStream(
+                    gamePath.resolve("gameObject.ser").toFile()
+                )
+            )
+        ).use {
+            it.writeObject(game)
+        }
+    }
+}
+
+fun newTestGame(): Game {
+    val origin = T(0.c, 0)
+
+    val game = Game()
+
+    game.input(listOf(
+        origin A CAT M BRU i 2,
+        origin A POM M BRU i 1,
+    ))
+    game.adjudicate()
+
+    game.input(listOf(
+        T(i, 0) A CAT M Location(CAT, origin) i 2,
+        T(i, 0) A BRU M Location(CAT, origin) i 2,
+
+        T(-1.c, 0) A BRU M POM i 1,
+        T(-1.c, 0) A POM M Location(POM, origin) i 1,
+    ))
+    game.adjudicate()
+    game.input(listOf(Build(T(-1+i, 0) A CAT)))
+    game.adjudicate()
+
+    game.input(listOf(
+        T(-1+i, 0) A CAT M Location(CAE, T(i, 0)) i 3,
+        T(-1+i, 0) A POM M Location(POM, T(i, 0)) i 3,
+
+        T(i, 1) A CAT S { T(-1+i, 0) A CAT M Location(CAE, T(i, 0)) },
+        T(i, 1) A POM M CAE i 3,
+        T(i, 1) A BRU S { T(i, 1) A POM M CAE },
+    ))
+    game.adjudicate()
+
+    return game
+}
