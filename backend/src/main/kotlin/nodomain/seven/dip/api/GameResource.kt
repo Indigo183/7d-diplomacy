@@ -57,7 +57,7 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     fun getGameNames(@HeaderParam("UserName") userName: String?,
                      @HeaderParam("Password") password: String?): Collection<String> {
         if (userName !== null)
-            return UserDao.login(User(userName, password!!)).orders.keys
+            return UserDao.login(User(userName, password!!)).inputs.keys
         return GameDAO.allGames()
     }
 
@@ -120,8 +120,8 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
         val game = GameDAO.loadGame(id)
         signUps.players.forEach { (userName, country) ->
             val orderingUser = UserDao.getUser(userName)
-            game.input(orderingUser.orders[id] ?: listOf(), country)
-            orderingUser.orders[id] = listOf()
+            game.input(orderingUser.inputs[id]?.orders ?: listOf(), country)
+            orderingUser.inputs[id] = OrderWriteUp(listOf())
             UserDao.saveData(orderingUser)
         }
         game.adjudicate()
@@ -147,10 +147,19 @@ class OrdersResource {
         return this
     }
 
+    @Path("ready")
+    @POST
+    fun setReady(@QueryParam("ready") ready: Boolean?) {
+        user.inputs[id] = user.inputs[id]?.ready(ready ?: false) ?: OrderWriteUp(listOf(), ready ?: false)
+    }
+
+    @Path("ready")
+    @GET
+    fun seeReady(): Boolean? = user.inputs[id]?.ready
 
     @GET
     fun getOrders(@PathParam("country") country: String): List<Inputtable> =
-        user.orders[id] ?: listOf()
+        user.inputs[id]?.orders ?: listOf()
 
     @POST
     fun postOrders(@PathParam("country") country: String, orders: String): List<Inputtable> {
@@ -163,7 +172,7 @@ class OrdersResource {
         } catch (e: Exception) {
             throw UnprocessableEntryException("Incorrect format for the parser", e)
         } ?: listOf()
-        user.orders[id] = parsedOrders
+        user.inputs[id] = OrderWriteUp(parsedOrders)
         UserDao.saveData(user)
         return parsedOrders
     }

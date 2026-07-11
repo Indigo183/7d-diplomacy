@@ -9,7 +9,7 @@ import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
 import java.io.Serializable
 
 data class User(val name: String, val password: String,
-                @field:JsonIgnore val orders: MutableMap<String, List<Inputtable>> = mutableMapOf()) : Serializable {
+                @field:JsonIgnore val inputs: MutableMap<String, OrderWriteUp> = mutableMapOf()) : Serializable {
     override fun equals(other: Any?): Boolean {
         return other is User && other.name == name
     }
@@ -17,6 +17,11 @@ data class User(val name: String, val password: String,
     override fun hashCode(): Int {
         return name.hashCode()
     }
+}
+
+data class OrderWriteUp(val orders: List<Inputtable>, val ready: Boolean = false) {
+    fun ready(ready: Boolean): OrderWriteUp =
+        OrderWriteUp(orders, ready)
 }
 
 data class SignUps(val gm: User, val players: MutableMap<String, Player> = mutableMapOf(), val countries: List<Player>): Serializable {
