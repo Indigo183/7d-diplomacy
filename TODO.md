@@ -47,7 +47,9 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Ghost board
 - [ ] Hover provinces for full province name and abbreviation tooltip
 - [ ] Hover orders for order tooltip
-
+- [ ] Have a symbol to show a unit ordered to hold
+    - [ ] _Have a separate symbol for units that were given default orders becayse they did not submit orders_ 
+    - [ ] 
 ### Player List
 - [ ] List of all the powers
 - [ ] Number of centres controlled (and victory condition)
