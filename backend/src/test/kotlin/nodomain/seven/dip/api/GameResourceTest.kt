@@ -27,14 +27,16 @@ class GameResourceTest {
         @AfterAll
         fun cleanTestFolder() {
             assertTrue(filePath.endsWith("test"))
-            Files.walk(filePath).use {
-                it.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete)
+            if (Files.exists(filePath)) {
+                Files.walk(filePath).use {
+                    it.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete)
+                }
             }
         }
     }
 
     @Test
-    fun test() {
+    fun passwordToShortThenUnprocessableEntity() {
         Given {
             header("UserName", "someUnusedNameThatNoOneShallHaveClaimed12345")
             header("Password", "toShort")
