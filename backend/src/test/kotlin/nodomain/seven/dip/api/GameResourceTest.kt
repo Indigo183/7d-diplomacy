@@ -94,6 +94,26 @@ class GameResourceTest {
         Given {
             header("UserName", "t3st-GM")
             header("Password", "P-a-s-s-w-o-r-d")
+            queryParam("ready", true)
+        } When {
+            post("api/game/$gameId/cato/ready")
+        } Then {
+            statusCode(204)
+        }
+
+        Given {
+            header("UserName", "t3st-GM")
+            header("Password", "P-a-s-s-w-o-r-d")
+        } When {
+            get("api/game/$gameId/cato/ready")
+        } Then {
+            statusCode(200)
+            body(equalTo("true"))
+        }
+
+        Given {
+            header("UserName", "t3st-GM")
+            header("Password", "P-a-s-s-w-o-r-d")
         } When {
             patch("api/game/$gameId")
         } Then {

@@ -117,6 +117,11 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
         }
         if (signUps.gm.name != UserDao.login(user).name)
             throw UnauthorizedException("Only the GM of this game may adjudicate it!")
+        val allPlayersReady = signUps.players.keys.asSequence()
+            .map(UserDao::getUser)
+            .all { it.inputs[id]?.ready ?: false }
+        if (! allPlayersReady)
+            throw ConflictException("Not all players have readied up")
         val game = GameDAO.loadGame(id)
         signUps.players.forEach { (userName, country) ->
             val orderingUser = UserDao.getUser(userName)
@@ -151,6 +156,7 @@ class OrdersResource {
     @POST
     fun setReady(@QueryParam("ready") ready: Boolean?) {
         user.inputs[id] = user.inputs[id]?.ready(ready ?: false) ?: OrderWriteUp(listOf(), ready ?: false)
+        UserDao.saveData(user)
     }
 
     @Path("ready")

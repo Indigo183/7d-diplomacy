@@ -19,7 +19,7 @@ data class User(val name: String, val password: String,
     }
 }
 
-data class OrderWriteUp(val orders: List<Inputtable>, val ready: Boolean = false) {
+data class OrderWriteUp(val orders: List<Inputtable>, val ready: Boolean = false): Serializable {
     fun ready(ready: Boolean): OrderWriteUp =
         OrderWriteUp(orders, ready)
 }
