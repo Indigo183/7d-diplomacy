@@ -47,7 +47,7 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
         UserDao.signUp(User(userName, password))
     }
 
-    @GET //DO NOT USE YET. PROMISE FOR THE FUTURE
+    @GET
     fun getGameNames(@HeaderParam("UserName") userName: String?,
                      @HeaderParam("Password") password: String?): Collection<String> {
         if (userName !== null)
@@ -147,18 +147,17 @@ class OrdersResource {
 
     @Path("ready")
     @POST
-    fun setReady(@QueryParam("ready") ready: Boolean?) {
-        user.inputs[id] = user.inputs[id]?.ready(ready ?: false) ?: OrderWriteUp(listOf(), ready ?: false)
-        UserDao.saveData(user)
-    }
+    fun setReady(@QueryParam("ready") ready: Boolean?) =
+        UserDao.saveData(user.apply {
+            inputs[id] = inputs[id]?.ready(ready ?: false) ?: OrderWriteUp(listOf(), ready ?: false)
+        })
 
     @Path("ready")
     @GET
     fun seeReady(): Boolean? = user.inputs[id]?.ready
 
     @GET
-    fun getOrders(): List<Inputtable> =
-        user.inputs[id]?.orders ?: listOf()
+    fun getOrders(): List<Inputtable> = user.inputs[id]?.orders ?: listOf()
 
     @POST
     fun postOrders(orders: String): List<Inputtable> {
