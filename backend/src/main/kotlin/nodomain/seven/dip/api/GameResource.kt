@@ -22,6 +22,7 @@ import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.orders.input
+import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
 import nodomain.seven.dip.utils.exceptions.ConflictException
@@ -136,7 +137,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
 
     @Path("{country}")
     fun orders(@PathParam("country") country: String): OrdersResource {
-        return ordersResource.with(id, user)
+        return ordersResource.with(id, user, country)
     }
 }
 
@@ -145,10 +146,13 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
 class OrdersResource {
     lateinit var user: User
     lateinit var id: String
-    fun with(id: String, user: User): OrdersResource {
+    lateinit var player: Player
+    fun with(id: String, user: User, country: String): OrdersResource {
         preventReservedTerms(id)
         this.id = id
         this.user = UserDao.login(user)
+        this.player = GameDAO.loadSignUps(id).players[user.name]
+            ?: throw UnauthorizedException("Not signed up as $country in $id")
         return this
     }
 
@@ -164,14 +168,12 @@ class OrdersResource {
     fun seeReady(): Boolean? = user.inputs[id]?.ready
 
     @GET
-    fun getOrders(@PathParam("country") country: String): List<Inputtable> =
+    fun getOrders(): List<Inputtable> =
         user.inputs[id]?.orders ?: listOf()
 
     @POST
-    fun postOrders(@PathParam("country") country: String, orders: String): List<Inputtable> {
+    fun postOrders(orders: String): List<Inputtable> {
         val gameState = GameDAO.loadGame(id).gameState
-        val player = GameDAO.loadSignUps(id).players[user.name]
-            ?: throw UnauthorizedException("Not signed up as $country in $id")
         val parsedOrders: List<Inputtable> = try {
             getParser<RomanPlayers, Romans>()
                 .parseOrderSet(orders, format = Parser.FullNationalisedFormat.DATC, gameState = gameState)[player]
