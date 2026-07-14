@@ -74,6 +74,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     lateinit var user: User
     lateinit var id: String
     fun with(id: String, userName: String?, password: String?): GameResource {
+        if (!GameDAO.existingGame(id)) throw NotFoundException("no game exists with this id")
         this.id = id
         if (userName != null && password != null)
             this.user = User(userName, password)
@@ -127,9 +128,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     }
 
     @Path("{country}")
-    fun orders(@PathParam("country") country: String): OrdersResource {
-        return ordersResource.with(id, user, country)
-    }
+    fun orders(@PathParam("country") country: String): OrdersResource = ordersResource.with(id, user, country)
 }
 
 @RequestScoped
@@ -163,10 +162,9 @@ class OrdersResource {
 
     @POST
     fun postOrders(orders: String): List<Inputtable> {
-        val gameState = GameDAO.loadGame(id).gameState
         val parsedOrders: List<Inputtable> = try {
             getParser<RomanPlayers, Romans>()
-                .parseOrderSet(orders, format = Parser.FullNationalisedFormat.DATC, gameState = gameState)[player]
+                .parseOrderSet(orders, Parser.FullNationalisedFormat.DATC, GameDAO.loadGame(id).gameState)[player]
         } catch (e: Exception) {
             throw UnprocessableEntryException("Incorrect format for the parser", e)
         } ?: listOf()
