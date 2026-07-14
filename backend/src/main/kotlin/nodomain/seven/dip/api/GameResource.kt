@@ -10,7 +10,6 @@ import jakarta.ws.rs.GET
 import jakarta.ws.rs.POST
 import jakarta.inject.Inject
 import jakarta.enterprise.context.RequestScoped
-import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.HeaderParam
 import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.PATCH
@@ -28,12 +27,6 @@ import nodomain.seven.dip.provinces.Romans
 import nodomain.seven.dip.utils.exceptions.ConflictException
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
 import kotlin.enums.enumEntries
-
-fun preventReservedTerms(id: String) {
-    when(id) {
-        "security", "users" -> throw BadRequestException("reserved term may not be used as game id")
-    }
-}
 
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
@@ -66,7 +59,6 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     @Produces(MediaType.TEXT_PLAIN)
     fun createGame(@QueryParam("id") id: String, @HeaderParam("UserName") userName: String,
                    @HeaderParam("Password") password: String): String {
-        preventReservedTerms(id)
         if (GameDAO.existingGame(id)) throw ConflictException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
@@ -82,7 +74,6 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     lateinit var user: User
     lateinit var id: String
     fun with(id: String, userName: String?, password: String?): GameResource {
-        preventReservedTerms(id)
         this.id = id
         if (userName != null && password != null)
             this.user = User(userName, password)
@@ -148,7 +139,6 @@ class OrdersResource {
     lateinit var id: String
     lateinit var player: Player
     fun with(id: String, user: User, country: String): OrdersResource {
-        preventReservedTerms(id)
         this.id = id
         this.user = UserDao.login(user)
         this.player = GameDAO.loadSignUps(id).players[user.name]
