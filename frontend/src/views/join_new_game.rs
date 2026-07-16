@@ -1,8 +1,9 @@
 use crate::settings::*;
 
 use dioxus::prelude::*;
+use tokio::time::{Duration, sleep};
 
-const THROBBER: Asset = asset!("/assets/styling/throbber.css");
+const THROBBER: Asset = asset!("/assets/styling/throbber.css"); //OwO
 const HEADER_SVG: Asset = asset!("/assets/header.svg");
 
 async fn load_game(
@@ -12,7 +13,7 @@ async fn load_game(
 ) -> Result<GameConfig, &'static str> {
     is_loading.set(true);
 
-    smol::Timer::after(std::time::Duration::from_secs(2)).await;
+    sleep(Duration::from_secs(2)).await;
 
     is_loading.set(false);
     loaded.set(true);
@@ -34,11 +35,9 @@ pub fn JoinNewGame() -> Element {
 
     rsx! {
         document::Link { rel: "stylesheet", href: THROBBER }
-        div {
-            class: "menu",
+        div { class: "menu",
             img { src: HEADER_SVG, id: "header" }
-            div {
-                class: "menu-options",
+            div { class: "menu-options",
                 if is_loading() {
                     span { class: "loader" }
                 } else if !loaded() {
@@ -53,38 +52,21 @@ pub fn JoinNewGame() -> Element {
                     }
                 } else {
                     div {
-                        div {
-                            class: "left-col",
-                            "Name",
-                        }
-                        div {
-                            class: "right-col",
-                            { game_config.read().as_ref().unwrap().name.clone() },
+                        div { class: "left-col", "Name" }
+                        div { class: "right-col", {game_config.read().as_ref().unwrap().name.clone()} }
+                    }
+                    div {
+                        div { class: "left-col", "Variant" }
+                        div { class: "right-col",
+                            {game_config.read().as_ref().unwrap().variant.name.clone()}
                         }
                     }
                     div {
-                        div {
-                            class: "left-col",
-                            "Variant",
-                        }
-                        div {
-                            class: "right-col",
-                            { game_config.read().as_ref().unwrap().variant.name.clone() },
+                        div { class: "left-col", "Adjacencies" }
+                        div { class: "right-col",
+                            {format!("{}", game_config.read().as_ref().unwrap().adjacencies)}
                         }
                     }
-                    div {
-                        div {
-                            class: "left-col",
-                            "Adjacencies",
-                        }
-                        div {
-                            class: "right-col",
-                            { format!("{}", game_config.read().as_ref().unwrap().adjacencies) },
-                        }
-                    }
-                    // div { "Name: <NAME>" }
-                    // div { "Variant: <VARIANT>" }
-                    // div { "Adjacencies: <LOOSE|STRICT>" }
                 }
             }
         }

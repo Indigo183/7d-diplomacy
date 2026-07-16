@@ -5,6 +5,8 @@ use crate::Route;
 use crate::settings::*;
 
 use dioxus::prelude::*;
+use tokio::time::Duration;
+use tokio::time::sleep;
 
 fn sanitise(input: String) -> String {
     input
@@ -38,7 +40,7 @@ async fn create_new_game(
     id: String,
     adjacencies: Adjacencies,
 ) -> Result<Route, &'static str> {
-    smol::Timer::after(std::time::Duration::from_secs(2)).await;
+    sleep(Duration::from_secs(2)).await;
     println!("{name}\n{id}\n{adjacencies}");
     Ok(Route::ResumeGame { id: id })
 }
