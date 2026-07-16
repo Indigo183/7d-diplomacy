@@ -6,6 +6,7 @@ import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.game.RequiredRetreat
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.BuildOrder
+import nodomain.seven.dip.orders.ConvoyOrder
 import nodomain.seven.dip.orders.Disband
 import nodomain.seven.dip.orders.HoldOrder
 import nodomain.seven.dip.orders.Inputtable
@@ -53,10 +54,12 @@ interface WithAssertionsDATC: WithAssertions {
     infix fun Build.shift(num: Int): Build = +(piece moveTo from + num.c)
     infix fun Disband.shift(num: Int): Disband = -(piece moveTo from + num.c) withFlare flare
     infix fun Inputtable.shift(num: Int): Inputtable {
+        // I hate that this is necessary
         return when (this) {
             is HoldOrder -> this shift num
             is MoveOrder -> this shift num
             is SupportOrder -> this shift num
+            is ConvoyOrder -> this shift num
             is Build -> this shift num
             is Disband -> this shift num
         }
