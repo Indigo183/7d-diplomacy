@@ -40,9 +40,6 @@ enum Route {
         #[route("/game/:id")]
         Game { id: String },
 
-        #[route("/open/:id")]
-        ResumeGame { id: String },
-
         #[route("/new/join")]
         JoinNewGame {},
 
@@ -63,9 +60,9 @@ fn main() {
         .with_cfg(
             Config::default().with_menu(None).with_window(
                 WindowBuilder::new()
-                    // .with_maximized(true)
-                    // .with_title("7D Diplomacy With Multitime Travel")
-                    .with_decorations(false),
+                    .with_maximized(true)
+                    .with_title("7D Diplomacy With Multitime Travel")
+                    // .with_decorations(false),
             ),
         )
         .launch(App);

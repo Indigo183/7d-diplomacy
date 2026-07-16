@@ -16,7 +16,6 @@ pub fn MainMenu() -> Element {
             div { class: "menu-options",
                 // The RSX macro also supports text nodes surrounded by quotes
                 ResumeGameList {  }
-                Link { to: Route::ResumeGame { id: String::from("select-game") }, "Resume Game" }
                 Link { to: Route::JoinNewGame {}, "Join New Game" }
                 Link { to: Route::HostNewGame {}, "Host New Game" }
             }

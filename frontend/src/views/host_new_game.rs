@@ -42,7 +42,7 @@ async fn create_new_game(
 ) -> Result<Route, &'static str> {
     sleep(Duration::from_secs(2)).await;
     println!("{name}\n{id}\n{adjacencies}");
-    Ok(Route::ResumeGame { id: id })
+    Ok(Route::Game { id })
 }
 
 const HEADER_SVG: Asset = asset!("/assets/header.svg");

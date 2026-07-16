@@ -11,8 +11,8 @@
 mod home;
 pub use home::Home;
 
-mod resume_game;
-pub use resume_game::ResumeGame;
+mod game;
+pub use game::Game;
 
 mod join_new_game;
 pub use join_new_game::JoinNewGame;
@@ -25,6 +25,3 @@ pub use blog::Blog;
 
 mod navbar;
 pub use navbar::Navbar;
-
-mod game;
-pub use game::Game;

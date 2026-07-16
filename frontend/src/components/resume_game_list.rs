@@ -1,3 +1,4 @@
+use crate::Route;
 use dioxus::prelude::*;
 
 #[component]
@@ -19,57 +20,75 @@ pub fn ResumeGameList() -> Element {
 }
 
 #[component]
-fn ResumeGameListBig(game_name: String, power_name: String, power_colour: String, game_turn: usize) -> Element {
-
+fn ResumeGameListBig(
+    game_name: String,
+    power_name: String,
+    power_colour: String,
+    game_turn: usize,
+) -> Element {
     // let status: SubmissionStatus = SubmissionStatus::Ready;
 
     rsx! {
-        div { class: "menu-options m-5 hover:bg-gray-800 bg-clip-border rounded-[10]",
-            div { class: "flex justify-between w-[80vw] py-3 px-10 ",
-                div { class: "flex gap-3",
-                    h1 { class: "text-nowrap ", {game_name} }
-                    h1 { class: "text-nowrap text-sm/9.5 text-gray-400 bottom-0", "as" }
-                    h1 { class: format!("text-nowrap"), style: "color:{power_colour}", "{power_name}" }
+        Link {
+            to: Route::Game { id: game_name.clone() },
+            div { class: "menu-options m-5 hover:bg-gray-800 bg-clip-border rounded-[10]",
+                div { class: "flex justify-between w-[80vw] py-3 px-10 ",
+                    div { class: "flex gap-3",
+                        h1 { class: "text-nowrap ", { game_name } }
+                        h1 { class: "text-nowrap text-sm/9.5 text-gray-400 bottom-0", "as" }
+                        h1 {
+                            class: "text-nowrap".to_string(),
+                            style: "color:{power_colour}",
+                            "{power_name}",
+                        }
+                    }
+
+                    div { class: "flex gap-3",
+                        h1 { class: "text-nowrap", "Turn {game_turn}" }
+                        h1 { class: "text-nowrap", "-" }
+                        h1 { class: "text-nowrap text-green-400", "Submitted and Ready" }
+                    }
                 }
 
-                div { class: "flex gap-3",
-                    h1 { class: "text-nowrap", "Turn {game_turn}" }
-                    h1 { class: "text-nowrap", "-" }
-                    h1 { class: "text-nowrap text-green-400", "Submitted and Ready" }
+                div { class: "flex justify-between text-sm py-3 px-10",
+                    p { "7D Diplomacy - Romans" }
+                    p { class: "text-gray-500", "|" }
+                    p { "Loose Adjacencies" }
+                    p { class: "text-gray-500", "|" }
+                    p { "Manual Adjudication" }
                 }
 
-            }
-
-            div { class: "flex justify-between text-sm py-3 px-10",
-                p { "7D Diplomacy - Romans" }
-                p { class: "text-gray-500", "|" }
-                p { "Loose Adjacencies" }
-                p { class: "text-gray-500", "|" }
-                p { "Manual Adjudication" }
-            }
-
-            p { class: "text-sm text-gray-400 py-3 px-10  text-left",
-                "https://7d-diplomacy.panik!.net:80085"
+                p { class: "text-sm text-gray-400 py-3 px-10  text-left",
+                    "https://7d-diplomacy.panik!.net:80085"
+                }
             }
         }
     }
 }
 
 #[component]
-fn ResumeGameListSmall(game_name: String, power_name: String, power_colour: String, game_turn: usize) -> Element {
+fn ResumeGameListSmall(
+    game_name: String,
+    power_name: String,
+    power_colour: String,
+    game_turn: usize,
+) -> Element {
     rsx! {
-        div { class: "menu-options m-5",
-            div { class: "flex justify-between w-[80vw] py-3 px-10 hover:bg-gray-800 bg-clip-border rounded-[10]",
-                div { class: "flex gap-3",
-                    h1 { class: "text-nowrap ", {game_name} }
-                    h1 { class: "text-nowrap text-sm/9.5 text-gray-400 bottom-0", "as" }
-                    h1 { class: "text-nowrap", style: "color:{power_colour}", "{power_name}" }
-                }
+        Link {
+            to: Route::Game { id: game_name.clone() },
+            div { class: "menu-options m-5",
+                div { class: "flex justify-between w-[80vw] py-3 px-10 hover:bg-gray-800 bg-clip-border rounded-[10]",
+                    div { class: "flex gap-3",
+                        h1 { class: "text-nowrap ", {game_name} }
+                        h1 { class: "text-nowrap text-sm/9.5 text-gray-400 bottom-0", "as" }
+                        h1 { class: "text-nowrap", style: "color:{power_colour}", "{power_name}" }
+                    }
 
-                div { class: "flex gap-3",
-                    h1 { class: "text-nowrap", "T{game_turn}" }
-                    h1 { class: "text-nowrap", "-" }
-                    h1 { class: "text-nowrap text-red-400", "Unsubmitted" }
+                    div { class: "flex gap-3",
+                        h1 { class: "text-nowrap", "T{game_turn}" }
+                        h1 { class: "text-nowrap", "-" }
+                        h1 { class: "text-nowrap text-red-400", "Unsubmitted" }
+                    }
                 }
             }
         }

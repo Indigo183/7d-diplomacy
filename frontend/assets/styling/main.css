@@ -22,7 +22,7 @@ body {
     flex-direction: column;
 }
 
-.menu-options a,
+/*.menu-options a,*/
 .menu-options button,
 .menu-options .resume-list,
 .menu-options input {
@@ -36,7 +36,7 @@ body {
     padding: 10px;
 }
 
-.menu-options a:not([disabled="true"]):hover,
+/*.menu-options a:not([disabled="true"]):hover,*/
 .menu-options input:not([disabled="true"]):hover,
 .menu-options button:not([disabled="true"]):hover {
     background-color: #1f1f1f;
