@@ -13,7 +13,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 ### Landing Page
 - [x] Join New Game button
 - [x] Host New Game Button
-- [ ] *List of games*
+- [ ] List of games
     - [ ] Resume button in lieu of temp. 
     - [ ] Automatically add joined games to the list
     - [ ] Way of removing games from the list
@@ -88,3 +88,4 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Integrate some of Ludo's order logger code to generate order logs?
 - [ ] Add passwords for joining countries
 - [ ] *Add order stack for each player*
+
