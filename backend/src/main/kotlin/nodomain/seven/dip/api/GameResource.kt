@@ -28,6 +28,12 @@ import nodomain.seven.dip.utils.exceptions.ConflictException
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
 import kotlin.enums.enumEntries
 
+val ALPHANUMERIC_WITH_DASHES = Regex("^[A-Za-z0-9-]+$")
+fun requireValidGameId(id: String) {
+    if (! ALPHANUMERIC_WITH_DASHES.matches(id))
+        throw UnprocessableEntryException("The game Id must be an alphanumerical kabab case string of at least 4 characters")
+}
+
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
 class GamesResource @Inject constructor(val gameResource: GameResource) {
@@ -40,9 +46,9 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     @PUT
     fun createAccount(@HeaderParam("UserName") userName: String?,
                       @HeaderParam("Password") password: String?) {
-        if (userName === null || userName.length < 4 || ! Regex("^[A-Za-z0-9-]+$").matches(userName))
+        if (userName === null || userName.length < 4 || ! ALPHANUMERIC_WITH_DASHES.matches(userName))
             throw UnprocessableEntryException("UserName must be an alphanumerical kabab case string of at least 4 characters")
-        if (password === null || password.length < 8 || ! Regex("^[A-Za-z0-9-]+$").matches(password))
+        if (password === null || password.length < 8 || ! ALPHANUMERIC_WITH_DASHES.matches(password))
             throw UnprocessableEntryException("Password must be an alphanumerical kabab case string of at least 8 characters")
         UserDao.signUp(User(userName, password))
     }
@@ -59,6 +65,7 @@ class GamesResource @Inject constructor(val gameResource: GameResource) {
     @Produces(MediaType.TEXT_PLAIN)
     fun createGame(@QueryParam("id") id: String, @HeaderParam("UserName") userName: String,
                    @HeaderParam("Password") password: String): String {
+        requireValidGameId(id)
         if (GameDAO.existingGame(id)) throw ConflictException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
@@ -74,6 +81,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     lateinit var user: User
     lateinit var id: String
     fun with(id: String, userName: String?, password: String?): GameResource {
+        requireValidGameId(id)
         if (!GameDAO.existingGame(id)) throw NotFoundException("no game exists with this id")
         this.id = id
         if (userName != null && password != null)
