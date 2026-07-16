@@ -3,7 +3,7 @@ use dioxus::prelude::*;
 #[component]
 pub fn ResumeGameList() -> Element {
     rsx! {
-        div { class: "menu-options resume-list",
+        div { class: "menu-options resume-list ",
 
             ResumeGameListSmall { game_name: "T1S02 Holland", power_name: "France",  power_colour: "#2B79EA", game_turn: 1 }
             hr { class: "w-95/100 center-0 m-auto" }
@@ -24,8 +24,8 @@ fn ResumeGameListBig(game_name: String, power_name: String, power_colour: String
     // let status: SubmissionStatus = SubmissionStatus::Ready;
 
     rsx! {
-        div { class: "menu-options p-5",
-            div { class: "flex justify-between w-[80vw] py-3 px-10",
+        div { class: "menu-options m-5 hover:bg-gray-800 bg-clip-border rounded-[10]",
+            div { class: "flex justify-between w-[80vw] py-3 px-10 ",
                 div { class: "flex gap-3",
                     h1 { class: "text-nowrap ", {game_name} }
                     h1 { class: "text-nowrap text-sm/9.5 text-gray-400 bottom-0", "as" }
@@ -58,8 +58,8 @@ fn ResumeGameListBig(game_name: String, power_name: String, power_colour: String
 #[component]
 fn ResumeGameListSmall(game_name: String, power_name: String, power_colour: String, game_turn: usize) -> Element {
     rsx! {
-        div { class: "menu-options p-5",
-            div { class: "flex justify-between w-[80vw] py-3 px-10",
+        div { class: "menu-options m-5",
+            div { class: "flex justify-between w-[80vw] py-3 px-10 hover:bg-gray-800 bg-clip-border rounded-[10]",
                 div { class: "flex gap-3",
                     h1 { class: "text-nowrap ", {game_name} }
                     h1 { class: "text-nowrap text-sm/9.5 text-gray-400 bottom-0", "as" }

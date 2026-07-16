@@ -14,7 +14,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [x] Join New Game button
 - [x] Host New Game Button
 - [ ] List of games
-    - [ ] Resume button in lieu of temp. 
+    - [x] Resume button in lieu of temp. 
     - [ ] Automatically add joined games to the list
     - [ ] Way of removing games from the list
     - [ ] Archiving games so that you can see the results from local caches of them?
