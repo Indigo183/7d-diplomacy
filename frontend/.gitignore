@@ -9,5 +9,9 @@
 **/*.rs.bk
 
 ### HELIX ###
-
 .helix/
+
+
+### ASSETS ###
+# This is generated on `dx serve` anyway, so we don't need to include it in the repo
+assets/tailwind.css

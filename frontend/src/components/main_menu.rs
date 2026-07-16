@@ -1,4 +1,5 @@
 use crate::Route;
+use crate::components::ResumeGameList;
 use dioxus::prelude::*;
 
 const HEADER_SVG: Asset = asset!("/assets/header.svg");
@@ -14,6 +15,7 @@ pub fn MainMenu() -> Element {
             img { src: HEADER_SVG, id: "header" }
             div { class: "menu-options",
                 // The RSX macro also supports text nodes surrounded by quotes
+                ResumeGameList {  }
                 Link { to: Route::ResumeGame { id: String::from("select-game") }, "Resume Game" }
                 Link { to: Route::JoinNewGame {}, "Join New Game" }
                 Link { to: Route::HostNewGame {}, "Host New Game" }

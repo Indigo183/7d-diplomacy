@@ -72,7 +72,8 @@ fn main() {
 fn main() {
     // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
     // you have enabled
-    launch(App);
+    dioxus::LaunchBuilder::new()
+        .launch(App);
 }
 
 /// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function

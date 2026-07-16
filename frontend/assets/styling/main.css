@@ -15,7 +15,6 @@ body {
 }
 
 .menu-options {
-    width: 400px;
     text-align: center;
     font-size: x-large;
     color: white;
@@ -25,6 +24,7 @@ body {
 
 .menu-options a,
 .menu-options button,
+.menu-options .resume-list,
 .menu-options input {
     color: white;
     text-align: center;
