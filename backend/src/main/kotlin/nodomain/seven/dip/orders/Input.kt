@@ -21,7 +21,7 @@ private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean 
     if(! (player?.equals(board.pieces[order.from]) // 2
             ?: (board.pieces[order.from] !== null))) return false // 1
     val destination = when(order) {
-        is MoveOrder  -> {
+        is MoveOrder -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
             getBoard(order.action.to.boardIndex) ?: return false // 3
             order.flare ?: return false // 3
@@ -36,6 +36,7 @@ private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean 
             order.action.order.from.boardIndex.timeplane ?: return false // 5
             order.action.order.piece.location
         }
+        is ConvoyOrder -> throw Unit as Throwable // TODO: actually implement fleets
         is HoldOrder -> return true // hold orders do not have a destination, thus 4 is trivial
     }
     return destination.isAdjacentTo(order.piece) // 4

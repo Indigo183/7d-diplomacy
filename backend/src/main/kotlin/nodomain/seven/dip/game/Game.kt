@@ -51,14 +51,15 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
 
     // All orders, past and present
     private val orders: MutableMap<Location, Order> = mutableMapOf()
-    @get:JsonIgnore
     val moves: List<MoveOrder>
         get() = orders.values.filterIsInstance<MoveOrder>()
-    @get:JsonIgnore
     val supports: List<SupportOrder>
         get() = orders.values.filterIsInstance<SupportOrder>()
+    val convoys: List<ConvoyOrder>
+        get() = orders.values.filterIsInstance<ConvoyOrder>()
 
     // Most recent adjudication results
+    @JsonIgnore
     val adjudicators: MutableMap<TemporalFlare, AdjudicationResult> = mutableMapOf()
 
     // All units requiring retreats

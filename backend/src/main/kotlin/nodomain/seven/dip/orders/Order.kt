@@ -71,6 +71,15 @@ class SupportOrder(piece: Piece, override val action: Supports): Order(piece, " 
     override fun isLocal() = from.boardIndex == action.order.from.boardIndex && action.order.isLocal()
 }
 
+@JvmInline
+value class Convoys(val move: MoveOrder): Action {
+    override fun toString(): String = "$move"
+    override fun asLocal(): String = move.asLocal()
+}
+class ConvoyOrder(piece: Piece, override val action: Convoys): Order(piece, " S ") {
+    override fun isLocal() = from.boardIndex == action.move.from.boardIndex && action.move.isLocal()
+}
+
 // Timeplane specifier shorthand
 fun T(boardIndex: ComplexNumber, timeplane: Int): BoardIndex = BoardIndex(boardIndex, timeplane)
 
