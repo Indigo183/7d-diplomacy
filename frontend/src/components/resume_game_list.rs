@@ -5,25 +5,22 @@ pub fn ResumeGameList() -> Element {
     rsx! {
         div { class: "menu-options resume-list",
 
-            ResumeGameListSmall {  }
+            ResumeGameListSmall { game_name: "T1S02 Holland", power_name: "France",  power_colour: "#2B79EA", game_turn: 1 }
             hr { class: "w-95/100 center-0 m-auto" }
-            ResumeGameListSmall {  }
+            ResumeGameListSmall { game_name: "Double Trouble", power_name: "Serbia-Moscow",  power_colour: "#B370BA", game_turn: 2 }
             hr { class: "w-95/100 center-0 m-auto" }
-            ResumeGameListBig {  }
+            ResumeGameListBig { game_name: "Romans", power_name: "Cato",  power_colour: "#2B79EA", game_turn: 7 }
             hr { class: "w-95/100 center-0 m-auto" }
-            ResumeGameListBig {  }
+            ResumeGameListBig {  game_name: "Torture", power_name: "Epstein Island",  power_colour: "#75401a", game_turn: 5  }
             hr { class: "w-95/100 center-0 m-auto" }
-            ResumeGameListSmall {  }
+            ResumeGameListSmall { game_name: "Variant Champion 2026", power_name: "Gamemaster",  power_colour: "#ffffff", game_turn: 10 }
         }
     }
 }
 
 #[component]
-fn ResumeGameListBig() -> Element {
-    let game_name: String = "Romans".to_owned();
-    let power_name: String = "Cato".to_owned();
-    let power_colour: String = "#2B79EA".to_owned();
-    let game_turn: usize = 5;
+fn ResumeGameListBig(game_name: String, power_name: String, power_colour: String, game_turn: usize) -> Element {
+
     // let status: SubmissionStatus = SubmissionStatus::Ready;
 
     rsx! {
@@ -59,13 +56,7 @@ fn ResumeGameListBig() -> Element {
 }
 
 #[component]
-fn ResumeGameListSmall() -> Element {
-    let game_name: String = "Double Trouble".to_owned();
-    let power_name: String = "Serbia-Moscow".to_owned();
-    let power_colour: String = "#B370BA".to_owned();
-    let game_turn: usize = 2;
-    // let status: SubmissionStatus = SubmissionStatus::Ready;
-
+fn ResumeGameListSmall(game_name: String, power_name: String, power_colour: String, game_turn: usize) -> Element {
     rsx! {
         div { class: "menu-options p-5",
             div { class: "flex justify-between w-[80vw] py-3 px-10",
