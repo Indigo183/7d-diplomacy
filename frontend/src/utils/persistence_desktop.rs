@@ -10,6 +10,7 @@ use crate::settings::Game;
 /// The path to the directory to search for caches.
 pub const JOINED_GAMES_PATH: &str = "~/.7dip/joined-games/";
 
+/// Generates the expected path of the cache for a given game, as specified by id and string
 pub fn get_cache_path(id: &str, player: &str) -> PathBuf {
     PathBuf::from(JOINED_GAMES_PATH.to_owned() + id + "_" + player + ".json")
 }
@@ -61,6 +62,7 @@ pub fn get_cached_games() -> Result<Vec<(String, String)>> {
     Ok(cached_games)
 }
 
+/// Returns whether or not a game is cached
 pub fn is_game_cached(id: &str, player: &str) -> bool {
     get_cache_path(id, player).exists()
 }
