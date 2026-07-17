@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+/// The time travel details of a game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum TimeTravel {
     FiveDimensional,
@@ -14,11 +15,13 @@ impl std::fmt::Display for TimeTravel {
     }
 }
 impl Default for TimeTravel {
+    /// The default is currently 7D, as that is what is implemented in the backend.
     fn default() -> Self {
         Self::SevenDimensional
     }
 }
 
+/// The time travel adjacencies of a game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum Adjacencies {
     Strict,
@@ -33,6 +36,7 @@ impl std::fmt::Display for Adjacencies {
     }
 }
 impl Default for Adjacencies {
+    /// The default is currently strict adjacencies, as it makes 7D ever-so-slightly playable.
     fn default() -> Self {
         Self::Strict
     }
@@ -50,6 +54,36 @@ pub struct RGBA {
     /// *absolute make-a-wish-maxxing*
     pub alpha: u8,
 }
+impl RGBA {
+    /// Constructs an RGBA colour from an RGB colour, as represented by a `u32`. Any bits above the
+    /// twenty-fourth bit will be thrown away.
+    pub fn from_rgb(rgb: u32) -> Self {
+        Self::from(rgb << 8 | 0xFF)
+    }
+
+    /// Constructs an RGBA colour from an ARGB colour, as represented by a `u32`.
+    pub fn from_argb(argb: u32) -> Self {
+        Self::from(argb.rotate_left(8))
+    }
+}
+impl From<u32> for RGBA {
+    fn from(value: u32) -> Self {
+        RGBA {
+            red: (value & 0xFF000000 >> 24) as u8,
+            green: (value & 0xFF0000 >> 16) as u8,
+            blue: (value & 0xFF00 >> 8) as u8,
+            alpha: (value & 0xFF) as u8,
+        }
+    }
+}
+impl Into<u32> for RGBA {
+    fn into(self) -> u32 {
+        (self.red as u32) << 24
+            | (self.green as u32) << 16
+            | (self.blue as u32) << 8
+            | self.alpha as u32
+    }
+}
 
 impl From<&str> for RGBA {
     fn from(value: &str) -> Self {
@@ -66,7 +100,11 @@ pub struct Player {
     /// The colour associated with a player.
     pub colour: RGBA,
 }
-// TODO: impl Player
+impl Player {
+    pub fn new(name: String, colour: RGBA) -> Self {
+        Player { name, colour }
+    }
+}
 
 /// The variant data for a specific variant, parsed from JSON.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -76,14 +114,17 @@ pub struct Variant {
     /// The variant's map data (TODO: NOT IMPLEMENTED).
     map: (),
     /// The variant's player list.
-    player_list: Vec<String>,
+    pub player_list: Vec<Player>,
 }
 impl Default for Variant {
     fn default() -> Self {
         Self {
             name: String::from("Romans"),
             map: (),
-            player_list: vec![String::from("Cato"), String::from("Pompey")],
+            player_list: vec![
+                Player::new(String::from("Cato"), RGBA::from_rgb(0x0000FF)),
+                Player::new(String::from("Pompey"), RGBA::from_rgb(0xFF0000)),
+            ],
         }
     }
 }
