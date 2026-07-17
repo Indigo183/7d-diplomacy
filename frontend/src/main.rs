@@ -52,7 +52,8 @@ enum Route {
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 // The asset macro also minifies some assets like CSS and JS to make bundled smaller
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
-const TAILWIND_CSS: Asset = asset!("/assets/tailwind.css");
+const TAILWIND_CSS: Asset = option_asset!("/assets/tailwind.css")
+    .expect("tailwind generates on the fly");
 
 #[cfg(feature = "desktop")]
 fn main() {
