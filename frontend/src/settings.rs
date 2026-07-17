@@ -61,6 +61,8 @@ pub struct GameConfig {
     pub name: String,
     /// The game's unique alphanumeric identifier.
     pub id: String,
+    /// A link to the game hosted on a potentially external server.
+    pub link: String,
     /// The game's variant data.
     pub variant: Variant,
     /// The game's time travel details.
@@ -74,6 +76,7 @@ impl GameConfig {
         GameConfigBuilder {
             name: String::new(),
             id: String::new(),
+            link: String::from("localhost:9090"),
             variant: Variant::default(),
             time_travel: TimeTravel::default(),
             adjacencies: Adjacencies::default(),
@@ -87,6 +90,8 @@ pub struct GameConfigBuilder {
     name: String,
     /// The game's unique alphanumeric identifier.
     id: String,
+    /// A link to the game hosted on a potentially external server.
+    link: String,
     /// The game's variant data.
     variant: Variant,
     /// The game's time travel details.
@@ -103,29 +108,31 @@ impl GameConfigBuilder {
     pub fn with_id(self, id: String) -> Self {
         Self { id, ..self }
     }
+    /// A link to the game hosted on a potentially external server.
+    pub fn with_link(self, link: String) -> Self {
+        Self {
+            link: link.strip_suffix('/').unwrap_or(&link).to_string(),
+            ..self
+        }
+    }
     /// The game's variant data.
     pub fn with_variant(self, variant: Variant) -> Self {
         Self { variant, ..self }
     }
     /// The game's time travel details.
     pub fn with_time_travel(self, time_travel: TimeTravel) -> Self {
-        Self {
-            time_travel,
-            ..self
-        }
+        Self { time_travel, ..self }
     }
     /// The game's adjacency settings.
     pub fn with_adjacencies(self, adjacencies: Adjacencies) -> Self {
-        Self {
-            adjacencies,
-            ..self
-        }
+        Self { adjacencies, ..self }
     }
     /// Builds an instance of `settings::GameConfig` from the builder.
     pub fn build(self) -> GameConfig {
         GameConfig {
             name: self.name,
             id: self.id,
+            link: self.link,
             variant: self.variant,
             time_travel: self.time_travel,
             adjacencies: self.adjacencies,
