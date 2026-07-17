@@ -1,4 +1,6 @@
-#[derive(PartialEq, Eq, Clone, Copy)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum TimeTravel {
     FiveDimensional,
     SevenDimensional,
@@ -17,7 +19,7 @@ impl Default for TimeTravel {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum Adjacencies {
     Strict,
     Loose,
@@ -37,6 +39,7 @@ impl Default for Adjacencies {
 }
 
 /// A wrapper struct for RGBA colours, purely for convenience.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct RGBA {
     /// RED, THE BLOOD OF ANGRY MEN
     pub red: u8,
@@ -47,9 +50,16 @@ pub struct RGBA {
     /// *absolute make-a-wish-maxxing*
     pub alpha: u8,
 }
+
+impl From<&str> for RGBA {
+    fn from(value: &str) -> Self {
+        todo!()
+    }
+}
 // TODO: impl RGBA
 
 /// The associated data for a player, parsed from JSON.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Player {
     /// The name of the player to be displayed.
     pub name: String,
@@ -59,6 +69,7 @@ pub struct Player {
 // TODO: impl Player
 
 /// The variant data for a specific variant, parsed from JSON.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Variant {
     /// The variant's name (not including time travel details).
     pub name: String,
@@ -78,6 +89,7 @@ impl Default for Variant {
 }
 
 /// The configuration for a given game instance (e.g "5D Diplomacy AC").
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
     /// The game's non-unique official name.
     pub name: String,
@@ -148,15 +160,24 @@ impl GameConfigBuilder {
     }
     /// The game's time travel details.
     pub fn with_time_travel(self, time_travel: TimeTravel) -> Self {
-        Self { time_travel, ..self }
+        Self {
+            time_travel,
+            ..self
+        }
     }
     /// The game's adjacency settings.
     pub fn with_adjacencies(self, adjacencies: Adjacencies) -> Self {
-        Self { adjacencies, ..self }
+        Self {
+            adjacencies,
+            ..self
+        }
     }
     /// Whether the game will adjudicate itself automatically at the specified deadline.
     pub fn with_adjudication(self, automatic_adjudication: bool) -> Self {
-        Self { automatic_adjudication, ..self }
+        Self {
+            automatic_adjudication,
+            ..self
+        }
     }
     /// Builds an instance of `settings::GameConfig` from the builder.
     pub fn build(self) -> GameConfig {
@@ -173,6 +194,7 @@ impl GameConfigBuilder {
 }
 
 /// The current phase of the game.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Phase {
     Spring,
     Fall,
@@ -180,6 +202,7 @@ pub enum Phase {
 }
 
 /// The current turn of the game.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Turn {
     /// The absolute turn number, either zero- or one-indexed.
     pub number: u8,
@@ -192,6 +215,7 @@ pub struct Turn {
 }
 
 /// A game instance, storing all current game state.
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Game {
     /// The configuration of the game instance.
     pub config: GameConfig,

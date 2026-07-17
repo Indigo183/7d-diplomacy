@@ -1753,6 +1753,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dioxus",
+ "serde",
  "serde_json",
  "tokio",
 ]
