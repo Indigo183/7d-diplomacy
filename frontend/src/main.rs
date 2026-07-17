@@ -11,6 +11,7 @@ use views::*;
 mod components;
 /// Contains data structures storing settings.
 mod settings;
+mod utils;
 /// Define a views module that contains the UI for all Layouts and Routes for our app.
 mod views;
 
@@ -52,8 +53,8 @@ enum Route {
 const FAVICON: Asset = asset!("/assets/favicon.ico");
 // The asset macro also minifies some assets like CSS and JS to make bundled smaller
 const MAIN_CSS: Asset = asset!("/assets/styling/main.css");
-const TAILWIND_CSS: Asset = option_asset!("/assets/tailwind.css")
-    .expect("tailwind generates on the fly");
+const TAILWIND_CSS: Asset =
+    option_asset!("/assets/tailwind.css").expect("tailwind generates on the fly");
 
 #[cfg(feature = "desktop")]
 fn main() {
@@ -61,9 +62,8 @@ fn main() {
         .with_cfg(
             Config::default().with_menu(None).with_window(
                 WindowBuilder::new()
-                    .with_maximized(true)
-                    .with_title("7D Diplomacy With Multitime Travel")
-                    // .with_decorations(false),
+                    // .with_maximized(true)
+                    .with_title("7D Diplomacy With Multitime Travel"), // .with_decorations(false),
             ),
         )
         .launch(App);
@@ -73,8 +73,7 @@ fn main() {
 fn main() {
     // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
     // you have enabled
-    dioxus::LaunchBuilder::new()
-        .launch(App);
+    dioxus::LaunchBuilder::new().launch(App);
 }
 
 /// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function
