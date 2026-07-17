@@ -19,7 +19,7 @@ async fn load_game(
     loaded.set(true);
     Ok(GameConfig::builder()
         .with_name(String::from("5D \"Double Trouble\" Diplomacy"))
-        .with_id(game_link)
+        .with_link(game_link)
         .build())
 }
 
