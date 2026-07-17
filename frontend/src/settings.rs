@@ -122,8 +122,8 @@ impl Default for Variant {
             name: String::from("Romans"),
             map: (),
             player_list: vec![
-                Player::new(String::from("Cato"), RGBA::from_rgb(0x0000FF)),
-                Player::new(String::from("Pompey"), RGBA::from_rgb(0xFF0000)),
+                Player::new(String::from("Cato"), RGBA::from("#265BA5")),
+                Player::new(String::from("Pompey"), RGBA::from("#972530")),
             ],
         }
     }
