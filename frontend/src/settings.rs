@@ -1,3 +1,5 @@
+use std::option::Option;
+
 use serde::{Deserialize, Serialize};
 
 /// The time travel details of a game.
@@ -272,13 +274,25 @@ pub struct Game {
 /// A struct containing the information about a `Game` and its state only concerning/privy to one `Player`.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlayerSpecifics {
-    player: Player,
+    pub player: Player,
     // order_drafts: Vec<OrderSet> // for example
 }
 
 /// A wrapper struct around `Game` and `PlayerSpecifics` for more compact serialisation
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameCache {
-    pub(crate) game: Game,
-    player_specifics: Vec<PlayerSpecifics>
+    pub game: Game,
+    pub player_specifics: Vec<PlayerSpecifics>
+}
+
+impl GameCache {
+    pub fn get_player_specifics(&self, player_name: String) -> Option<&PlayerSpecifics> {
+        self.player_specifics.iter().find(|x| x.player.name == player_name)
+    }
+}
+
+impl From<Game> for GameCache {
+    fn from(value: Game) -> Self {
+        GameCache { game: value, player_specifics: vec![] }
+    }
 }
