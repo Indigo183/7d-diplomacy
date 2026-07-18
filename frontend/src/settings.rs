@@ -43,7 +43,7 @@ impl Default for Adjacencies {
 }
 
 /// A wrapper struct for RGBA colours, purely for convenience.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
 pub struct RGBA {
     /// RED, THE BLOOD OF ANGRY MEN
     pub red: u8,
@@ -54,6 +54,7 @@ pub struct RGBA {
     /// *absolute make-a-wish-maxxing*
     pub alpha: u8,
 }
+
 impl RGBA {
     /// Constructs an RGBA colour from an RGB colour, as represented by a `u32`. Any bits above the
     /// twenty-fourth bit will be thrown away.
@@ -66,6 +67,7 @@ impl RGBA {
         Self::from(argb.rotate_left(8))
     }
 }
+
 impl From<u32> for RGBA {
     fn from(value: u32) -> Self {
         RGBA {
@@ -76,6 +78,7 @@ impl From<u32> for RGBA {
         }
     }
 }
+
 impl Into<u32> for RGBA {
     fn into(self) -> u32 {
         (self.red as u32) << 24
@@ -264,4 +267,18 @@ pub struct Game {
     pub player: Player,
     /// The current turn of the game.
     pub turn: Turn,
+}
+
+/// A struct containing the information about a `Game` and its state only concerning/privy to one `Player`.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PlayerSpecifics {
+    player: Player,
+    // order_drafts: Vec<OrderSet> // for example
+}
+
+/// A wrapper struct around `Game` and `PlayerSpecifics` for more compact serialisation
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GameCache {
+    pub(crate) game: Game,
+    player_specifics: Vec<PlayerSpecifics>
 }

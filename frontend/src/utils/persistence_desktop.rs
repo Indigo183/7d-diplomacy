@@ -5,27 +5,27 @@ use std::{
 
 use anyhow::{Ok, Result, anyhow};
 
-use crate::settings::Game;
+use crate::settings::{Game, GameCache};
 
 /// The path to the directory to search for caches.
 pub const JOINED_GAMES_PATH: &str = "~/.7dip/joined-games/";
 
 /// Generates the expected path of the cache for a given game, as specified by id and string
-pub fn get_cache_path(id: &str, player: &str) -> PathBuf {
-    PathBuf::from(JOINED_GAMES_PATH.to_owned() + id + "_" + player + ".json")
+pub fn get_cache_path(id: &str) -> PathBuf {
+    PathBuf::from(JOINED_GAMES_PATH.to_owned() + id + ".json")
 }
 
 /// Updates the cache for a game
-pub fn cache_game(game: &Game) -> Result<()> {
-    let f = File::open(get_cache_path(&game.config.id, &game.player.name))?;
-    serde_json::to_writer(f, game)?;
+pub fn cache_game(game_cache: &GameCache) -> Result<()> {
+    let f = File::open(get_cache_path(&game_cache.game.config.id))?;
+    serde_json::to_writer(f, game_cache)?;
 
     Ok(())
 }
 
 /// Attempts to load a game from the cache.
-pub fn load_cached_game(id: &str, player: &str) -> Result<Game> {
-    let f = File::open(PathBuf::try_from(get_cache_path(id, player))?)?;
+pub fn load_cached_game(id: &str) -> Result<GameCache> {
+    let f = File::open(PathBuf::try_from(get_cache_path(id))?)?;
     Ok(serde_json::from_reader(f)?)
 }
 
@@ -63,6 +63,6 @@ pub fn get_cached_games() -> Result<Vec<(String, String)>> {
 }
 
 /// Returns whether or not a game is cached
-pub fn is_game_cached(id: &str, player: &str) -> bool {
-    get_cache_path(id, player).exists()
+pub fn is_game_cached(id: &str) -> bool {
+    get_cache_path(id).exists()
 }
