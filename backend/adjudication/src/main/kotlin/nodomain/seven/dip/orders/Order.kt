@@ -43,6 +43,7 @@ enum class TemporalFlare(val direction: ComplexNumber) {
 }
 
 data object Holds: Action {
+    private fun readResolve(): Any = Holds
     override fun toString(): String = "H"
 }
 class HoldOrder(piece: Piece): Order(piece, " ") {
@@ -76,7 +77,7 @@ value class Convoys(val move: MoveOrder): Action {
     override fun toString(): String = "$move"
     override fun asLocal(): String = move.asLocal()
 }
-class ConvoyOrder(piece: Piece, override val action: Convoys): Order(piece, " S ") {
+class ConvoyOrder(piece: Piece, override val action: Convoys): Order(piece, " C ") {
     override fun isLocal() = from.boardIndex == action.move.from.boardIndex && action.move.isLocal()
 }
 

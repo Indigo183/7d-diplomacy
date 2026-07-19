@@ -9,9 +9,8 @@ import nodomain.seven.dip.utils.filePath
 import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.AfterAll
-import java.io.File
 import java.nio.file.Files
-import java.nio.file.Path
+import java.util.Comparator.reverseOrder
 import kotlin.test.assertTrue
 
 @QuarkusTest
@@ -29,7 +28,7 @@ class GameResourceTest {
             assertTrue(filePath.endsWith("test"))
             if (Files.exists(filePath)) {
                 Files.walk(filePath).use {
-                    it.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete)
+                    it.sorted(reverseOrder()).forEach(Files::delete)
                 }
             }
         }
