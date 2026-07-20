@@ -35,6 +35,13 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-bom</artifactId>
+                <version>${jwt.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
                 <groupId>nodomain.seven.dip</groupId>
                 <artifactId>7d-diplomacy-adjudicator</artifactId>
                 <version>1.0</version>
