@@ -1,5 +1,7 @@
 package nodomain.seven.dip.utils
 
+import io.jsonwebtoken.JwtParser
+import io.jsonwebtoken.Jwts
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.enterprise.inject.Produces
 import jakarta.ws.rs.ApplicationPath
@@ -33,7 +35,7 @@ fun setupFiles(filePath: Path) {
 }
 
 @ApplicationScoped
-class JWTKeyProvider {
+class JWTParserProvider {
     init {
         if (!Files.exists(filePath)) setupFiles(filePath)
     }
@@ -43,4 +45,7 @@ class JWTKeyProvider {
     ))).use {
         it.readObject() as SecretKey
     }
+
+    @Produces
+    val jwtParser: JwtParser = Jwts.parser().verifyWith(key).build()!!
 }
