@@ -2,6 +2,7 @@ package nodomain.seven.dip.api
 
 import kotlin.test.Test
 import io.quarkus.test.junit.QuarkusTest
+import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.When
 import io.restassured.module.kotlin.extensions.Then
@@ -35,54 +36,41 @@ class GameResourceTest {
     }
 
     @Test
-    fun passwordToShortThenUnprocessableEntity() {
-        Given {
-            header("UserName", "someUnusedNameThatNoOneShallHaveClaimed12345")
-            header("Password", "toShort")
-        } When {
-            put("api/game")
-        } Then {
-            statusCode(422)
-        }
-    }
-
-    @Test
     fun happyPathSingleTurnRomans() {
         val gameId = "happy-path-game-test"
 
-        Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
-        } When {
-            put("api/game")
-        } Then {
-            statusCode(204)
-        }
-
-        Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
+        val gmToken = Given {
             queryParam("id", gameId)
         } When {
             post("api/game")
         } Then {
             statusCode(200)
+        } Extract {
+            body().asString()
         }
 
-        Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
+        val catoToken = Given {
             queryParam("country", "cato")
         } When {
             post("api/game/$gameId")
         } Then {
             statusCode(200)
-            body(equalTo("Cato"))
+        } Extract {
+            body().asString()
+        }
+
+        val pompeyToken = Given {
+            queryParam("country", "pompey")
+        } When {
+            post("api/game/$gameId")
+        } Then {
+            statusCode(200)
+        } Extract {
+            body().asString()
         }
 
         Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
+            header("Authorisation", "BEARER $catoToken")
             body(GameResourceTest::class.java.getResource("/cato-test-orders.txt")!!.readText())
         } When {
             post("api/game/$gameId/cato")
@@ -91,8 +79,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
+            header("Authorisation", "BEARER $catoToken")
             queryParam("ready", true)
         } When {
             post("api/game/$gameId/cato/ready")
@@ -101,8 +88,25 @@ class GameResourceTest {
         }
 
         Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
+            header("Authorisation", "BEARER $pompeyToken")
+            body(GameResourceTest::class.java.getResource("/pompey-test-orders.txt")!!.readText())
+        } When {
+            post("api/game/$gameId/pompey")
+        } Then {
+            statusCode(200)
+        }
+
+        Given {
+            header("Authorisation", "BEARER $pompeyToken")
+            queryParam("ready", true)
+        } When {
+            post("api/game/$gameId/pompey/ready")
+        } Then {
+            statusCode(204)
+        }
+
+        Given {
+            header("Authorisation", "BEARER $catoToken")
         } When {
             get("api/game/$gameId/cato/ready")
         } Then {
@@ -111,8 +115,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("UserName", "t3st-GM")
-            header("Password", "P-a-s-s-w-o-r-d")
+            header("Authorisation", "BEARER $gmToken")
         } When {
             patch("api/game/$gameId")
         } Then {

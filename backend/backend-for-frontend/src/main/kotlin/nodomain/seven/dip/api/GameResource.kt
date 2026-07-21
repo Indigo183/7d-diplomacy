@@ -1,4 +1,6 @@
 package nodomain.seven.dip.api
+import io.jsonwebtoken.JwtParser
+import io.jsonwebtoken.Jwts
 import io.quarkus.security.UnauthorizedException
 import nodomain.seven.dip.game.GameDAO
 import nodomain.seven.dip.game.Game
@@ -13,7 +15,6 @@ import jakarta.enterprise.context.RequestScoped
 import jakarta.ws.rs.HeaderParam
 import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.PATCH
-import jakarta.ws.rs.PUT
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import nodomain.seven.dip.adjudication.adjudicate
@@ -25,7 +26,9 @@ import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
 import nodomain.seven.dip.utils.exceptions.ConflictException
+import nodomain.seven.dip.utils.exceptions.UnauthenticatedException
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
+import javax.crypto.SecretKey
 import kotlin.enums.enumEntries
 
 val ALPHANUMERIC_WITH_DASHES = Regex("^[A-Za-z0-9-]+$")
@@ -36,56 +39,41 @@ fun requireValidGameId(id: String) {
 
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
-class GamesResource @Inject constructor(val gameResource: GameResource) {
+class GamesResource @Inject constructor(val gameResource: GameResource, val key: SecretKey) {
     @Path("{id}")
-    fun game(@PathParam("id") id: String,
-             @HeaderParam("UserName") userName: String?,
-             @HeaderParam("Password") password: String?) =
-        gameResource.with(id, userName, password)
-
-    @PUT
-    fun createAccount(@HeaderParam("UserName") userName: String?,
-                      @HeaderParam("Password") password: String?) {
-        if (userName === null || userName.length < 4 || ! ALPHANUMERIC_WITH_DASHES.matches(userName))
-            throw UnprocessableEntryException("UserName must be an alphanumerical kabab case string of at least 4 characters")
-        if (password === null || password.length < 8 || ! ALPHANUMERIC_WITH_DASHES.matches(password))
-            throw UnprocessableEntryException("Password must be an alphanumerical kabab case string of at least 8 characters")
-        UserDao.signUp(User(userName, password))
-    }
+    fun game(@PathParam("id") id: String) =
+        gameResource.with(id)
 
     @GET
-    fun getGameNames(@HeaderParam("UserName") userName: String?,
-                     @HeaderParam("Password") password: String?): Collection<String> {
-        if (userName !== null)
-            return UserDao.login(User(userName, password!!)).inputs.keys
+    fun getGameNames(): Collection<String> {
         return GameDAO.allGames()
     }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    fun createGame(@QueryParam("id") id: String, @HeaderParam("UserName") userName: String,
-                   @HeaderParam("Password") password: String): String {
+    fun createGame(@QueryParam("id") id: String): String {
         requireValidGameId(id)
         if (GameDAO.existingGame(id)) throw ConflictException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
-        val signUps = SignUps(gm = UserDao.login(User(userName, password)), countries = enumEntries<RomanPlayers>())
+        val signUps = SignUps(countries = enumEntries<RomanPlayers>())
         GameDAO.storeGame(id, game, signUps)
-        return ""
+        return Jwts.builder()
+            .claim("gameId", id)
+            .claim("isGM", true)
+            .signWith(key)
+            .compact()
     }
 }
 
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
-class GameResource @Inject constructor(val ordersResource: OrdersResource) {
-    lateinit var user: User
+class GameResource @Inject constructor(val ordersResource: OrdersResource, val key: SecretKey, val tokenParser: JwtParser) {
     lateinit var id: String
-    fun with(id: String, userName: String?, password: String?): GameResource {
+    fun with(id: String): GameResource {
         requireValidGameId(id)
         if (!GameDAO.existingGame(id)) throw NotFoundException("no game exists with this id")
         this.id = id
-        if (userName != null && password != null)
-            this.user = User(userName, password)
         return this
     }
 
@@ -104,31 +92,41 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
         } catch (_: Exception) {
             throw NotFoundException("Game sign-up object cannot be located")
         }
-        val signedUpCountry = signUps.signUp(UserDao.login(user), country)
+        val signedUpCountry = signUps.signUp(country)
+        val orderDao = OrderDao(id)
+        orderDao.createIfNotExists(country)
         GameDAO.saveSignUps(id, signUps)
-        return signedUpCountry.name
+        return Jwts.builder()
+            .claim("gameId", id)
+            .claim("country", signedUpCountry)
+            .signWith(key)
+            .compact()
     }
 
     @PATCH
-    fun adjudicate(): Game { // not atomized! not safe! very much not enterprise grade!
+    fun adjudicate(@HeaderParam("Authorisation") token: String): Game { // not atomized! not safe! very much not enterprise grade!
         val signUps = try {
             GameDAO.loadSignUps(id)
         } catch (_: Exception) {
             throw NotFoundException("Game sign-up object cannot be located")
         }
-        if (signUps.gm.name != UserDao.login(user).name)
+        val claims: Map<String, Any> = try {
+            tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
+        } catch (_: Exception) {
+            throw UnauthenticatedException("Your token couldn't be verified")
+        }
+        println(claims)
+        println(claims["isGM"]?.javaClass?.name)
+        if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
             throw UnauthorizedException("Only the GM of this game may adjudicate it!")
-        val allPlayersReady = signUps.players.keys.asSequence()
-            .map(UserDao::getUser)
-            .all { it.inputs[id]?.ready ?: false }
+        val allPlayersReady = signUps.players.size == signUps.countries.size && signUps.players.values.all { it }
         if (! allPlayersReady)
             throw ConflictException("Not all players have readied up")
         val game = GameDAO.loadGame(id)
-        signUps.players.forEach { (userName, country) ->
-            val orderingUser = UserDao.getUser(userName)
-            game.input(orderingUser.inputs[id]?.orders ?: listOf(), country)
-            orderingUser.inputs[id] = OrderWriteUp(listOf())
-            UserDao.saveData(orderingUser)
+        val orderDao = OrderDao(id)
+        signUps.players.keys.forEach {
+            game.input(orderDao.loadOrders(it.name).orders)
+            orderDao.saveOrders(it.name, OrderWriteUp(listOf()))
         }
         game.adjudicate()
         GameDAO.saveGame(id, game)
@@ -136,36 +134,47 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource) {
     }
 
     @Path("{country}")
-    fun orders(@PathParam("country") country: String): OrdersResource = ordersResource.with(id, user, country)
+    fun orders(@PathParam("country") country: String, @HeaderParam("Authorisation") token: String): OrdersResource {
+        val claims: Map<String, Any> = try {
+            tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
+        } catch (_: Exception) {
+            throw UnauthenticatedException("Your token couldn't be verified")
+        }
+        if (claims["gameId"] != id)
+            throw UnauthorizedException("Supplied token isn't for this game")
+        val player = GameDAO.loadSignUps(id).find(claims["country"]?.toString())
+        if (player === null ||  player.name.lowercase() != country.lowercase())
+            throw UnauthorizedException("Supplied token isn't for this country")
+        return ordersResource.with(id, player)
+    }
 }
 
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
 class OrdersResource {
-    lateinit var user: User
     lateinit var id: String
+    lateinit var orderDao: OrderDao
     lateinit var player: Player
-    fun with(id: String, user: User, country: String): OrdersResource {
+    fun with(id: String, player: Player): OrdersResource {
         this.id = id
-        this.user = UserDao.login(user)
-        this.player = GameDAO.loadSignUps(id).players[user.name]
-            ?: throw UnauthorizedException("Not signed up as $country in $id")
+        this.orderDao = OrderDao(id)
+        this.player = player
         return this
     }
 
     @Path("ready")
     @POST
     fun setReady(@QueryParam("ready") ready: Boolean?) =
-        UserDao.saveData(user.apply {
-            inputs[id] = inputs[id]?.ready(ready ?: false) ?: OrderWriteUp(listOf(), ready ?: false)
+        GameDAO.saveSignUps(id, GameDAO.loadSignUps(id).also {
+            it.players[player]= ready ?: false
         })
 
     @Path("ready")
     @GET
-    fun seeReady(): Boolean? = user.inputs[id]?.ready
+    fun seeReady(): Boolean? = GameDAO.loadSignUps(id).players[player]
 
     @GET
-    fun getOrders(): List<Inputtable> = user.inputs[id]?.orders ?: listOf()
+    fun getOrders(): List<Inputtable> = orderDao.loadOrders(player.name).orders
 
     @POST
     fun postOrders(orders: String): List<Inputtable> {
@@ -175,8 +184,7 @@ class OrdersResource {
         } catch (e: Exception) {
             throw UnprocessableEntryException("Incorrect format for the parser", e)
         } ?: listOf()
-        user.inputs[id] = OrderWriteUp(parsedOrders)
-        UserDao.saveData(user)
+        orderDao.saveOrders(player.name, OrderWriteUp(parsedOrders))
         return parsedOrders
     }
 }
