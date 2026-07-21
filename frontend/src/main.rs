@@ -17,7 +17,7 @@ mod views;
 
 /// The Route enum is used to define the structure of internal routes in our app. All route enums need to derive
 /// the [`Routable`] trait, which provides the necessary methods for the router to work.
-/// 
+///
 /// Each variant represents a different URL pattern that can be matched by the router. If that pattern is matched,
 /// the components for that route will be rendered.
 #[derive(Debug, Clone, Routable, PartialEq)]
@@ -62,7 +62,7 @@ fn main() {
         .with_cfg(
             Config::default().with_menu(None).with_window(
                 WindowBuilder::new()
-                    // .with_maximized(true)
+                    .with_maximized(true)
                     .with_title("7D Diplomacy With Multitime Travel"), // .with_decorations(false),
             ),
         )
