@@ -1,10 +1,7 @@
 package nodomain.seven.dip.api
+
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
-import io.quarkus.security.UnauthorizedException
-import nodomain.seven.dip.game.GameDAO
-import nodomain.seven.dip.game.Game
-
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
@@ -18,6 +15,8 @@ import jakarta.ws.rs.PATCH
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import nodomain.seven.dip.adjudication.adjudicate
+import nodomain.seven.dip.game.GameDAO
+import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser
 import nodomain.seven.dip.orders.getParser
@@ -26,6 +25,7 @@ import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
 import nodomain.seven.dip.utils.exceptions.ConflictException
+import nodomain.seven.dip.utils.exceptions.ForbiddenException
 import nodomain.seven.dip.utils.exceptions.UnauthenticatedException
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
 import javax.crypto.SecretKey
@@ -118,7 +118,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
         println(claims)
         println(claims["isGM"]?.javaClass?.name)
         if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
-            throw UnauthorizedException("Only the GM of this game may adjudicate it!")
+            throw ForbiddenException("Only the GM of this game may adjudicate it!")
         val allPlayersReady = signUps.players.size == signUps.countries.size && signUps.players.values.all { it }
         if (! allPlayersReady)
             throw ConflictException("Not all players have readied up")
@@ -141,10 +141,10 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
             throw UnauthenticatedException("Your token couldn't be verified")
         }
         if (claims["gameId"] != id)
-            throw UnauthorizedException("Supplied token isn't for this game")
+            throw ForbiddenException("Supplied token isn't for this game")
         val player = GameDAO.loadSignUps(id).find(claims["country"]?.toString())
         if (player === null ||  player.name.lowercase() != country.lowercase())
-            throw UnauthorizedException("Supplied token isn't for this country")
+            throw ForbiddenException("Supplied token isn't for this country")
         return ordersResource.with(id, player)
     }
 }
