@@ -16,8 +16,16 @@ pub fn MainMenu() -> Element {
             div { class: "menu-options",
                 // The RSX macro also supports text nodes surrounded by quotes
                 ResumeGameList {  }
-                Link { to: Route::JoinNewGame {}, "Join New Game" }
-                Link { to: Route::HostNewGame {}, "Host New Game" }
+                Link {
+                    to: Route::JoinNewGame {},
+                    class: "menu-options m-auto hover:bg-gray-800 rounded-[10] flex justify-between w-[25vw] py-3 ",
+                    "Join New Game"
+                }
+                Link {
+                    to: Route::HostNewGame {},
+                    class: "menu-options m-auto hover:bg-gray-800 rounded-[10] flex justify-between w-[25vw] py-3 ",
+                    "Host New Game"
+                }
             }
         }
     }
