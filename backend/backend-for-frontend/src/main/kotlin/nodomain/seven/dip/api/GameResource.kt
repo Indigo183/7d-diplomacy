@@ -41,19 +41,17 @@ fun requireValidGameId(id: String) {
 @Produces(MediaType.APPLICATION_JSON)
 class GamesResource @Inject constructor(val gameResource: GameResource, val key: SecretKey) {
     @Path("{id}")
-    fun game(@PathParam("id") id: String) =
-        gameResource.with(id)
+    fun game(@PathParam("id") id: String) = gameResource.with(id)
 
     @GET
-    fun getGameNames(): Collection<String> {
-        return GameDAO.allGames()
-    }
+    fun getGameNames(): Collection<String> = GameDAO.allGames()
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     fun createGame(@QueryParam("id") id: String): String {
         requireValidGameId(id)
-        if (GameDAO.existingGame(id)) throw ConflictException("game with this id already exists")
+        if (GameDAO.existingGame(id))
+            throw ConflictException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
         val signUps = SignUps(countries = enumEntries<RomanPlayers>())
@@ -78,20 +76,14 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
     }
 
     @GET
-    fun getGame() = try {
-        GameDAO.loadGame(id)
-    } catch (_ : Exception) {
-        throw NotFoundException("no game exists with this id")
-    }
+    fun getGame() = try { GameDAO.loadGame(id) }
+        catch (_ : Exception) { throw NotFoundException("no game exists with this id") }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     fun signUp(@QueryParam("country") country: String): String {
-        val signUps = try {
-            GameDAO.loadSignUps(id)
-        } catch (_: Exception) {
-            throw NotFoundException("Game sign-up object cannot be located")
-        }
+        val signUps = try { GameDAO.loadSignUps(id) }
+            catch (_: Exception) { throw NotFoundException("Game sign-up object cannot be located") }
         val signedUpCountry = signUps.signUp(country)
         val orderDao = OrderDao(id)
         orderDao.createIfNotExists(country)
@@ -105,22 +97,13 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
 
     @PATCH
     fun adjudicate(@HeaderParam("Authorisation") token: String): Game { // not atomized! not safe! very much not enterprise grade!
-        val signUps = try {
-            GameDAO.loadSignUps(id)
-        } catch (_: Exception) {
-            throw NotFoundException("Game sign-up object cannot be located")
-        }
-        val claims: Map<String, Any> = try {
-            tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
-        } catch (_: Exception) {
-            throw UnauthenticatedException("Your token couldn't be verified")
-        }
-        println(claims)
-        println(claims["isGM"]?.javaClass?.name)
+        val signUps = try { GameDAO.loadSignUps(id) }
+            catch (_: Exception) { throw NotFoundException("Game sign-up object cannot be located") }
+        val claims: Map<String, Any> = try { tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload }
+            catch (_: Exception) { throw UnauthenticatedException("Your token couldn't be verified") }
         if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
             throw ForbiddenException("Only the GM of this game may adjudicate it!")
-        val allPlayersReady = signUps.players.size == signUps.countries.size && signUps.players.values.all { it }
-        if (! allPlayersReady)
+        if (signUps.players.size != signUps.countries.size || !signUps.players.values.all { it })
             throw ConflictException("Not all players have readied up")
         val game = GameDAO.loadGame(id)
         val orderDao = OrderDao(id)
