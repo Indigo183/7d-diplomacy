@@ -118,8 +118,10 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
         signUps.players.keys.forEach {
             game.input(orderDao.load(it.name).orders)
             orderDao.save(it.name, OrderWriteUp(listOf()))
+            signUps.players[it] = false
         }
         game.adjudicate()
+        GameDAO.saveSignUps(id, signUps)
         GameDAO.saveGame(id, game)
         return game
     }
