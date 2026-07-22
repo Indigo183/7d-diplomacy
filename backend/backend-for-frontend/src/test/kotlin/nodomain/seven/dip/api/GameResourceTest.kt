@@ -45,7 +45,7 @@ class GameResourceTest {
         } When {
             post("api/game")
         } Then {
-            statusCode(200)
+            statusCode(201)
         } Extract {
             body().asString()
         }
@@ -134,7 +134,7 @@ class GameResourceTest {
         } When {
             post("api/game")
         } Then {
-            statusCode(200)
+            statusCode(201)
         }
 
         val catoToken = Given {

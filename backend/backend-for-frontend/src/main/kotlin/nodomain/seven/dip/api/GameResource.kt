@@ -2,6 +2,7 @@ package nodomain.seven.dip.api
 
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
+import org.jboss.resteasy.reactive.ResponseStatus;
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
@@ -47,6 +48,7 @@ class GamesResource @Inject constructor(val gameResource: GameResource, val key:
     fun getGameNames(): Collection<String> = GameDAO.allGames()
 
     @POST
+    @ResponseStatus(201)
     @Produces(MediaType.TEXT_PLAIN)
     fun createGame(@QueryParam("id") id: String): String {
         requireValidGameId(id)
