@@ -1,5 +1,7 @@
 package nodomain.seven.dip.utils
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import jakarta.enterprise.context.ApplicationScoped
@@ -48,4 +50,15 @@ class JWTParserProvider {
 
     @Produces
     val jwtParser: JwtParser = Jwts.parser().verifyWith(key).build()!!
+}
+
+@ApplicationScoped
+class JacksonConfig {
+    @Produces
+    fun objectMapper(): ObjectMapper =
+        ObjectMapper()
+            .registerModule(
+                KotlinModule.Builder()
+                    .build()
+            )
 }

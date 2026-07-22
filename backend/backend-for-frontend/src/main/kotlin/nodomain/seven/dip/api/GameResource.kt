@@ -10,6 +10,7 @@ import jakarta.ws.rs.GET
 import jakarta.ws.rs.POST
 import jakarta.inject.Inject
 import jakarta.enterprise.context.RequestScoped
+import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.DefaultValue
 import jakarta.ws.rs.HeaderParam
 import jakarta.ws.rs.NotFoundException
@@ -168,7 +169,8 @@ class OrdersResource {
     fun getOrders(): List<Inputtable> = orderDao.load(player.name).orders
 
     @POST
-    fun postOrders(orders: String): List<Inputtable> {
+    @Consumes(MediaType.TEXT_PLAIN)
+    fun postTextOrders(orders: String): List<Inputtable> {
         val parsedOrders: List<Inputtable> = try {
             getParser<RomanPlayers, Romans>()
                 .parseOrderSet(orders, Parser.FullNationalisedFormat.DATC, GameDAO.loadGame(id).gameState)[player]
@@ -178,4 +180,12 @@ class OrdersResource {
         orderDao.save(player.name, OrderWriteUp(parsedOrders))
         return parsedOrders
     }
+
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    fun postJsonOrders(orders: List<Inputtable>): List<Inputtable> {
+        orderDao.save(player.name, OrderWriteUp(orders))
+        return orders
+    }
+
 }

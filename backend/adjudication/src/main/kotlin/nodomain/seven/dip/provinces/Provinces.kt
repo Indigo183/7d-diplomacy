@@ -1,5 +1,7 @@
 package nodomain.seven.dip.provinces
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.utils.*
 import java.io.Serializable
@@ -7,6 +9,11 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.enums.enumEntries
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.DEDUCTION,
+    defaultImpl = Romans::class
+)
+@JsonSubTypes(JsonSubTypes.Type(Romans::class))
 interface Province: Serializable {
     infix fun isAdjacent(other: Province): Boolean
 

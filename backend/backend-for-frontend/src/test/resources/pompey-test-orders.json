@@ -1,0 +1,27 @@
+[
+  {
+    "piece": {
+      "@type": "Army",
+      "province": "POM",
+      "boardIndex": {
+        "coordinate": {
+          "real": 0,
+          "imaginary": 0
+        },
+        "timeplane": 0
+      }
+    },
+    "action": {
+      "province": "BRU",
+      "boardIndex": {
+        "coordinate": {
+          "real": 0,
+          "imaginary": 0
+        },
+        "timeplane": 0
+      }
+    },
+    "flare": "RIGHT",
+    "symbol": " - "
+  }
+]

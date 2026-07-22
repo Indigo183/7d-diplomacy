@@ -2,6 +2,7 @@ package nodomain.seven.dip.api
 
 import kotlin.test.Test
 import io.quarkus.test.junit.QuarkusTest
+import io.restassured.http.ContentType
 import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.When
@@ -82,6 +83,7 @@ class GameResourceTest {
 
         Given {
             header("Authorisation", "BEARER $catoToken")
+            contentType(ContentType.TEXT)
             body(GameResourceTest::class.java.getResource("/cato-test-orders.txt")!!.readText())
         } When {
             post("api/game/$gameId/cato")
@@ -100,7 +102,8 @@ class GameResourceTest {
 
         Given {
             header("Authorisation", "BEARER $pompeyToken")
-            body(GameResourceTest::class.java.getResource("/pompey-test-orders.txt")!!.readText())
+            contentType(ContentType.JSON)
+            body(GameResourceTest::class.java.getResource("/pompey-test-orders.json")!!.readText())
         } When {
             post("api/game/$gameId/pompey")
         } Then {

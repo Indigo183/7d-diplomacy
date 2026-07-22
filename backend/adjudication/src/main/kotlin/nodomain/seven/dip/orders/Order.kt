@@ -1,6 +1,8 @@
 package nodomain.seven.dip.orders
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import nodomain.seven.dip.utils.*
 import java.io.Serializable
 import kotlin.enums.enumEntries
@@ -10,16 +12,32 @@ sealed interface Action: Serializable {
     fun asLocal(): String = toString()
 }
 
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
+    property = "symbol",
+    visible = true
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = HoldOrder::class, name = " "),
+    JsonSubTypes.Type(value = MoveOrder::class, name = " - "),
+    JsonSubTypes.Type(value = SupportOrder::class, name = " S "),
+    JsonSubTypes.Type(value = ConvoyOrder::class, name = " C "),
+    JsonSubTypes.Type(value = Disband::class, name = "Disband "),
+    JsonSubTypes.Type(value = Build::class, name = "Build ")
+)
 sealed interface Inputtable: Serializable {
+    val symbol: String
     val piece: Piece
     @get:JsonIgnore
     val from: Location
         get() = piece.location
+    @JsonIgnore
     fun isLocal(): Boolean = true
 }
 
 // An action and the piece ordering it
-sealed class Order(override val piece: Piece, val symbol: String): Inputtable {
+sealed class Order(override val piece: Piece, override val symbol: String): Inputtable {
     abstract val action: Action
     fun asLocal(): String = toString()
 
@@ -92,9 +110,11 @@ sealed interface RetreatOrder: Adjustment {
 }
 
 class Build(override val piece: Piece): BuildOrder {
+    override val symbol: String get() = "Build "
     override fun toString(): String = "Build ${piece.asLocal()}"
 }
 class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder {
+    override val symbol: String get() = "Disband "
     override fun toString(): String = "Disband ${piece.asLocal()}"
 
     infix fun i(timeFlare: Int) = Disband(piece, enumEntries<TemporalFlare>()[timeFlare % 4])
