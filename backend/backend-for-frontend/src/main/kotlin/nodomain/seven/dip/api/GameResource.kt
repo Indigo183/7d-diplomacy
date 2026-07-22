@@ -89,7 +89,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
             signedUpCountry = signUps.signUp(country)
             GameDAO.saveSignUps(id, signUps)
         }
-        OrderDao(id).createIfNotExists(country)
+        OrderDao(id).createIfNotExists(signedUpCountry.name)
         val token = Jwts.builder()
             .claim("gameId", id)
             .claim("country", signedUpCountry)
@@ -152,6 +152,10 @@ class OrdersResource {
         this.player = player
         return this
     }
+
+    @Path("token-log")
+    @GET
+    fun getTokenAccessLog(): TokenAccess = TokenAccess.load(countryDataDirectory(id).resolve(player.name))
 
     @Path("ready")
     @POST
