@@ -10,18 +10,20 @@ import jakarta.ws.rs.GET
 import jakarta.ws.rs.POST
 import jakarta.inject.Inject
 import jakarta.enterprise.context.RequestScoped
+import jakarta.ws.rs.DefaultValue
 import jakarta.ws.rs.HeaderParam
 import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.PATCH
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
-import nodomain.seven.dip.adjudication.adjudicate
+import jakarta.ws.rs.core.Response
+import jakarta.ws.rs.core.UriInfo
+import jakarta.ws.rs.core.Context
 import nodomain.seven.dip.game.GameDAO
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser
 import nodomain.seven.dip.orders.getParser
-import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.Romans
@@ -78,8 +80,7 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
     }
 
     @GET
-    fun getGame() = try { GameDAO.loadGame(id) }
-        catch (_ : Exception) { throw NotFoundException("no game exists with this id") }
+    fun getGame() = GameDAO.loadGame(id)
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -106,16 +107,20 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
     }
 
     @PATCH
-    fun adjudicate(@HeaderParam("Authorisation") token: String): Game { // not atomized! not safe! very much not enterprise grade!
-        val signUps = try { GameDAO.loadSignUps(id) }
-            catch (_: Exception) { throw NotFoundException("Game sign-up object cannot be located") }
+    fun gmAction(
+        @HeaderParam("Authorisation") token: String,
+        @DefaultValue("adjudication") @QueryParam("action") action: String,
+        @Context uriInfo: UriInfo
+    ): Response { // not atomized! not safe! very much not enterprise grade!
         val claims: Map<String, Any> = try { tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload }
             catch (_: Exception) { throw UnauthenticatedException("Your token couldn't be verified") }
         if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
-            throw ForbiddenException("Only the GM of this game may adjudicate it!")
+            throw ForbiddenException("Only the GM of this game may take actions it!")
+/*
+        val signUps = GameDAO.loadSignUps(id)
+        val game = GameDAO.loadGame(id)
         if (signUps.players.size != signUps.countries.size || !signUps.players.values.all { it })
             throw ConflictException("Not all players have readied up")
-        val game = GameDAO.loadGame(id)
         val orderDao = OrderDao(id)
         signUps.players.keys.forEach {
             game.input(orderDao.load(it.name).orders)
@@ -126,6 +131,8 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
         GameDAO.saveSignUps(id, signUps)
         GameDAO.saveGame(id, game)
         return game
+*/
+        return getActionByName(action).run(id, uriInfo)
     }
 
     @Path("{country}")
