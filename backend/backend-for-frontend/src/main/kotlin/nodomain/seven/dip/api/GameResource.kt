@@ -116,22 +116,6 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
             catch (_: Exception) { throw UnauthenticatedException("Your token couldn't be verified") }
         if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
             throw ForbiddenException("Only the GM of this game may take actions it!")
-/*
-        val signUps = GameDAO.loadSignUps(id)
-        val game = GameDAO.loadGame(id)
-        if (signUps.players.size != signUps.countries.size || !signUps.players.values.all { it })
-            throw ConflictException("Not all players have readied up")
-        val orderDao = OrderDao(id)
-        signUps.players.keys.forEach {
-            game.input(orderDao.load(it.name).orders)
-            orderDao.save(it.name, OrderWriteUp(listOf()))
-            signUps.players[it] = false
-        }
-        game.adjudicate()
-        GameDAO.saveSignUps(id, signUps)
-        GameDAO.saveGame(id, game)
-        return game
-*/
         return getActionByName(action).run(id, uriInfo)
     }
 

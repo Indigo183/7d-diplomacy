@@ -15,6 +15,7 @@ fun interface GMAction {
 
 fun getActionByName(name: String): GMAction = when (name) {
     "adjudication" -> adjudicate
+    "set-property" -> setProperty
     else -> throw BadRequestException("The action $name is not recognised")
 }
 
@@ -33,4 +34,14 @@ val adjudicate = GMAction { id, _ ->
     GameDAO.saveSignUps(id, signUps)
     GameDAO.saveGame(id, game)
     Response.status(200).entity(game).build()
+}
+
+val setProperty = GMAction { id, context ->
+    val signUps = GameDAO.loadSignUps(id)
+    val propertyToSet = context.queryParameters["property"]?.first()
+    if (propertyToSet === null)
+        throw BadRequestException("action set-property requires a property to be set")
+    signUps.properties.add(GameProperty.fromString(propertyToSet))
+    GameDAO.saveSignUps(id, signUps)
+    Response.status(200).entity(signUps.properties.toString()).build()
 }
