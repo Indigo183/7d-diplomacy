@@ -81,19 +81,26 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    fun signUp(@QueryParam("country") country: String): String {
+    fun getPlayerToken(@QueryParam("country") country: String, @QueryParam("recovery-key") recoveryKey: String?): String {
         val signUps = try { GameDAO.loadSignUps(id) }
             catch (_: Exception) { throw NotFoundException("Game sign-up object cannot be located") }
-        val signedUpCountry = signUps.signUp(country)
-        val orderDao = OrderDao(id)
-        orderDao.createIfNotExists(country)
-        GameDAO.saveSignUps(id, signUps)
-        TokenAccess.logCreateToken(id, country)
-        return Jwts.builder()
+        var signedUpCountry = signUps.find(country)
+        if (signedUpCountry === null) {
+            signedUpCountry = signUps.signUp(country)
+            GameDAO.saveSignUps(id, signUps)
+        }
+        OrderDao(id).createIfNotExists(country)
+        val token = Jwts.builder()
             .claim("gameId", id)
             .claim("country", signedUpCountry)
             .signWith(key)
             .compact()
+        when (recoveryKey?.length) {
+            null, 0                             -> TokenAccess.logCreateToken(id, country)
+            10 if (token.endsWith(recoveryKey)) -> TokenAccess.logRecoverToken(id, country)
+            else                                -> throw ForbiddenException("Invalid recovery key")
+        }
+        return token
     }
 
     @PATCH
