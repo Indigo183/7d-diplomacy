@@ -108,8 +108,8 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
         val game = GameDAO.loadGame(id)
         val orderDao = OrderDao(id)
         signUps.players.keys.forEach {
-            game.input(orderDao.loadOrders(it.name).orders)
-            orderDao.saveOrders(it.name, OrderWriteUp(listOf()))
+            game.input(orderDao.load(it.name).orders)
+            orderDao.save(it.name, OrderWriteUp(listOf()))
         }
         game.adjudicate()
         GameDAO.saveGame(id, game)
@@ -157,7 +157,7 @@ class OrdersResource {
     fun seeReady(): Boolean? = GameDAO.loadSignUps(id).players[player]
 
     @GET
-    fun getOrders(): List<Inputtable> = orderDao.loadOrders(player.name).orders
+    fun getOrders(): List<Inputtable> = orderDao.load(player.name).orders
 
     @POST
     fun postOrders(orders: String): List<Inputtable> {
@@ -167,7 +167,7 @@ class OrdersResource {
         } catch (e: Exception) {
             throw UnprocessableEntryException("Incorrect format for the parser", e)
         } ?: listOf()
-        orderDao.saveOrders(player.name, OrderWriteUp(parsedOrders))
+        orderDao.save(player.name, OrderWriteUp(parsedOrders))
         return parsedOrders
     }
 }
