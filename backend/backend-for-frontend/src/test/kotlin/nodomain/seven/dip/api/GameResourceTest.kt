@@ -71,6 +71,16 @@ class GameResourceTest {
         }
 
         Given {
+            header("Authorisation", "BEARER $gmToken")
+            queryParam("action", "set-property")
+            queryParam("property", "started")
+        } When {
+            patch("api/game/$gameId")
+        } Then {
+            statusCode(200)
+        }
+
+        Given {
             header("Authorisation", "BEARER $catoToken")
             body(GameResourceTest::class.java.getResource("/cato-test-orders.txt")!!.readText())
         } When {
@@ -129,12 +139,14 @@ class GameResourceTest {
     fun tokenAccessTest() {
         val gameId = "token-access-log-test"
 
-        Given {
+        val gmToken = Given {
             queryParam("id", gameId)
         } When {
             post("api/game")
         } Then {
             statusCode(201)
+        } Extract {
+            body().asString()
         }
 
         val catoToken = Given {
@@ -174,6 +186,24 @@ class GameResourceTest {
             statusCode(200)
             body("tokenCreatedLog", hasSize<Long>(2))
             body("tokenRecoveredLog", hasSize<Long>(1))
+        }
+
+        Given {
+            header("Authorisation", "BEARER $gmToken")
+            queryParam("action", "set-property")
+            queryParam("property", "started")
+        } When {
+            patch("api/game/$gameId")
+        } Then {
+            statusCode(200)
+        }
+
+        Given {
+            queryParam("country", "cato")
+        } When {
+            post("api/game/$gameId")
+        } Then {
+            statusCode(403)
         }
     }
 }

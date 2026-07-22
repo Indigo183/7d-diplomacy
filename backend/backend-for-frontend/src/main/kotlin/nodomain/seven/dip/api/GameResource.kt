@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.UriInfo
 import jakarta.ws.rs.core.Context
+import nodomain.seven.dip.api.GameProperty.STARTED
 import nodomain.seven.dip.game.GameDAO
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.orders.Inputtable
@@ -99,9 +100,9 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
             .signWith(key)
             .compact()
         when (recoveryKey?.length) {
-            null, 0                             -> TokenAccess.logCreateToken(id, country)
-            10 if (token.endsWith(recoveryKey)) -> TokenAccess.logRecoverToken(id, country)
-            else                                -> throw ForbiddenException("Invalid recovery key")
+            null if (STARTED !in signUps.properties) -> TokenAccess.logCreateToken(id, country)
+            10 if (token.endsWith(recoveryKey))      -> TokenAccess.logRecoverToken(id, country)
+            else                                     -> throw ForbiddenException("Invalid recovery key")
         }
         return token
     }

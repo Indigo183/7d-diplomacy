@@ -22,6 +22,8 @@ fun getActionByName(name: String): GMAction = when (name) {
 val adjudicate = GMAction { id, _ ->
     val signUps = GameDAO.loadSignUps(id)
     val game = GameDAO.loadGame(id)
+    if (!signUps.properties.contains(GameProperty.STARTED))
+        throw ConflictException("A game may only be adjudicated once it has started")
     if (signUps.players.size != signUps.countries.size || !signUps.players.values.all { it })
         throw ConflictException("Not all players have readied up")
     val orderDao = OrderDao(id)
