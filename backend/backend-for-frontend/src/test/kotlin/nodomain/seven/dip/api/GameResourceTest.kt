@@ -8,6 +8,7 @@ import io.restassured.module.kotlin.extensions.When
 import io.restassured.module.kotlin.extensions.Then
 import nodomain.seven.dip.utils.filePath
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.AfterAll
 import java.nio.file.Files
@@ -121,6 +122,58 @@ class GameResourceTest {
         } Then {
             statusCode(200)
             body("turn", equalTo(2))
+        }
+    }
+
+    @Test
+    fun tokenAccessTest() {
+        val gameId = "token-access-log-test"
+
+        Given {
+            queryParam("id", gameId)
+        } When {
+            post("api/game")
+        } Then {
+            statusCode(200)
+        }
+
+        val catoToken = Given {
+            queryParam("country", "cato")
+        } When {
+            post("api/game/$gameId")
+        } Then {
+            statusCode(200)
+        } Extract {
+            body().asString()
+        }
+
+        Given {
+            queryParam("country", "cato")
+        } When {
+            post("api/game/$gameId")
+        } Then {
+            statusCode(200)
+            body(equalTo(catoToken))
+        }
+
+        Given {
+            queryParam("country", "cato")
+            queryParam("recovery-key", catoToken.substring(catoToken.length - 10))
+        } When {
+            post("api/game/$gameId")
+        } Then {
+            statusCode(200)
+            body(equalTo(catoToken))
+        }
+
+        Given {
+            header("Authorisation", "BEARER $catoToken")
+        } When {
+            get("api/game/$gameId/cato/token-log")
+        } Then {
+            statusCode(200)
+            body("tokenCreatedLog", hasSize<Long>(2))
+            body("tokenRecoveredLog", hasSize<Long>(1))
         }
     }
 }

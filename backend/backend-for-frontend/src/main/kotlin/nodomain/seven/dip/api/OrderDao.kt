@@ -27,9 +27,9 @@ class OrderDao(gameId: String): FileDAO<String, OrderWriteUp>() {
     }
 }
 
-class TokenAccess(
-    var tokenCreatedLog: MutableList<Long> = mutableListOf(),
-    var tokenRecoveredLog: MutableList<Long> = mutableListOf()
+data class TokenAccess(
+    val tokenCreatedLog: MutableList<Long> = mutableListOf(),
+    val tokenRecoveredLog: MutableList<Long> = mutableListOf()
 ): Serializable {
     companion object: FileDAO<Path, TokenAccess>() {
         override fun getPath(identifier: Path): Path = identifier.resolve("tokenLog.ser")
@@ -38,7 +38,7 @@ class TokenAccess(
         fun logCreateToken(gameId: String, country: String) {
             val path = countryDataDirectory(gameId).resolve(country)
             val log = load(path)
-            log.tokenCreatedLog+= Clock.System.now().epochSeconds
+            log.tokenCreatedLog += Clock.System.now().epochSeconds
             save(path, log)
         }
 
@@ -46,7 +46,7 @@ class TokenAccess(
         fun logRecoverToken(gameId: String, country: String) {
             val path = countryDataDirectory(gameId).resolve(country)
             val log = load(path)
-            log.tokenRecoveredLog+= Clock.System.now().epochSeconds
+            log.tokenRecoveredLog += Clock.System.now().epochSeconds
             save(path, log)
         }
     }
