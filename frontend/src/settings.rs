@@ -119,9 +119,9 @@ impl Player {
     }
 }
 
-/// The variant data for a specific variant, parsed from JSON.
+/// The variant data for a specific map, parsed from JSON.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Variant {
+pub struct VariantMap {
     /// The variant's name (not including time travel details).
     pub name: String,
     /// The variant's map data (TODO: NOT IMPLEMENTED).
@@ -129,14 +129,14 @@ pub struct Variant {
     /// The variant's player list.
     pub player_list: Vec<Player>,
 }
-impl Default for Variant {
+impl Default for VariantMap {
     fn default() -> Self {
         Self {
             name: String::from("Romans"),
             map: (),
             player_list: vec![
-                Player::new(String::from("Cato"), RGBA::from("#265BA5")),
-                Player::new(String::from("Pompey"), RGBA::from("#972530")),
+                Player::new(String::from("Cato"), RGBA::try_from("#265BA5").unwrap()),
+                Player::new(String::from("Pompey"), RGBA::try_from("#972530").unwrap()),
             ],
         }
     }
@@ -152,7 +152,7 @@ pub struct GameConfig {
     /// A link to the game hosted on a potentially external server.
     pub link: String,
     /// The game's variant data.
-    pub variant: Variant,
+    pub variant: VariantMap,
     /// The game's time travel details.
     pub time_travel: TimeTravel,
     /// The game's adjacency settings.
@@ -167,7 +167,7 @@ impl GameConfig {
             name: String::new(),
             id: String::new(),
             link: String::from("localhost:9090"),
-            variant: Variant::default(),
+            variant: VariantMap::default(),
             time_travel: TimeTravel::default(),
             adjacencies: Adjacencies::default(),
             automatic_adjudication: false,
@@ -184,7 +184,7 @@ pub struct GameConfigBuilder {
     /// A link to the game hosted on a potentially external server.
     link: String,
     /// The game's variant data.
-    variant: Variant,
+    variant: VariantMap,
     /// The game's time travel details.
     time_travel: TimeTravel,
     /// The game's adjacency settings.
@@ -209,7 +209,7 @@ impl GameConfigBuilder {
         }
     }
     /// The game's variant data.
-    pub fn with_variant(self, variant: Variant) -> Self {
+    pub fn with_variant(self, variant: VariantMap) -> Self {
         Self { variant, ..self }
     }
     /// The game's time travel details.
@@ -290,17 +290,22 @@ pub struct PlayerSpecifics {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameCache {
     pub game: Game,
-    pub player_specifics: Vec<PlayerSpecifics>
+    pub player_specifics: Vec<PlayerSpecifics>,
 }
 
 impl GameCache {
     pub fn get_player_specifics(&self, player_name: String) -> Option<&PlayerSpecifics> {
-        self.player_specifics.iter().find(|x| x.player.name == player_name)
+        self.player_specifics
+            .iter()
+            .find(|x| x.player.name == player_name)
     }
 }
 
 impl From<Game> for GameCache {
     fn from(value: Game) -> Self {
-        GameCache { game: value, player_specifics: vec![] }
+        GameCache {
+            game: value,
+            player_specifics: vec![],
+        }
     }
 }
