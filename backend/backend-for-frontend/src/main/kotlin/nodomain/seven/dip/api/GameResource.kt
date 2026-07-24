@@ -2,27 +2,26 @@ package nodomain.seven.dip.api
 
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
-import org.jboss.resteasy.reactive.ResponseStatus;
-import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
-import jakarta.ws.rs.Produces
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.POST
-import jakarta.inject.Inject
 import jakarta.enterprise.context.RequestScoped
+import jakarta.inject.Inject
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.DefaultValue
+import jakarta.ws.rs.GET
 import jakarta.ws.rs.HeaderParam
 import jakarta.ws.rs.NotFoundException
 import jakarta.ws.rs.PATCH
+import jakarta.ws.rs.POST
+import jakarta.ws.rs.Path
+import jakarta.ws.rs.PathParam
+import jakarta.ws.rs.Produces
 import jakarta.ws.rs.QueryParam
+import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.UriInfo
-import jakarta.ws.rs.core.Context
 import nodomain.seven.dip.api.GameProperty.STARTED
-import nodomain.seven.dip.game.GameDAO
 import nodomain.seven.dip.game.Game
+import nodomain.seven.dip.game.GameDAO
 import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser
 import nodomain.seven.dip.orders.getParser
@@ -33,13 +32,15 @@ import nodomain.seven.dip.utils.exceptions.ConflictException
 import nodomain.seven.dip.utils.exceptions.ForbiddenException
 import nodomain.seven.dip.utils.exceptions.UnauthenticatedException
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
+import org.eclipse.microprofile.openapi.annotations.Operation
+import org.jboss.resteasy.reactive.ResponseStatus
 import javax.crypto.SecretKey
 import kotlin.enums.enumEntries
 
-val ALPHANUMERIC_WITH_DASHES = Regex("^[A-Za-z0-9-]+$")
+val LOWERCASE_ALPHANUMERIC_WITH_DASHES = Regex("^[a-z0-9-]+$")
 fun requireValidGameId(id: String) {
-    if (! ALPHANUMERIC_WITH_DASHES.matches(id))
-        throw UnprocessableEntryException("The game Id must be an alphanumerical kabab case string of at least 4 characters")
+    if (id.length < 4 || !LOWERCASE_ALPHANUMERIC_WITH_DASHES.matches(id))
+        throw UnprocessableEntryException("game id must be a lowercase alphanumerical kebab case string of at least 4 characters")
 }
 
 @Path("game")
@@ -72,7 +73,11 @@ class GamesResource @Inject constructor(val gameResource: GameResource, val key:
 
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
-class GameResource @Inject constructor(val ordersResource: OrdersResource, val key: SecretKey, val tokenParser: JwtParser) {
+class GameResource @Inject constructor(
+    val ordersResource: OrdersResource,
+    val key: SecretKey,
+    val tokenParser: JwtParser
+) {
     lateinit var id: String
     fun with(id: String): GameResource {
         requireValidGameId(id)
@@ -86,9 +91,15 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
-    fun getPlayerToken(@QueryParam("country") country: String, @QueryParam("recovery-key") recoveryKey: String?): String {
-        val signUps = try { GameDAO.loadSignUps(id) }
-            catch (_: Exception) { throw NotFoundException("Game sign-up object cannot be located") }
+    fun getPlayerToken(
+        @QueryParam("country") country: String,
+        @QueryParam("recovery-key") recoveryKey: String?
+    ): String {
+        val signUps = try {
+            GameDAO.loadSignUps(id)
+        } catch (_: Exception) {
+            throw NotFoundException("game sign-up object cannot be located")
+        }
         var signedUpCountry = signUps.find(country)
         if (signedUpCountry === null) {
             signedUpCountry = signUps.signUp(country)
@@ -102,37 +113,44 @@ class GameResource @Inject constructor(val ordersResource: OrdersResource, val k
             .compact()
         when (recoveryKey?.length) {
             null if (STARTED !in signUps.properties) -> TokenAccess.logCreateToken(id, country)
-            10 if (token.endsWith(recoveryKey))      -> TokenAccess.logRecoverToken(id, country)
-            else                                     -> throw ForbiddenException("Invalid recovery key")
+            10 if (token.endsWith(recoveryKey)) -> TokenAccess.logRecoverToken(id, country)
+            else -> throw ForbiddenException("invalid recovery key")
         }
         return token
     }
 
+    @Operation(summary = "GM Action")
     @PATCH
     fun gmAction(
         @HeaderParam("Authorisation") token: String,
-        @DefaultValue("adjudication") @QueryParam("action") action: String,
+        @DefaultValue("adjudicate") @QueryParam("action") action: String,
         @Context uriInfo: UriInfo
-    ): Response { // not atomized! not safe! very much not enterprise grade!
-        val claims: Map<String, Any> = try { tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload }
-            catch (_: Exception) { throw UnauthenticatedException("Your token couldn't be verified") }
+    ): Response { // not atomised! not safe! very much not enterprise grade!
+        val claims: Map<String, Any> = try {
+            tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
+        } catch (_: Exception) {
+            throw UnauthenticatedException("token couldn't be verified")
+        }
         if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
-            throw ForbiddenException("Only the GM of this game may take actions it!")
+            throw ForbiddenException("only the GM of this game may take actions it!")
         return getActionByName(action).run(id, uriInfo)
     }
 
     @Path("{country}")
-    fun orders(@PathParam("country") country: String, @HeaderParam("Authorisation") token: String): OrdersResource {
+    fun orders(
+        @PathParam("country") country: String,
+        @HeaderParam("Authorisation") token: String
+    ): OrdersResource {
         val claims: Map<String, Any> = try {
             tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
         } catch (_: Exception) {
-            throw UnauthenticatedException("Your token couldn't be verified")
+            throw UnauthenticatedException("token couldn't be verified")
         }
         if (claims["gameId"] != id)
-            throw ForbiddenException("Supplied token isn't for this game")
+            throw ForbiddenException("supplied token isn't for this game")
         val player = GameDAO.loadSignUps(id).find(claims["country"]?.toString())
-        if (player === null ||  player.name.lowercase() != country.lowercase())
-            throw ForbiddenException("Supplied token isn't for this country")
+        if (player === null || player.name.lowercase() != country.lowercase())
+            throw ForbiddenException("supplied token isn't for this country")
         return ordersResource.with(id, player)
     }
 }
@@ -152,13 +170,14 @@ class OrdersResource {
 
     @Path("token-log")
     @GET
-    fun getTokenAccessLog(): TokenAccess = TokenAccess.load(countryDataDirectory(id).resolve(player.name))
+    fun getTokenAccessLog(): TokenAccess =
+        TokenAccess.load(countryDataDirectory(id).resolve(player.name))
 
     @Path("ready")
     @POST
     fun setReady(@QueryParam("ready") ready: Boolean?) =
         GameDAO.saveSignUps(id, GameDAO.loadSignUps(id).also {
-            it.players[player]= ready ?: false
+            it.players[player] = ready ?: false
         })
 
     @Path("ready")
@@ -173,9 +192,13 @@ class OrdersResource {
     fun postTextOrders(orders: String): List<Inputtable> {
         val parsedOrders: List<Inputtable> = try {
             getParser<RomanPlayers, Romans>()
-                .parseOrderSet(orders, Parser.FullNationalisedFormat.DATC, GameDAO.loadGame(id).gameState)[player]
+                .parseOrderSet(
+                    orders,
+                    Parser.FullNationalisedFormat.DATC,
+                    GameDAO.loadGame(id).gameState
+                )[player]
         } catch (e: Exception) {
-            throw UnprocessableEntryException("Incorrect format for the parser", e)
+            throw UnprocessableEntryException("incorrect format for the parser", e)
         } ?: listOf()
         orderDao.save(player.name, OrderWriteUp(parsedOrders))
         return parsedOrders

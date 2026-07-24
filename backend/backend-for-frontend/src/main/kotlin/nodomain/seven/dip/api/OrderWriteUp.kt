@@ -15,16 +15,18 @@ data class SignUps(
 ): Serializable {
     fun signUp(country: String): Player {
         val player = countries.find { it.name.equals(country, ignoreCase = true) }
-            ?: throw UnprocessableEntryException("Country $country doesn't exist for this game")
+            ?: throw UnprocessableEntryException("country $country doesn't exist for this game")
         players.putIfAbsent(player, false)
         return player
     }
-    fun find(country: String?): Player? = players.keys.find { it.name.equals(country, ignoreCase = true) }
+
+    fun find(country: String?): Player? =
+        players.keys.find { it.name.equals(country, ignoreCase = true) }
 }
 
 interface GameProperty: Serializable {
     companion object {
-        fun fromString(string: String): GameProperty = when(string) {
+        fun fromString(string: String): GameProperty = when (string) {
             "started" -> STARTED
             "ended" -> ENDED
             else -> object : Flag(string) {} // custom flag

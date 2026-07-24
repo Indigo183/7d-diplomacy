@@ -8,18 +8,21 @@ import java.nio.file.Path
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-fun countryDataDirectory(gameId: String): Path = GameDAO.gameDataPath.resolve(gameId).resolve(".countries")
+fun countryDataDirectory(gameId: String): Path =
+    GameDAO.gameDataPath.resolve(gameId).resolve(".countries")
 
 class OrderDao(gameId: String): FileDAO<String, OrderWriteUp>() {
     val orderFilePath: Path = countryDataDirectory(gameId)
+
     init {
         if (!Files.exists(orderFilePath.parent))
-            throw IllegalArgumentException("Game does not exist")
+            throw IllegalArgumentException("game does not exist")
         if (!Files.exists(orderFilePath))
             Files.createDirectory(orderFilePath)
     }
 
-    override fun getPath(identifier: String): Path = orderFilePath.resolve(identifier).resolve("currentOrders.ser")
+    override fun getPath(identifier: String): Path =
+        orderFilePath.resolve(identifier).resolve("currentOrders.ser")
 
     override fun onCreation(identifier: String, creationPath: Path) {
         TokenAccess.createIfNotExists(creationPath.parent)

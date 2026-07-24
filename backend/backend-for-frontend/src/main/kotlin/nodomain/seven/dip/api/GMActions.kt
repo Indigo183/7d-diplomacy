@@ -14,18 +14,18 @@ fun interface GMAction {
 }
 
 fun getActionByName(name: String): GMAction = when (name) {
-    "adjudication" -> adjudicate
+    "adjudicate" -> adjudicate
     "set-property" -> setProperty
-    else -> throw BadRequestException("The action $name is not recognised")
+    else -> throw BadRequestException("the action $name is not recognised")
 }
 
 val adjudicate = GMAction { id, _ ->
     val signUps = GameDAO.loadSignUps(id)
     val game = GameDAO.loadGame(id)
     if (!signUps.properties.contains(GameProperty.STARTED))
-        throw ConflictException("A game may only be adjudicated once it has started")
+        throw ConflictException("a game may only be adjudicated once it has started")
     if (signUps.players.size != signUps.countries.size || !signUps.players.values.all { it })
-        throw ConflictException("Not all players have readied up")
+        throw ConflictException("not all players have readied up")
     val orderDao = OrderDao(id)
     signUps.players.keys.forEach {
         game.input(orderDao.load(it.name).orders)
