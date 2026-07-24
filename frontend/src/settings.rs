@@ -1,6 +1,6 @@
-use std::option::Option;
-
+use anyhow::{anyhow, Error};
 use serde::{Deserialize, Serialize};
+use std::option::Option;
 
 /// The time travel details of a game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
@@ -89,13 +89,21 @@ impl Into<u32> for RGBA {
             | self.alpha as u32
     }
 }
+impl TryFrom<&str> for RGBA {
+    type Error = Error;
 
-impl From<&str> for RGBA {
-    fn from(value: &str) -> Self {
-        todo!()
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let hex_as_str = value.trim_matches('#').to_ascii_lowercase();
+        let hex = u32::from_str_radix(&hex_as_str, 16)?;
+        match hex_as_str.len() {
+            // assumes RGB
+            6 => Ok(RGBA::from_rgb(hex)),
+            // assumes RGBA
+            8 => Ok(RGBA::from(hex)),
+            _ => Err(anyhow!("RGB/RGBA must be 6/8 characters long")),
+        }
     }
 }
-// TODO: impl RGBA
 
 /// The associated data for a player, parsed from JSON.
 #[derive(Debug, Clone, Serialize, Deserialize)]
