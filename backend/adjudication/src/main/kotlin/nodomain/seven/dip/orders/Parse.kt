@@ -74,11 +74,13 @@ class Parser(
     }
     enum class NationalisedFormat(val getFormatter: Parser.() -> ParsingHelper<Owned<Order>>): (Parser) -> ParsingHelper<Owned<Order>> {
         VERBOSE_WITH_PLAYER({National(Verbose())}),
+        VERBOSE_WITH_ANNOUNCED_PLAYER({ AnnouncedNational(Verbose()) }),
         DATC({ this.OrderDATC() });
 
         override fun invoke(parser: Parser): ParsingHelper<Owned<Order>> = parser.getFormatter()
     }
     enum class FullNationalisedFormat(val getFormatter: Parser.() -> OwnedDiplomacyParser): (Parser) -> OwnedDiplomacyParser {
+        VERBOSE_WITH_ANNOUNCED_PLAYER({ announcedNationalWithRetreatsTransformer(AnnouncedNational(Verbose()), AnnouncedNational(VerboseBuilds()))}),
         DATC({ datcParser(this.OrderDATC(), this.BuildDATC()) });
 
         override fun invoke(parser: Parser) = parser.getFormatter()
@@ -170,12 +172,22 @@ class Parser(
                 .combiningInto(notation::asAction, 'H') { action, piece -> when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue) }
-                    'M' -> piece M queue.withFirst(notation::asBoardIndex)
+                    'M', '-' -> piece M queue.withFirst(notation::asBoardIndex)
                         .combiningManyInto(asProvince, combiner = ::Location) i notation.asTemporalFlare(queue.remove())
                     else -> throw IllegalStateException()
                 } }
         }
     }
+
+    private inner class VerboseBuilds: Formatted<BuildOrder> {
+        override fun parseOrderInPieces(queue: Queue<String>): BuildOrder {
+            return queue.withFirst(notation::asBoardIndex)
+                .combiningNext(notation::asBuildAction) { action , board -> Pair(action, board)}
+                .combiningNext(notation::asUnitType) { unitType, (action, board) -> { province: Province -> action(unitType(Location(province, board)))}}
+                .combiningManyInto(asProvince) {province, action -> (action(province))}
+        }
+    }
+
 
     private abstract inner class DATC<T>: Announced<Owned<T>> {
         val origin = BoardIndex(0.c)
@@ -232,12 +244,42 @@ class Parser(
 
     private fun datcParser(orderDATC: OrderDATC, buildDATC: BuildDATC) = OwnedDiplomacyParser(orderDATC, buildDATC, RetreatDATC(orderDATC, buildDATC))
 
-    private inner class National(val basedOn: Formatted<Order>): Formatted<Owned<Order>> {
-        override fun parseOrderInPieces(queue: Queue<String>): Owned<Order> {
+    private inner class National<T>(val basedOn: Formatted<T>): Formatted<Owned<T>> {
+        override fun parseOrderInPieces(queue: Queue<String>): Owned<T> {
             val player = queue.take(asPlayer)
             return player.having(basedOn.parseOrderInPieces(queue))
         }
     }
+
+    private inner class AnnouncedNational<T>(val basedOn: Formatted<T>): Announced<Owned<T>> {
+        lateinit var owner: Player
+        override fun parseHeader(asString: String) {
+            owner = asPlayer(asString.substringBefore(':')).provideComplete()
+        }
+
+        override fun parseOrderInPieces(queue: Queue<String>): Owned<T> =
+            owner.having(basedOn.parseOrderInPieces(queue))
+    }
+
+    private fun announcedNationalWithRetreatsTransformer(
+        orders: AnnouncedNational<Order>,
+        builds: AnnouncedNational<BuildOrder>,
+        validStartsOfDisband: List<String> = listOf("-", "disband", "remove")
+    ): OwnedDiplomacyParser = OwnedDiplomacyParser(orders, builds,
+        object: Announced<Owned<RetreatOrder>> {
+            override fun parseHeader(asString: String) {
+                orders.parseHeader(asString)
+                builds.parseHeader(asString)
+            }
+
+            override fun parseOrderInPieces(queue: Queue<String>): Owned<RetreatOrder> {
+                val differentiator = queue.peek()
+                return if (validStartsOfDisband.any { differentiator.startsWith(it) })
+                    builds.owner.having(builds.parseOrderInPieces(queue).order as Disband)
+                else
+                    orders.owner.having(orders.parseOrderInPieces(queue).order as MoveOrder)
+            }
+        })
 }
 
 object DefaultNotation: Notation {

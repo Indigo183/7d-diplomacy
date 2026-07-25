@@ -13,21 +13,10 @@ sealed interface Action: Serializable {
 }
 
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.EXISTING_PROPERTY,
-    property = "symbol",
-    visible = true
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(value = HoldOrder::class, name = " "),
-    JsonSubTypes.Type(value = MoveOrder::class, name = " - "),
-    JsonSubTypes.Type(value = SupportOrder::class, name = " S "),
-    JsonSubTypes.Type(value = ConvoyOrder::class, name = " C "),
-    JsonSubTypes.Type(value = Disband::class, name = "Disband "),
-    JsonSubTypes.Type(value = Build::class, name = "Build ")
+    use = JsonTypeInfo.Id.SIMPLE_NAME,
+    property = "orderType"
 )
 sealed interface Inputtable: Serializable {
-    val symbol: String
     val piece: Piece
     @get:JsonIgnore
     val from: Location
@@ -37,7 +26,7 @@ sealed interface Inputtable: Serializable {
 }
 
 // An action and the piece ordering it
-sealed class Order(override val piece: Piece, override val symbol: String): Inputtable {
+sealed class Order(override val piece: Piece, @JsonIgnore val symbol: String): Inputtable {
     abstract val action: Action
     fun asLocal(): String = toString()
 
@@ -110,11 +99,9 @@ sealed interface RetreatOrder: Adjustment {
 }
 
 class Build(override val piece: Piece): BuildOrder {
-    override val symbol: String get() = "Build "
     override fun toString(): String = "Build ${piece.asLocal()}"
 }
 class Disband(override val piece: Piece, override val flare: TemporalFlare? = null): BuildOrder, RetreatOrder {
-    override val symbol: String get() = "Disband "
     override fun toString(): String = "Disband ${piece.asLocal()}"
 
     infix fun i(timeFlare: Int) = Disband(piece, enumEntries<TemporalFlare>()[timeFlare % 4])

@@ -1,7 +1,7 @@
 [
   {
     "piece": {
-      "@type": "Army",
+      "unitType": "Army",
       "province": "POM",
       "boardIndex": {
         "coordinate": {
@@ -11,6 +11,7 @@
         "timeplane": 0
       }
     },
+    "orderType": "MoveOrder",
     "action": {
       "province": "BRU",
       "boardIndex": {

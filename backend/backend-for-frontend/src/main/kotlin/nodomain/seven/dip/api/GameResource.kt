@@ -23,7 +23,7 @@ import nodomain.seven.dip.api.GameProperty.STARTED
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.game.GameDAO
 import nodomain.seven.dip.orders.Inputtable
-import nodomain.seven.dip.orders.Parser
+import nodomain.seven.dip.orders.Parser.FullNationalisedFormat.VERBOSE_WITH_ANNOUNCED_PLAYER
 import nodomain.seven.dip.orders.getParser
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.RomanPlayers
@@ -194,12 +194,13 @@ class OrdersResource {
             getParser<RomanPlayers, Romans>()
                 .parseOrderSet(
                     orders,
-                    Parser.FullNationalisedFormat.DATC,
+                    VERBOSE_WITH_ANNOUNCED_PLAYER,
                     GameDAO.loadGame(id).gameState
                 )[player]
         } catch (e: Exception) {
             throw UnprocessableEntryException("incorrect format for the parser", e)
         } ?: listOf()
+        println(parsedOrders)
         orderDao.save(player.name, OrderWriteUp(parsedOrders))
         return parsedOrders
     }

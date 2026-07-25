@@ -8,7 +8,8 @@ import nodomain.seven.dip.provinces.Province
 import java.io.Serializable
 
 @JsonTypeInfo(
-    use = JsonTypeInfo.Id.SIMPLE_NAME
+    use = JsonTypeInfo.Id.SIMPLE_NAME,
+    property = "unitType"
 )
 sealed interface Piece: Serializable {
     val location: Location
