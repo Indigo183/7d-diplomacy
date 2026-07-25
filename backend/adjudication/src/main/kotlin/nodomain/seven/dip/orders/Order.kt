@@ -14,7 +14,7 @@ sealed interface Action: Serializable {
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.SIMPLE_NAME,
-    property = "orderType"
+    property = "order_type"
 )
 sealed interface Inputtable: Serializable {
     val piece: Piece

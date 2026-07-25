@@ -1,9 +1,9 @@
 [
   {
     "piece": {
-      "unitType": "Army",
+      "unit_type": "Army",
       "province": "POM",
-      "boardIndex": {
+      "board_index": {
         "coordinate": {
           "real": 0,
           "imaginary": 0
@@ -11,10 +11,10 @@
         "timeplane": 0
       }
     },
-    "orderType": "MoveOrder",
+    "order_type": "MoveOrder",
     "action": {
       "province": "BRU",
-      "boardIndex": {
+      "board_index": {
         "coordinate": {
           "real": 0,
           "imaginary": 0

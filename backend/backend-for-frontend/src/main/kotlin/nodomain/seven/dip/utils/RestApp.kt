@@ -1,6 +1,7 @@
 package nodomain.seven.dip.utils
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
@@ -60,5 +61,8 @@ class JacksonConfig {
             .registerModule(
                 KotlinModule.Builder()
                     .build()
+            )
+            .setPropertyNamingStrategy(
+                PropertyNamingStrategies.SNAKE_CASE
             )
 }

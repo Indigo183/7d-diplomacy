@@ -9,7 +9,7 @@ import java.io.Serializable
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.SIMPLE_NAME,
-    property = "unitType"
+    property = "unit_type"
 )
 sealed interface Piece: Serializable {
     val location: Location

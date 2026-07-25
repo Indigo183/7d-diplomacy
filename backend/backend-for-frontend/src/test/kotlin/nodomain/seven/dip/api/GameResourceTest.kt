@@ -128,14 +128,16 @@ class GameResourceTest {
             body(equalTo("true"))
         }
 
-        Given {
+        println(Given {
             header("Authorisation", "BEARER $gmToken")
         } When {
             patch("api/game/$gameId")
         } Then {
             statusCode(200)
             body("turn", equalTo(2))
-        }
+        } Extract {
+            body().asString()
+        })
     }
 
     @Test
@@ -187,8 +189,8 @@ class GameResourceTest {
             get("api/game/$gameId/cato/token-log")
         } Then {
             statusCode(200)
-            body("tokenCreatedLog", hasSize<Long>(2))
-            body("tokenRecoveredLog", hasSize<Long>(1))
+            body("token_created_log", hasSize<Long>(2))
+            body("token_recovered_log", hasSize<Long>(1))
         }
 
         Given {
