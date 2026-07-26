@@ -6,7 +6,7 @@
 
     <groupId>nodomain.seven.dip</groupId>
     <artifactId>7d-diplomacy</artifactId>
-    <version>1.1</version>
+    <version>${project.version}</version>
 
     <packaging>pom</packaging>
 
@@ -23,6 +23,8 @@
         <kotlin.version>2.2.21</kotlin.version>
         <quarkus.platform.version>3.34.3</quarkus.platform.version>
         <jwt.version>0.13.0</jwt.version>
+
+        <project.version>1.1</project.version>
     </properties>
 
     <dependencyManagement>
@@ -44,7 +46,7 @@
             <dependency>
                 <groupId>nodomain.seven.dip</groupId>
                 <artifactId>7d-diplomacy-adjudicator</artifactId>
-                <version>1.0</version>
+                <version>${project.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
