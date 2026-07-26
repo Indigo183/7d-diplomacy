@@ -22,7 +22,7 @@ fun getActionByName(name: String): GMAction = when (name) {
 
 val adjudicate = GMAction { id, _ ->
     val signUps = GameDAO.loadSignUps(id)
-    val game = GameDAO.loadGame(id)
+    val game = GameDAO.load(id)
     if (!signUps.properties.contains(GameProperty.STARTED))
         throw ConflictException("a game may only be adjudicated once it has started")
     if (signUps.players.size != signUps.countries.size || !signUps.players.values.all { it })
@@ -35,7 +35,7 @@ val adjudicate = GMAction { id, _ ->
     }
     game.adjudicate()
     GameDAO.saveSignUps(id, signUps)
-    GameDAO.saveGame(id, game)
+    GameDAO.save(id, game)
     Response.status(200).entity(game).build()
 }
 

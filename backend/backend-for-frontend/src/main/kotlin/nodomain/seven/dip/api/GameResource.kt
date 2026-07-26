@@ -63,7 +63,7 @@ class GamesResource @Inject constructor(val gameResource: GameResource, val key:
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
         val signUps = SignUps(countries = enumEntries<RomanPlayers>())
-        GameDAO.storeGame(id, game, signUps)
+        GameDAO.createAndSave(id, game, signUps)
         return Jwts.builder()
             .claim("gameId", id)
             .claim("isGM", true)
@@ -88,7 +88,7 @@ class GameResource @Inject constructor(
     }
 
     @GET
-    fun getGame() = GameDAO.loadGame(id)
+    fun getGame() = GameDAO.load(id)
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -196,7 +196,7 @@ class OrdersResource {
                 .parseOrderSet(
                     orders,
                     VERBOSE_WITH_ANNOUNCED_PLAYER,
-                    GameDAO.loadGame(id).gameState
+                    GameDAO.load(id).gameState
                 )[player]
         } catch (e: Exception) {
             throw UnprocessableEntryException("incorrect format for the parser", e)

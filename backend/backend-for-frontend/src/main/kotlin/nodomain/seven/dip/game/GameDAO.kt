@@ -1,6 +1,8 @@
 package nodomain.seven.dip.game
 
 import nodomain.seven.dip.adjudication.adjudicate
+import nodomain.seven.dip.file.FileDAO
+import nodomain.seven.dip.game.GameDAO.gameDataPath
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.T
@@ -12,41 +14,26 @@ import nodomain.seven.dip.utils.filePath
 import nodomain.seven.dip.utils.i
 import nodomain.seven.dip.utils.plus
 import nodomain.seven.dip.utils.setupFiles
-import java.io.BufferedInputStream
-import java.io.BufferedOutputStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.io.ObjectInputStream
-import java.io.ObjectOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors.toList
 import kotlin.io.path.Path
 
-object GameDAO {
+object GameDAO: FileDAO<String, Game>() {
     val gameDataPath: Path = filePath.resolve("hosted-games")
 
     init {
         if (!Files.exists(filePath)) setupFiles(filePath)
         if (!Files.exists(gameDataPath)) Files.createDirectory(gameDataPath)
         if (!Files.exists(gameDataPath.resolve(Path("testGame", "gameObject.ser")))) {
-            storeGame("testGame", newTestGame())
+            createAndSave("testGame", newTestGame())
         }
     }
 
-    fun loadGame(name: String): Game {
-        val saveGamePath = gameDataPath.resolve(name).resolve("gameObject.ser")
-        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
-            it.readObject() as Game
-        }
-    }
+    override fun getPath(identifier: String): Path =
+        gameDataPath.resolve(identifier).resolve("gameObject.ser")
 
-    fun loadSignUps(name: String): SignUps {
-        val saveGamePath = gameDataPath.resolve(name).resolve("signUps.ser")
-        return ObjectInputStream(BufferedInputStream(FileInputStream(saveGamePath.toFile()))).use {
-            it.readObject() as SignUps
-        }
-    }
+    fun loadSignUps(name: String): SignUps = SignUpDAO.load(name)
 
     fun allGames(): List<String> = Files.walk(gameDataPath, 1)
         .filter(Files::isDirectory)
@@ -55,42 +42,23 @@ object GameDAO {
 
     fun existingGame(name: String) = Files.exists(gameDataPath.resolve(name))
 
-    fun storeGame(name: String, game: Game, signUps: SignUps? = null) {
-        val gamePath = gameDataPath.resolve(name)
-        Files.createDirectory(gamePath)
-        Files.createFile(gamePath.resolve("gameObject.ser"))
-        saveGame(name, game)
+    fun createAndSave(name: String, game: Game, signUps: SignUps? = null) {
+        createIfNotExists(name)
+        save(name, game)
         if (signUps !== null) {
-            Files.createFile(gamePath.resolve("signUps.ser"))
+            SignUpDAO.createIfNotExists(name)
             saveSignUps(name, signUps)
         }
     }
 
     fun saveSignUps(name: String, signUps: SignUps) {
-        val gamePath = gameDataPath.resolve(name)
-        ObjectOutputStream(
-            BufferedOutputStream(
-                FileOutputStream(
-                    gamePath.resolve("signUps.ser").toFile()
-                )
-            )
-        ).use {
-            it.writeObject(signUps)
-        }
+        SignUpDAO.save(name, signUps)
     }
+}
 
-    fun saveGame(name: String, game: Game) {
-        val gamePath = gameDataPath.resolve(name)
-        ObjectOutputStream(
-            BufferedOutputStream(
-                FileOutputStream(
-                    gamePath.resolve("gameObject.ser").toFile()
-                )
-            )
-        ).use {
-            it.writeObject(game)
-        }
-    }
+object SignUpDAO: FileDAO<String, SignUps>() {
+    override fun getPath(identifier: String): Path =
+        gameDataPath.resolve(identifier).resolve("signUps.ser")
 }
 
 fun newTestGame(): Game {
