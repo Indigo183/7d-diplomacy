@@ -19,9 +19,10 @@ import jakarta.ws.rs.core.Context
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.UriInfo
-import nodomain.seven.dip.api.GameProperty.STARTED
+import nodomain.seven.dip.game.GameProperty.STARTED
 import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.game.GameDAO
+import nodomain.seven.dip.game.SignUps
 import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.orders.Parser.FullNationalisedFormat.VERBOSE_WITH_ANNOUNCED_PLAYER
 import nodomain.seven.dip.orders.getParser

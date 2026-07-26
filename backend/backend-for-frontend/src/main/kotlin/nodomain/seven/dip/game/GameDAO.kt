@@ -1,7 +1,6 @@
 package nodomain.seven.dip.game
 
 import nodomain.seven.dip.adjudication.adjudicate
-import nodomain.seven.dip.api.SignUps
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.T

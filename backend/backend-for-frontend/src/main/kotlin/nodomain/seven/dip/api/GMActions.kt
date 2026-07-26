@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.Response
 import jakarta.ws.rs.core.UriInfo
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.game.GameDAO
+import nodomain.seven.dip.game.GameProperty
 import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.utils.exceptions.ConflictException
 import kotlin.collections.set

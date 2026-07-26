@@ -1,7 +1,8 @@
 package nodomain.seven.dip.api
 
 import nodomain.seven.dip.game.GameDAO
-import nodomain.seven.dip.utils.FileDAO
+import nodomain.seven.dip.file.FileDAO
+import nodomain.seven.dip.orders.Inputtable
 import java.io.Serializable
 import java.nio.file.Files
 import java.nio.file.Path
@@ -10,6 +11,9 @@ import kotlin.time.ExperimentalTime
 
 fun countryDataDirectory(gameId: String): Path =
     GameDAO.gameDataPath.resolve(gameId).resolve(".countries")
+
+@JvmInline
+value class OrderWriteUp(val orders: List<Inputtable>): Serializable
 
 class OrderDao(gameId: String): FileDAO<String, OrderWriteUp>() {
     val orderFilePath: Path = countryDataDirectory(gameId)
