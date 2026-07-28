@@ -4,6 +4,7 @@ import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import jakarta.enterprise.context.RequestScoped
 import jakarta.inject.Inject
+import jakarta.ws.rs.BadRequestException
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.DefaultValue
 import jakarta.ws.rs.GET
@@ -37,6 +38,7 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.jboss.resteasy.reactive.ResponseStatus
 import javax.crypto.SecretKey
 import kotlin.enums.enumEntries
+import kotlin.random.Random
 
 val LOWERCASE_ALPHANUMERIC_WITH_DASHES = Regex("^[a-z0-9-]+$")
 fun requireValidGameId(id: String) {
@@ -46,24 +48,24 @@ fun requireValidGameId(id: String) {
 
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
-class GamesResource @Inject constructor(val gameResource: GameResource, val key: SecretKey) {
+class GamesResource @Inject constructor(val gameResource: GameResource, val key: SecretKey, val gameDAO: GameDAO) {
     @Path("{id}")
     fun game(@PathParam("id") id: String) = gameResource.with(id)
 
     @GET
-    fun getGameNames(): Collection<String> = GameDAO.allGames()
+    fun getGameNames(): Collection<String> = gameDAO.allGames()
 
     @POST
     @ResponseStatus(201)
     @Produces(MediaType.TEXT_PLAIN)
     fun createGame(@QueryParam("id") id: String): String {
         requireValidGameId(id)
-        if (GameDAO.existingGame(id))
+        if (gameDAO.existingGame(id))
             throw ConflictException("game with this id already exists")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
         val signUps = SignUps(countries = enumEntries<RomanPlayers>())
-        GameDAO.createAndSave(id, game, signUps)
+        gameDAO.createAndSave(id, game, signUps)
         return Jwts.builder()
             .claim("gameId", id)
             .claim("isGM", true)
@@ -77,18 +79,22 @@ class GamesResource @Inject constructor(val gameResource: GameResource, val key:
 class GameResource @Inject constructor(
     val ordersResource: OrdersResource,
     val key: SecretKey,
-    val tokenParser: JwtParser
+    val tokenParser: JwtParser,
+    val gameDAO: GameDAO,
+    val gmActions: GMActions,
+    val orderDao: OrderDao,
+    val tokenAccessDAO: TokenAccessDAO
 ) {
     lateinit var id: String
     fun with(id: String): GameResource {
         requireValidGameId(id)
-        if (!GameDAO.existingGame(id)) throw NotFoundException("no game exists with this id")
+        if (!gameDAO.existingGame(id)) throw NotFoundException("no game exists with this id")
         this.id = id
         return this
     }
 
     @GET
-    fun getGame() = GameDAO.load(id)
+    fun getGame() = gameDAO.load(id)
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
@@ -97,24 +103,23 @@ class GameResource @Inject constructor(
         @QueryParam("recovery-key") recoveryKey: String?
     ): String {
         val signUps = try {
-            GameDAO.loadSignUps(id)
+            gameDAO.loadSignUps(id)
         } catch (_: Exception) {
             throw NotFoundException("game sign-up object cannot be located")
         }
-        var signedUpCountry = signUps.find(country)
-        if (signedUpCountry === null) {
-            signedUpCountry = signUps.signUp(country)
-            GameDAO.saveSignUps(id, signUps)
-        }
-        OrderDao(id).createIfNotExists(signedUpCountry.name)
+        val signedUpCountry = signUps.find(country)
+            ?: signUps.signUp(country)
+                .also { gameDAO.saveSignUps(id, signUps) }
+        orderDao.with(id).createIfNotExists(signedUpCountry.name)
         val token = Jwts.builder()
             .claim("gameId", id)
             .claim("country", signedUpCountry)
             .signWith(key)
             .compact()
+        tokenAccessDAO.with(id)
         when (recoveryKey?.length) {
-            null if (STARTED !in signUps.properties) -> TokenAccess.logCreateToken(id, country)
-            10 if (token.endsWith(recoveryKey)) -> TokenAccess.logRecoverToken(id, country)
+            null if (STARTED !in signUps.properties) -> tokenAccessDAO.logCreateToken(country)
+            10 if (token.endsWith(recoveryKey)) -> tokenAccessDAO.logRecoverToken(country)
             else -> throw ForbiddenException("invalid recovery key")
         }
         return token
@@ -134,7 +139,7 @@ class GameResource @Inject constructor(
         }
         if (claims["gameId"] != id || claims["isGM"] === null || !(claims["isGM"] as Boolean))
             throw ForbiddenException("only the GM of this game may take actions it!")
-        return getActionByName(action).run(id, uriInfo)
+        return gmActions.getActionByName(action).run(id, uriInfo)
     }
 
     @Path("{country}")
@@ -149,7 +154,7 @@ class GameResource @Inject constructor(
         }
         if (claims["gameId"] != id)
             throw ForbiddenException("supplied token isn't for this game")
-        val player = GameDAO.loadSignUps(id).find(claims["country"]?.toString())
+        val player = gameDAO.loadSignUps(id).find(claims["country"]?.toString())
         if (player === null || player.name.lowercase() != country.lowercase())
             throw ForbiddenException("supplied token isn't for this country")
         return ordersResource.with(id, player)
@@ -158,13 +163,17 @@ class GameResource @Inject constructor(
 
 @RequestScoped
 @Produces(MediaType.APPLICATION_JSON)
-class OrdersResource {
+class OrdersResource @Inject constructor(
+    val gameDAO: GameDAO,
+    val orderDao: OrderDao,
+    val tokenAccessDAO: TokenAccessDAO
+) {
     lateinit var id: String
-    lateinit var orderDao: OrderDao
     lateinit var player: Player
     fun with(id: String, player: Player): OrdersResource {
         this.id = id
-        this.orderDao = OrderDao(id)
+        orderDao.with(id)
+        tokenAccessDAO.with(id)
         this.player = player
         return this
     }
@@ -172,18 +181,18 @@ class OrdersResource {
     @Path("token-log")
     @GET
     fun getTokenAccessLog(): TokenAccess =
-        TokenAccess.load(countryDataDirectory(id).resolve(player.name))
+        tokenAccessDAO.load(player.name)
 
     @Path("ready")
     @POST
     fun setReady(@QueryParam("ready") ready: Boolean?) =
-        GameDAO.saveSignUps(id, GameDAO.loadSignUps(id).also {
+        gameDAO.saveSignUps(id, gameDAO.loadSignUps(id).also {
             it.players[player] = ready ?: false
         })
 
     @Path("ready")
     @GET
-    fun seeReady(): Boolean? = GameDAO.loadSignUps(id).players[player]
+    fun seeReady(): Boolean? = gameDAO.loadSignUps(id).players[player]
 
     @GET
     fun getOrders(): List<Inputtable> = orderDao.load(player.name).orders
@@ -196,12 +205,11 @@ class OrdersResource {
                 .parseOrderSet(
                     orders,
                     VERBOSE_WITH_ANNOUNCED_PLAYER,
-                    GameDAO.load(id).gameState
+                    gameDAO.load(id).gameState
                 )[player]
         } catch (e: Exception) {
-            throw UnprocessableEntryException("incorrect format for the parser", e)
+            throw BadRequestException("incorrect format for the parser", e)
         } ?: listOf()
-        println(parsedOrders)
         orderDao.save(player.name, OrderWriteUp(parsedOrders))
         return parsedOrders
     }

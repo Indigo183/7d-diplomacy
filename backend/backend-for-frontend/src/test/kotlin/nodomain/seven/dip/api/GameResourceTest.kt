@@ -7,35 +7,12 @@ import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.When
 import io.restassured.module.kotlin.extensions.Then
-import nodomain.seven.dip.utils.filePath
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.AfterAll
-import java.nio.file.Files
-import java.util.Comparator.reverseOrder
-import kotlin.test.assertTrue
 
 @QuarkusTest
 class GameResourceTest {
-    companion object{
-        @JvmStatic
-        @BeforeAll
-        fun setFilePath() {
-            filePath = filePath.resolve("test")
-        }
 
-        @JvmStatic
-        @AfterAll
-        fun cleanTestFolder() {
-            assertTrue(filePath.endsWith("test"))
-            if (Files.exists(filePath)) {
-                Files.walk(filePath).use {
-                    it.sorted(reverseOrder()).forEach(Files::delete)
-                }
-            }
-        }
-    }
 
     @Test
     fun happyPathSingleTurnRomans() {

@@ -1,8 +1,10 @@
 package nodomain.seven.dip.game
 
+import jakarta.enterprise.context.Dependent
+import jakarta.inject.Inject
 import nodomain.seven.dip.adjudication.adjudicate
 import nodomain.seven.dip.file.FileDAO
-import nodomain.seven.dip.game.GameDAO.gameDataPath
+import nodomain.seven.dip.file.FilePathService
 import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Build
 import nodomain.seven.dip.orders.T
@@ -10,30 +12,21 @@ import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.provinces.Romans.*
 import nodomain.seven.dip.utils.Location
 import nodomain.seven.dip.utils.c
-import nodomain.seven.dip.utils.filePath
 import nodomain.seven.dip.utils.i
 import nodomain.seven.dip.utils.plus
-import nodomain.seven.dip.utils.setupFiles
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.stream.Collectors.toList
-import kotlin.io.path.Path
 
-object GameDAO: FileDAO<String, Game>() {
-    val gameDataPath: Path = filePath.resolve("hosted-games")
-
-    init {
-        if (!Files.exists(filePath)) setupFiles(filePath)
-        if (!Files.exists(gameDataPath)) Files.createDirectory(gameDataPath)
-        if (!Files.exists(gameDataPath.resolve(Path("testGame", "gameObject.ser")))) {
-            createAndSave("testGame", newTestGame())
-        }
-    }
+@Dependent
+class GameDAO @Inject constructor(filePathService: FilePathService): FileDAO<String, Game>() {
+    val gameDataPath: Path = filePathService.gameDataPath
+    private val signUpDAO = SignUpDAO()
 
     override fun getPath(identifier: String): Path =
         gameDataPath.resolve(identifier).resolve("gameObject.ser")
 
-    fun loadSignUps(name: String): SignUps = SignUpDAO.load(name)
+    fun loadSignUps(name: String): SignUps = signUpDAO.load(name)
 
     fun allGames(): List<String> = Files.walk(gameDataPath, 1)
         .filter(Files::isDirectory)
@@ -46,20 +39,21 @@ object GameDAO: FileDAO<String, Game>() {
         createIfNotExists(name)
         save(name, game)
         if (signUps !== null) {
-            SignUpDAO.createIfNotExists(name)
+            signUpDAO.createIfNotExists(name)
             saveSignUps(name, signUps)
         }
     }
 
     fun saveSignUps(name: String, signUps: SignUps) {
-        SignUpDAO.save(name, signUps)
+        signUpDAO.save(name, signUps)
+    }
+
+    inner class SignUpDAO: FileDAO<String, SignUps>() {
+        override fun getPath(identifier: String): Path =
+            gameDataPath.resolve(identifier).resolve("signUps.ser")
     }
 }
 
-object SignUpDAO: FileDAO<String, SignUps>() {
-    override fun getPath(identifier: String): Path =
-        gameDataPath.resolve(identifier).resolve("signUps.ser")
-}
 
 fun newTestGame(): Game {
     val origin = T(0.c, 0)

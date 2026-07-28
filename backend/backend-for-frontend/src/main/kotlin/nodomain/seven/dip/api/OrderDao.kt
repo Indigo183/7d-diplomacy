@@ -1,60 +1,69 @@
 package nodomain.seven.dip.api
 
-import nodomain.seven.dip.game.GameDAO
+import jakarta.enterprise.context.Dependent
+import jakarta.inject.Inject
 import nodomain.seven.dip.file.FileDAO
+import nodomain.seven.dip.file.FilePathService
 import nodomain.seven.dip.orders.Inputtable
 import java.io.Serializable
-import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
-fun countryDataDirectory(gameId: String): Path =
-    GameDAO.gameDataPath.resolve(gameId).resolve(".countries")
-
 @JvmInline
 value class OrderWriteUp(val orders: List<Inputtable>): Serializable
 
-class OrderDao(gameId: String): FileDAO<String, OrderWriteUp>() {
-    val orderFilePath: Path = countryDataDirectory(gameId)
+@Dependent
+class OrderDao @Inject constructor(
+    val tokenAccessDAO: TokenAccessDAO,
+    val filePathService: FilePathService
+): FileDAO<String, OrderWriteUp>() {
+    lateinit var orderFilePath: Path
 
-    init {
-        if (!Files.exists(orderFilePath.parent))
-            throw IllegalArgumentException("game does not exist")
-        if (!Files.exists(orderFilePath))
-            Files.createDirectory(orderFilePath)
+    fun with(gameId: String): OrderDao {
+        orderFilePath = filePathService.countryDataDirectory(gameId)
+        tokenAccessDAO.with(gameId)
+        return this
     }
 
     override fun getPath(identifier: String): Path =
         orderFilePath.resolve(identifier).resolve("currentOrders.ser")
 
     override fun onCreation(identifier: String, creationPath: Path) {
-        TokenAccess.createIfNotExists(creationPath.parent)
-        TokenAccess.save(creationPath.parent, TokenAccess())
+        tokenAccessDAO.createIfNotExists(identifier)
+        tokenAccessDAO.save(identifier, TokenAccess())
     }
 }
 
 data class TokenAccess(
     val tokenCreatedLog: MutableList<Long> = mutableListOf(),
     val tokenRecoveredLog: MutableList<Long> = mutableListOf()
-): Serializable {
-    companion object: FileDAO<Path, TokenAccess>() {
-        override fun getPath(identifier: Path): Path = identifier.resolve("tokenLog.ser")
+): Serializable
 
-        @OptIn(ExperimentalTime::class)
-        fun logCreateToken(gameId: String, country: String) {
-            val path = countryDataDirectory(gameId).resolve(country)
-            val log = load(path)
-            log.tokenCreatedLog += Clock.System.now().epochSeconds
-            save(path, log)
-        }
+@Dependent
+class TokenAccessDAO @Inject constructor(val filePathService: FilePathService): FileDAO<String, TokenAccess>() {
+    lateinit var orderFilePath: Path
 
-        @OptIn(ExperimentalTime::class)
-        fun logRecoverToken(gameId: String, country: String) {
-            val path = countryDataDirectory(gameId).resolve(country)
-            val log = load(path)
-            log.tokenRecoveredLog += Clock.System.now().epochSeconds
-            save(path, log)
-        }
+    fun with(gameId: String): TokenAccessDAO {
+        orderFilePath = filePathService.countryDataDirectory(gameId)
+        return this
     }
+
+    override fun getPath(identifier: String): Path =
+        orderFilePath.resolve(identifier).resolve("tokenLog.ser")
+
+    @OptIn(ExperimentalTime::class)
+    fun logCreateToken(country: String) {
+        val log = load(country)
+        log.tokenCreatedLog += Clock.System.now().epochSeconds
+        save(country, log)
+    }
+
+    @OptIn(ExperimentalTime::class)
+    fun logRecoverToken(country: String) {
+        val log = load(country)
+        log.tokenRecoveredLog += Clock.System.now().epochSeconds
+        save(country, log)
+    }
+
 }
