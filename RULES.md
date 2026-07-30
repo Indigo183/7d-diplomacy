@@ -1,0 +1,59 @@
+# 7D Diplomacy with Multitime Travel
+
+-# *by Indigo183 and Ludo.BC*
+
+*7D Diplomacy with Multitime Travel*, as its name suggests, draws its inspiration from Oliver Lugg's *5D Diplomacy with Multiverse Time Travel*. Without his work, and the work of many others, this would not be possible.
+
+## Abstract
+
+-# *written by LunaRover*
+
+Even quantum mechanics doesn't explain this one.
+
+5D Diplomacy has now exploded to 574 players. Massive. Evidenced by today's abundance of 5D variants, including (but not limited to) 5D Imperial Diplomacy and 5D Double Trouble Chaos Diplomacy, many of these players seem to find the pure mechanics of 5D Diplomacy stale. Boring. Understood.
+
+7D Diplomacy has arrived to ruffle those dry, unscratched mental feathers; those mental feathers that crave challenge, overwhelm and excitement. The dough of 5D Diplomacy, overcomplicating an already complicated game, has been stretched and kneaded once more, and a large chunk pulled from it with absolutely no courtesy or respect to the mental pains it foreshadows. Or, in the case of the programmers of the adjudicator, the mental pains it has already caused.
+
+But if we lay aside 7D Diplomacy's advanced armour and weaponry, designed specifically to take siege of the human mind, we ultimately find a game reflecting the beauty of the mathematics it was inspired by. Even if 7D Diplomacy players don't decide to name boards using complex numbers, or denote rotations with powers of i, their experience will still allow them to appreciate the beauty, strength and power of mathematics.
+
+Therefore, I invite you, the inquisitive reader, to follow the white rabbit into the rabbit-hole, and ask your imagination this:
+
+What happens when time flows in more than one direction?
+
+## Overview
+
+Similarly to Oliver Lugg's *5D Diplomacy with Multiverse Time Travel*, 7D Diplomacy finds itself having a multidimensional collection of boards; however, while 5D stores boards as a list of one-dimensional "timelines", 7D instead stores a list of two-dimensional **timeplanes** (with the change in nomenclature being a result of adding one extra dimension). Each timeplane is an ordered grid of boards, with an **origin board** in the centre, that can be indexed by either Cartesian coordinates or complex numbers. These timeplanes are stacked on top of each other in a zero-indexed list, where timeplane zero (**T0**) is the original timeplane, and all new timeplanes are placed on top of the pre-existing stack.
+
+7D Diplomacy is centred around one core question from which the rest of the rules spiral: what if there were more than one "direction" of time? More precisely, what if each move took effect in only one of these temporal directions? As a result of this, each move submitted must also be accompanied by a corresponding **temporal flare** - referred to by either cardinal directions, powers of the imaginary constant i, or simply the terms "up", "down", "left", and "right" - representing the **temporal direction** in which the unit moves. In all other temporal directions, the unit is considered to hold. *(Supports and convoys, as well as any variant order types which the unit does not move as a result of (such as coring), will take place in every temporal direction, and as such do not warrant the inclusion of a temporal flare.)*
+
+## Adjacencies
+
+As a logical extension of the regular Diplomacy ruleset, a move or support is successful if the acting unit is adjacent to the destination, and a convoy is successful if there is a chain of adjacencies from the moving unit to the destination through the convoying units. Supports and convoys may also be issued to the future - that is to say, a unit can support or convoy an order that hasn't happened yet - or to the past (an order that has already been adjudicated). However, a move is only valid if the destination board exists at the time of order entry; a move to a board that has not been created yet will be considered invalid and will be adjudicated as a hold (including for the purposes of being support-held), but a move to any existing board (past or present) is valid, as it could be convoyed after the fact to make it succeed.
+
+On top of the standard adjacency rules dictated by the map being played on (see [Subvariants](#subvariants)), there are two differing rulesets for **cross-board** adjacencies that are taken directly from 5D Diplomacy, those being **strict** and **loose** adjacencies. In both rulesets, a board is considered adjacent to another if *either* the timeplanes, the real components, or the imaginary components of the two boards differ by one and both other coordinates are the same. That is to say, the boards must be *orthogonally adjacent* (next to each other); any two boards that are diagonal from each other are not considered adjacent. However, there is one key difference between the two rulesets:
+ - In **strict adjacencies**, a province is only considered adjacent to one on a differing board if their boards are adjacent to each other *and* they are the same province.
+ - In **loose adjacencies**, a province is considered adjacent to one on a differing board if their boards are adjacent and the provinces are adjacent or the same.
+
+Loose adjacencies are akin to an extension of strict adjacencies, insofar as any adjacency valid under strict adjacencies will always be valid under loose adjacencies, but not vice versa. We would recommend playing under strict adjacencies due to the increased complexity and number of possibilities introduced by loose adjacencies, but we include both rulesets for a reason. At the end of the day, it is down to the personal preference of the players and GMs, and what is 7D Diplomacy if not complex and full of possibilities?
+
+## Adjudication
+
+Adjudication of moves is done in five steps: one per temporal direction, plus one to place the resulting boards. In each temporal direction, all relevant orders (i.e. all moves with the corresponding temporal flare plus all non-move orders), **including all past orders**, are adjudicated as normal, and the results of adjudication are stored as a collection of new boards, where a board at location ***s*** in timeplane ***k*** adjudicated in the **i^*n*** direction creates a child board targeting location ***s + i^n*** in timeplane ***k***. New boards are only created if they differ from both their parent board and the parent's most recent child board (if any), and in the case of **cross-board moves** (moves where the origin and destination boards differ), both the origin board and the destination board are duplicated. Once this has been repeated for each temporal direction, the new boards are to be placed onto the map: if a board is unique in its target location, it is placed there without question. If its target location is occupied, the target location is shifted up a timeplane, and board placement is re-checked. If two boards target the same location, they must be compared to each other (see [Board Conflicts](#board-conflicts)).
+
+Adjudication of retreats is done on the parent board in which the retreating unit was dislodged, making it significantly clearer whether a retreat destination is valid (i.e. whether a bounce occurred in any potential retreat destinations). Retreats must either be **local moves** - meaning the origin and destination are on the same board - or disbands, though they must always have a temporal flare attached (regardless of whether they are a move or not) as one unit may have different retreats in different temporal directions. Notably, this means that retreats will be readjudicated if and only if the parent board in which a unit was dislodged gains a new child board, and will be readjudicated every time this happens. This also means that a dislodgement in one temporal direction is not adjudicated in any other temporal direction.
+
+If the sum of the real and imaginary components of the location of any **active board** - that is to say, any board that has not yet been adjudicated for moves - is even, then adjustments are adjudicated. Unlike in 5D Diplomacy, adjustments happen separately to moves, and so "Winter boards" as such do not exist; rather, adjustments are shown on the resulting "Spring board" (which will also contain moves once moves have been adjudicated). Adjustments are adjudicated in between every retreats phase and movement phase, where a "retreats phase" may be a retreats phase without any retreats. *(Imagine each timeplane as a black and white checkerboard, wherein the origin board is on a black square. Whenever an active board can be found on a black square in any timeplane, the game goes into adjustments, wherein all active boards on black squares are to be adjudicated.)*
+
+## Board Conflicts
+
+When two boards being created both target the same location, we have a slight issue: how do we decide which board is placed where? In this situation, there is a nice metric for deciding what happens: **board strength**. To calculate a board's strength before it is placed, simply add together the number of moves *to the board* and the number of *successful* (i.e. valid and uncut) supports that these moves receive. This means that all local moves and their supports are counted, and so are all cross-board moves to the board, but *not* cross-board moves *from the board*, so units exiting the board do not contribute in any way to the board's strength.
+
+After board strength is calculated, conflicts are resolved from the bottom up, as resolving a conflict on a lower timeplane can affect conflicts on timeplanes above it. For each conflict, if there is a board with a higher strength than any other, that board is placed, and the location targeted by each remaining conflicting board is shifted up one or more timeplanes until it reaches an empty location. This process is repeated until all remaining conflicts have no clear "winner" as such, and the remaining boards are placed into **limbo**, where they may be seen but not interacted with. A board in limbo remains in limbo until its conflicts are resolved, meaning its target location and conflict status is re-evaluated at the end of every movement phase as if it were a regular board, and as such may not receive orders until it is placed.
+
+## Win Condition
+
+[[In order for a player to win, they must control ]]
+
+## Subvariants
+
+[[RULES]]
