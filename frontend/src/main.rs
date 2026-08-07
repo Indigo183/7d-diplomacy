@@ -58,13 +58,13 @@ const TAILWIND_CSS: Asset =
 
 #[cfg(feature = "desktop")]
 fn main() {
-    dioxus::LaunchBuilder::new()
+    LaunchBuilder::new()
         .with_cfg(
             Config::default().with_menu(None).with_window(
                 WindowBuilder::new()
                     .with_maximized(true)
                     .with_title("7D Diplomacy With Multitime Travel"), // .with_decorations(false),
-            ),
+            ), // .with_disable_context_menu(true),
         )
         .launch(App);
 }
@@ -73,7 +73,7 @@ fn main() {
 fn main() {
     // The `launch` function is the main entry point for a dioxus app. It takes a component and renders it with the platform feature
     // you have enabled
-    dioxus::LaunchBuilder::new().launch(App);
+    LaunchBuilder::new().launch(App);
 }
 
 /// App is the main component of our app. Components are the building blocks of dioxus apps. Each component is a function
