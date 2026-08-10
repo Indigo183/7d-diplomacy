@@ -1,6 +1,6 @@
 use anyhow::{Error, anyhow};
 use serde::{Deserialize, Serialize};
-use std::option::Option;
+use std::fmt::{Display, Formatter};
 
 /// The time travel details of a game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
@@ -45,7 +45,7 @@ impl Default for Adjacencies {
 }
 
 /// A wrapper struct for RGBA colours, purely for convenience.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
 pub struct RGBA {
     /// RED, THE BLOOD OF ANGRY MEN
     pub red: u8,
@@ -73,9 +73,9 @@ impl RGBA {
 impl From<u32> for RGBA {
     fn from(value: u32) -> Self {
         RGBA {
-            red: (value & 0xFF000000 >> 24) as u8,
-            green: (value & 0xFF0000 >> 16) as u8,
-            blue: (value & 0xFF00 >> 8) as u8,
+            red: ((value & 0xFF000000) >> 24) as u8,
+            green: ((value & 0xFF0000) >> 16) as u8,
+            blue: ((value & 0xFF00) >> 8) as u8,
             alpha: (value & 0xFF) as u8,
         }
     }
@@ -105,8 +105,65 @@ impl TryFrom<&str> for RGBA {
     }
 }
 
+impl Display for RGBA {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        dbg!(&self);
+        println!(
+            "#{:02X}{:02X}{:02X}{:02X}",
+            self.red, self.green, self.blue, self.alpha
+        );
+        write!(
+            f,
+            "#{:02X}{:02X}{:02X}{:02X}",
+            self.red, self.green, self.blue, self.alpha
+        )
+        // write!(f, "#{}{}{}{}", self.red, self.green, self.blue, self.alpha) // TODO: fix pls
+    }
+}
+
+/// The current status of a game instance.
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
+pub enum Status {
+    /// Indicates that orders are required, but have not yet been submitted.
+    Unsubmitted,
+    /// Indicates that orders have been submitted, but have not yet been marked as final.
+    Submitted,
+    /// Indicates that orders have been submitted and marked as final, but can still be edited.
+    Ready,
+    /// Indicates that orders have been locked and cannot be edited. This may also be used to
+    /// indicate that no orders are required.
+    Locked,
+}
+
+impl Status {
+    pub fn colour(&self) -> &'static str {
+        "text-red-400 text-amber-400 text-green-400 text-gray-400"; // loads the tailwind colours
+        match self {
+            Self::Unsubmitted => "red-400",
+            Self::Submitted => "amber-400",
+            Self::Ready => "green-400",
+            Self::Locked => "gray-400",
+        }
+    }
+}
+
+impl Display for Status {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Unsubmitted => "Unsubmitted",
+                Self::Submitted => "Draft Submitted",
+                Self::Ready => "Ready",
+                Self::Locked => "Locked",
+            }
+        )
+    }
+}
+
 /// The associated data for a player, parsed from JSON.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Player {
     /// The name of the player to be displayed.
     pub name: String,
@@ -120,7 +177,7 @@ impl Player {
 }
 
 /// The variant data for a specific map, parsed from JSON.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct VariantMap {
     /// The variant's name (not including time travel details).
     pub name: String,
@@ -143,7 +200,7 @@ impl Default for VariantMap {
 }
 
 /// The configuration for a given game instance (e.g "5D Diplomacy AC").
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
     /// The game's non-unique official name.
     pub name: String,
@@ -247,16 +304,38 @@ impl GameConfigBuilder {
     }
 }
 
+/// The publicly available game state, including orders and their resulting boards.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct GameState {
+    // orders: Vec<Order>,
+    // boards: Vec<Board>,
+    x: (),
+}
+
 /// The current phase of the game.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub enum Phase {
     Spring,
     Fall,
     Winter,
 }
 
+impl Display for Phase {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Spring => "Spring",
+                Self::Fall => "Fall",
+                Self::Winter => "Winter",
+            }
+        )
+    }
+}
+
 /// The current turn of the game.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Turn {
     /// The absolute turn number, either zero- or one-indexed.
     pub number: u8,
@@ -268,11 +347,24 @@ pub struct Turn {
     pub is_retreats: bool,
 }
 
+impl Display for Turn {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Turn {}: {} {}", self.number, self.phase, self.year)?;
+        if self.is_retreats {
+            write!(f, " Retreats")?;
+        }
+
+        Ok(())
+    }
+}
+
 /// A game instance, storing all current game state.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Game {
     /// The configuration of the game instance.
     pub config: GameConfig,
+    /// The publicly available game state, including orders and their resulting boards.
+    pub state: GameState,
     /// The player / nation being played.
     pub player: Player,
     /// The current turn of the game.
@@ -280,25 +372,25 @@ pub struct Game {
 }
 
 /// A struct containing the information about a `Game` and its state only concerning/privy to one `Player`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct PlayerSpecifics {
-    pub player: Player,
+    pub status: Status,
     // order_drafts: Vec<OrderSet> // for example
 }
 
 /// A wrapper struct around `Game` and `PlayerSpecifics` for more compact serialisation
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct GameCache {
     pub game: Game,
     pub player_specifics: Vec<PlayerSpecifics>,
 }
 
 impl GameCache {
-    pub fn get_player_specifics(&self, player_name: String) -> Option<&PlayerSpecifics> {
-        self.player_specifics
-            .iter()
-            .find(|x| x.player.name == player_name)
-    }
+    // pub fn get_player_specifics(&self, player_name: String) -> Option<&PlayerSpecifics> {
+    //     self.player_specifics
+    //         .iter()
+    //         .find(|&&x| x.player.name == player_name)
+    // }
 }
 
 impl From<Game> for GameCache {

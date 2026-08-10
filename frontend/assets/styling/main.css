@@ -26,14 +26,15 @@ body {
 .menu-options button,
 .menu-options .resume-list,
 .menu-options input {
+    /*@apply rounded-md; TODO: move over to Tailwind*/
+
     color: white;
     text-align: center;
     text-decoration: none;
-    margin-top: 20px;
-    margin: 10px 0px;
+    margin: 10px 0;
     border: white 1px solid;
     border-radius: 10px;
-    padding: 10px;
+    /*padding: 10px;*/
 }
 
 /*.menu-options a:not([disabled="true"]):hover,*/

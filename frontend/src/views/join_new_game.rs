@@ -1,4 +1,4 @@
-use crate::settings::*;
+use crate::models::*;
 
 use dioxus::prelude::*;
 use tokio::time::{Duration, sleep};

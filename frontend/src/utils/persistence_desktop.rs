@@ -5,7 +5,7 @@ use std::{
 
 use anyhow::{Ok, Result, anyhow};
 
-use crate::settings::{Game, GameCache};
+use crate::models::GameCache;
 
 /// The path to the directory to search for caches.
 pub const JOINED_GAMES_PATH: &str = "~/.7dip/joined-games/";
