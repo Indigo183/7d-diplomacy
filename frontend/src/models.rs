@@ -215,7 +215,7 @@ pub struct GameConfig {
     /// The game's adjacency settings.
     pub adjacencies: Adjacencies,
     /// Whether the game will adjudicate itself automatically at the specified deadline.
-    pub automatic_adjudication: bool,
+    pub auto_adjudicate: bool,
 }
 impl GameConfig {
     /// Instantiates a builder for `settings::GameConfig`.
@@ -227,7 +227,7 @@ impl GameConfig {
             variant: VariantMap::default(),
             time_travel: TimeTravel::default(),
             adjacencies: Adjacencies::default(),
-            automatic_adjudication: false,
+            auto_adjudicate: false,
         }
     }
 }
@@ -247,7 +247,7 @@ pub struct GameConfigBuilder {
     /// The game's adjacency settings.
     adjacencies: Adjacencies,
     /// Whether the game will adjudicate itself automatically at the specified deadline.
-    automatic_adjudication: bool,
+    auto_adjudicate: bool,
 }
 impl GameConfigBuilder {
     /// The game's non-unique official name.
@@ -284,9 +284,9 @@ impl GameConfigBuilder {
         }
     }
     /// Whether the game will adjudicate itself automatically at the specified deadline.
-    pub fn with_adjudication(self, automatic_adjudication: bool) -> Self {
+    pub fn with_auto_adjudicate(self, auto_adjudicate: bool) -> Self {
         Self {
-            automatic_adjudication,
+            auto_adjudicate,
             ..self
         }
     }
@@ -299,7 +299,7 @@ impl GameConfigBuilder {
             variant: self.variant,
             time_travel: self.time_travel,
             adjacencies: self.adjacencies,
-            automatic_adjudication: self.automatic_adjudication,
+            auto_adjudicate: self.auto_adjudicate,
         }
     }
 }
