@@ -19,6 +19,13 @@ pub fn ResumeGameList() -> Element {
                 is_retreats: false,
             },
             status: Status::Ready,
+            map_name: "Classic".to_string(),
+            time_travel: TimeTravelDetails::from(Some(TimeTravel {
+                time_travel_type: TimeTravelType::FiveDimensional,
+                adjacencies: Adjacencies::Loose,
+            })),
+            auto_adjudicate: true,
+            server_address: "http://5d-diplomacy.keine-panik.net:5173/".to_string(),
         },
         GameHeaderProps {
             game_name: "Double Trouble".to_string(),
@@ -33,6 +40,13 @@ pub fn ResumeGameList() -> Element {
                 is_retreats: false,
             },
             status: Status::Locked,
+            map_name: "Classic (Double Trouble)".to_string(),
+            time_travel: TimeTravelDetails::from(Some(TimeTravel {
+                time_travel_type: TimeTravelType::FiveDimensional,
+                adjacencies: Adjacencies::Strict,
+            })),
+            auto_adjudicate: false,
+            server_address: "http://5d-diplomacy.keine-panik.net:5170/".to_string(),
         },
         GameHeaderProps {
             game_name: "Romans".to_string(),
@@ -47,6 +61,13 @@ pub fn ResumeGameList() -> Element {
                 is_retreats: false,
             },
             status: Status::Unsubmitted,
+            map_name: "Romans".to_string(),
+            time_travel: TimeTravelDetails::from(Some(TimeTravel {
+                time_travel_type: TimeTravelType::SevenDimensional,
+                adjacencies: Adjacencies::Strict,
+            })),
+            auto_adjudicate: true,
+            server_address: "http://7d-diplomacy.keine-panik.net:8080/".to_string(),
         },
         GameHeaderProps {
             game_name: "Torture".to_string(),
@@ -61,6 +82,10 @@ pub fn ResumeGameList() -> Element {
                 is_retreats: false,
             },
             status: Status::Locked,
+            map_name: "Crowded Imperial Diplomacy".to_string(),
+            time_travel: TimeTravelDetails::from(None),
+            auto_adjudicate: false,
+            server_address: "http://5d-diplomacy.keine-panik.net:5173/".to_string(),
         },
         GameHeaderProps {
             game_name: "Variant Champion 2026".to_string(),
@@ -75,6 +100,13 @@ pub fn ResumeGameList() -> Element {
                 is_retreats: false,
             },
             status: Status::Submitted,
+            map_name: "Classic".to_string(),
+            time_travel: TimeTravelDetails::from(Some(TimeTravel {
+                time_travel_type: TimeTravelType::SevenDimensional,
+                adjacencies: Adjacencies::Loose,
+            })),
+            auto_adjudicate: false,
+            server_address: "https://discord.gg/k6bwkadDKr/".to_string(),
         },
     ];
 
@@ -125,7 +157,7 @@ fn ItemTitle(game: GameHeaderProps) -> Element {
             div { class: "flex gap-3",
                 h1 { class: "text-nowrap", "{game.turn}" }
                 h1 { class: "text-nowrap", "-" }
-                h1 { class: "text-nowrap text-{game.status.colour()}", "{game.status}" }
+                h1 { class: "text-nowrap text-{game.status.tailwind_colour()}", "{game.status}" }
             }
         }
     }
@@ -135,12 +167,15 @@ fn ItemTitle(game: GameHeaderProps) -> Element {
 fn ItemBody(game: GameHeaderProps) -> Element {
     rsx! {
         div { class: "flex justify-between text-sm",
-            p { "7D Diplomacy - Romans" }
+            p { { game.map_name } }
             div { class: "h-4 w-px bg-gray-600" }
-            p { "Loose Adjacencies" }
+            p { "{game.time_travel}" }
             div { class: "h-4 w-px bg-gray-600" }
-            p { "Manual Adjudication" }
+            p { if game.auto_adjudicate { "Adjudicates Automatically" } else { "Manual Adjudication" } }
         }
-        p { class: "text-sm text-gray-400 text-left", "https://7d-diplomacy.panik!.net:80085" }
+
+        p { class: "text-sm text-gray-400 text-left",
+            { game.server_address }
+        }
     }
 }

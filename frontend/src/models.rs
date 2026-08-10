@@ -2,21 +2,23 @@ use anyhow::{Error, anyhow};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
-/// The time travel details of a game.
+/// The type of time travel used by a game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
-pub enum TimeTravel {
+pub enum TimeTravelType {
     FiveDimensional,
     SevenDimensional,
 }
-impl std::fmt::Display for TimeTravel {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+impl Display for TimeTravelType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::FiveDimensional => write!(f, "5D"),
             Self::SevenDimensional => write!(f, "7D"),
         }
     }
 }
-impl Default for TimeTravel {
+
+impl Default for TimeTravelType {
     /// The default is currently 7D, as that is what is implemented in the backend.
     fn default() -> Self {
         Self::SevenDimensional
@@ -29,14 +31,16 @@ pub enum Adjacencies {
     Strict,
     Loose,
 }
-impl std::fmt::Display for Adjacencies {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+
+impl Display for Adjacencies {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::Strict => write!(f, "Strict"),
             Self::Loose => write!(f, "Loose"),
         }
     }
 }
+
 impl Default for Adjacencies {
     /// The default is currently strict adjacencies, as it makes 7D ever-so-slightly playable.
     fn default() -> Self {
@@ -44,8 +48,68 @@ impl Default for Adjacencies {
     }
 }
 
+/// The time travel details (if any) of a game. This is a wrapper type of `Option<TimeTravel>`.
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
+pub struct TimeTravelDetails(Option<TimeTravel>);
+
+impl TimeTravelDetails {
+    /// Creates a new instance of TimeTravelDetails.
+    pub fn new(details: Option<TimeTravel>) -> Self {
+        Self(details)
+    }
+
+    /// Returns the contained time travel details (if any).
+    pub fn time_travel(&self) -> Option<TimeTravel> {
+        self.0
+    }
+}
+
+impl Default for TimeTravelDetails {
+    fn default() -> Self {
+        Self(Some(TimeTravel::default()))
+    }
+}
+
+impl From<Option<TimeTravel>> for TimeTravelDetails {
+    fn from(value: Option<TimeTravel>) -> Self {
+        Self(value)
+    }
+}
+
+impl Display for TimeTravelDetails {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.0 {
+            Some(t) => write!(f, "{}", t),
+            None => write!(f, "No Time Travel"),
+        }
+    }
+}
+
+/// The time travel details of a game.
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
+pub struct TimeTravel {
+    pub time_travel_type: TimeTravelType,
+    pub adjacencies: Adjacencies,
+}
+
+impl Default for TimeTravel {
+    /// The default is currently 7D with strict adjacencies, as that is what is implemented in the backend.
+    fn default() -> Self {
+        Self {
+            time_travel_type: TimeTravelType::default(),
+            adjacencies: Adjacencies::default(),
+        }
+    }
+}
+
+impl Display for TimeTravel {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} - {} Adjacencies", self.time_travel_type, self.adjacencies)
+    }
+}
+
 /// A wrapper struct for RGBA colours, purely for convenience.
-#[derive(Debug, PartialEq, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub struct RGBA {
     /// RED, THE BLOOD OF ANGRY MEN
     pub red: u8,
@@ -131,7 +195,7 @@ pub enum Status {
 }
 
 impl Status {
-    pub fn colour(&self) -> &'static str {
+    pub fn tailwind_colour(&self) -> &'static str {
         "text-red-400 text-amber-400 text-green-400 text-gray-400"; // loads the tailwind colours
         match self {
             Self::Unsubmitted => "red-400",
@@ -139,6 +203,12 @@ impl Status {
             Self::Ready => "green-400",
             Self::Locked => "gray-400",
         }
+    }
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Self::Unsubmitted
     }
 }
 
@@ -158,7 +228,7 @@ impl Display for Status {
 }
 
 /// The associated data for a player, parsed from JSON.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Player {
     /// The name of the player to be displayed.
     pub name: String,
@@ -172,7 +242,7 @@ impl Player {
 }
 
 /// The variant data for a specific map, parsed from JSON.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct VariantMap {
     /// The variant's name (not including time travel details).
     pub name: String,
@@ -195,7 +265,7 @@ impl Default for VariantMap {
 }
 
 /// The configuration for a given game instance (e.g "5D Diplomacy AC").
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct GameConfig {
     /// The game's non-unique official name.
     pub name: String,
@@ -300,7 +370,7 @@ impl GameConfigBuilder {
 }
 
 /// The publicly available game state, including orders and their resulting boards.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct GameState {
     // orders: Vec<Order>,
     // boards: Vec<Board>,
@@ -308,7 +378,7 @@ pub struct GameState {
 }
 
 /// The current phase of the game.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub enum Phase {
     Spring,
     Fall,
@@ -330,7 +400,7 @@ impl Display for Phase {
 }
 
 /// The current turn of the game.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Turn {
     /// The absolute turn number, either zero- or one-indexed.
     pub number: u8,
@@ -354,7 +424,7 @@ impl Display for Turn {
 }
 
 /// A game instance, storing all current game state.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct Game {
     /// The configuration of the game instance.
     pub config: GameConfig,
@@ -367,14 +437,14 @@ pub struct Game {
 }
 
 /// A struct containing the information about a `Game` and its state only concerning/privy to one `Player`.
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct PlayerSpecifics {
     pub status: Status,
     // order_drafts: Vec<OrderSet> // for example
 }
 
 /// A wrapper struct around `Game` and `PlayerSpecifics` for more compact serialisation
-#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
 pub struct GameCache {
     pub game: Game,
     pub player_specifics: Vec<PlayerSpecifics>,
