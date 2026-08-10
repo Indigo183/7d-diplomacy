@@ -108,16 +108,11 @@ impl TryFrom<&str> for RGBA {
 impl Display for RGBA {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         dbg!(&self);
-        println!(
-            "#{:02X}{:02X}{:02X}{:02X}",
-            self.red, self.green, self.blue, self.alpha
-        );
         write!(
             f,
             "#{:02X}{:02X}{:02X}{:02X}",
             self.red, self.green, self.blue, self.alpha
         )
-        // write!(f, "#{}{}{}{}", self.red, self.green, self.blue, self.alpha) // TODO: fix pls
     }
 }
 
