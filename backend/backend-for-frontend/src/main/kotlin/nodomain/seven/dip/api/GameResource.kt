@@ -187,7 +187,7 @@ class OrdersResource @Inject constructor(
     @POST
     fun setReady(@QueryParam("ready") ready: Boolean?) =
         gameDAO.saveSignUps(id, gameDAO.loadSignUps(id).also {
-            it.players[player] = ready ?: false
+            it.players[player] = ready ?: true
         })
 
     @Path("ready")
