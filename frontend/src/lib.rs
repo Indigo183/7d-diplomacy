@@ -16,3 +16,6 @@ pub use route::Route;
 
 /// Contains ???
 pub mod utils;
+
+/// Provides an interface with the backend.
+pub mod client;
