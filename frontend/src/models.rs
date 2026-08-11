@@ -169,7 +169,6 @@ impl TryFrom<&str> for RGBA {
 
 impl Display for RGBA {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        dbg!(&self);
         write!(
             f,
             "#{:02X}{:02X}{:02X}{:02X}",
