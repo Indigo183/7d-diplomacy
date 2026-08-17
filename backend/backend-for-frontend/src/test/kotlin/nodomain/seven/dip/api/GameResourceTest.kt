@@ -49,7 +49,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $gmToken")
+            header("Authorization", "BEARER $gmToken")
             queryParam("action", "set-property")
             queryParam("property", "started")
         } When {
@@ -59,7 +59,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "BEARER $catoToken")
             contentType(ContentType.TEXT)
             body(GameResourceTest::class.java.getResource("/cato-test-orders.txt")!!.readText())
         } When {
@@ -69,7 +69,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "BEARER $catoToken")
             queryParam("ready", true)
         } When {
             post("api/game/$gameId/cato/ready")
@@ -78,7 +78,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $pompeyToken")
+            header("Authorization", "BEARER $pompeyToken")
             contentType(ContentType.JSON)
             body(GameResourceTest::class.java.getResource("/pompey-test-orders.json")!!.readText())
         } When {
@@ -88,7 +88,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $pompeyToken")
+            header("Authorization", "BEARER $pompeyToken")
             queryParam("ready", true)
         } When {
             post("api/game/$gameId/pompey/ready")
@@ -97,7 +97,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "BEARER $catoToken")
         } When {
             get("api/game/$gameId/cato/ready")
         } Then {
@@ -106,7 +106,7 @@ class GameResourceTest {
         }
 
         println(Given {
-            header("Authorisation", "BEARER $gmToken")
+            header("Authorization", "BEARER $gmToken")
         } When {
             patch("api/game/$gameId")
         } Then {
@@ -161,7 +161,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "BEARER $catoToken")
         } When {
             get("api/game/$gameId/cato/token-log")
         } Then {
@@ -171,7 +171,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $gmToken")
+            header("Authorization", "BEARER $gmToken")
             queryParam("action", "set-property")
             queryParam("property", "started")
         } When {

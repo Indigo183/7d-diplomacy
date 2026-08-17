@@ -38,7 +38,6 @@ import org.eclipse.microprofile.openapi.annotations.Operation
 import org.jboss.resteasy.reactive.ResponseStatus
 import javax.crypto.SecretKey
 import kotlin.enums.enumEntries
-import kotlin.random.Random
 
 val LOWERCASE_ALPHANUMERIC_WITH_DASHES = Regex("^[a-z0-9-]+$")
 fun requireValidGameId(id: String) {
@@ -128,7 +127,7 @@ class GameResource @Inject constructor(
     @Operation(summary = "GM Action")
     @PATCH
     fun gmAction(
-        @HeaderParam("Authorisation") token: String,
+        @HeaderParam("Authorization") token: String,
         @DefaultValue("adjudicate") @QueryParam("action") action: String,
         @Context uriInfo: UriInfo
     ): Response { // not atomised! not safe! very much not enterprise grade!
@@ -145,7 +144,7 @@ class GameResource @Inject constructor(
     @Path("{country}")
     fun orders(
         @PathParam("country") country: String,
-        @HeaderParam("Authorisation") token: String
+        @HeaderParam("Authorization") token: String
     ): OrdersResource {
         val claims: Map<String, Any> = try {
             tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
