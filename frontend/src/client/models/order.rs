@@ -1,6 +1,12 @@
 use crate::client::models::utils::*;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum Inputtable {
+    Order(Order),
+    // Adjustment(Adjustment),
+}
+
 // trait Action<'a>: Debug + Clone + PartialEq + Eq + Serialize + Deserialize<'a> { }
 //
 // #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
