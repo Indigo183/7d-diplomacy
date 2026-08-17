@@ -3,7 +3,7 @@ mod test;
 
 mod models;
 
-use crate::client::models::game::Game;
+use crate::client::models::*;
 use reqwest;
 use reqwest::{Client, Url};
 use serde::ser::SerializeStruct;
@@ -87,35 +87,43 @@ pub async fn get_game_names(url: Url) -> anyhow::Result<Vec<String>> {
 }
 
 // POST
-pub async fn create_game(url: Url, id: &str) -> anyhow::Result<()> {
+pub async fn create_game(url: Url, id: &str) -> anyhow::Result<String> {
     let request_url = url.join("api/game/")?;
 
-    CLIENT
+    let response = CLIENT
         .post(request_url)
         .query(&[("id", id)])
         .send()
         .await?
-        .error_for_status()?;
+        .error_for_status()?
+        .text()
+        .await?;
 
-    Ok(())
+    Ok(response)
 }
 
 //-- /api/game/{id} --//
 
 // PATCH
-pub async fn gm_action(url: Url, token: &str, id: &str, action: GMAction) -> anyhow::Result<()> {
-    // TODO: take in authorisation header
+pub async fn gm_action(
+    url: Url,
+    token: &str,
+    id: &str,
+    action: GMAction,
+) -> anyhow::Result<String> {
     let request_url = url.join("api/game/")?.join(id)?;
 
-    CLIENT
+    let response = CLIENT
         .patch(request_url)
         .bearer_auth(token)
         .query(&action)
         .send()
         .await?
-        .error_for_status()?;
+        .error_for_status()?
+        .text()
+        .await?;
 
-    Ok(())
+    Ok(response)
 }
 
 // POST
@@ -163,28 +171,131 @@ pub async fn get_game(url: Url, id: &str) -> anyhow::Result<Game> {
 //-- /api/game/{id}/{country} --//
 
 // POST
-pub async fn post_json_orders(url: Url) -> anyhow::Result<()> {
-    todo!()
+pub async fn post_text_orders(
+    url: Url,
+    token: &str,
+    id: &str,
+    country: &str,
+    orders: String,
+) -> anyhow::Result<Vec<Inputtable>> {
+    let request_url = url.join(&format!("api/game/{id}/{country}"))?;
+
+    let orders = CLIENT
+        .post(request_url)
+        .bearer_auth(token)
+        .body(orders)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    Ok(orders)
 }
+
+// POST
+pub async fn post_json_orders(
+    url: Url,
+    token: &str,
+    id: &str,
+    country: &str,
+    orders: Vec<Inputtable>,
+) -> anyhow::Result<Vec<Inputtable>> {
+    let request_url = url.join(&format!("api/game/{id}/{country}"))?;
+
+    let orders = CLIENT
+        .post(request_url)
+        .bearer_auth(token)
+        .body(serde_json::to_string(&orders)?)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    Ok(orders)
+}
+
 // GET
-pub async fn get_orders(url: Url) -> anyhow::Result<()> {
-    todo!()
+pub async fn get_orders(
+    url: Url,
+    token: &str,
+    id: &str,
+    country: &str,
+) -> anyhow::Result<Vec<Inputtable>> {
+    let request_url = url.join(&format!("api/game/{id}/{country}"))?;
+
+    let orders = CLIENT
+        .get(request_url)
+        .bearer_auth(token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    Ok(orders)
 }
 
 //-- /api/game/{id}/{country}/ready --//
 
 // POST
-pub async fn set_ready(url: Url) -> anyhow::Result<()> {
-    todo!()
+pub async fn set_ready(
+    url: Url,
+    token: &str,
+    id: &str,
+    country: &str,
+    ready: bool,
+) -> anyhow::Result<()> {
+    let request_url = url.join(&format!("api/game/{id}/{country}/ready"))?;
+
+    CLIENT
+        .post(request_url)
+        .bearer_auth(token)
+        .query(&[("ready", ready)])
+        .send()
+        .await?
+        .error_for_status()?
+        .text()
+        .await?;
+
+    Ok(())
 }
 // GET
-pub async fn get_ready(url: Url) -> anyhow::Result<()> {
-    todo!()
+pub async fn get_ready(url: Url, token: &str, id: &str, country: &str) -> anyhow::Result<bool> {
+    let request_url = url.join(&format!("api/game/{id}/{country}/ready"))?;
+
+    let ready = CLIENT
+        .post(request_url)
+        .bearer_auth(token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    Ok(ready)
 }
 
 //-- /api/game/{id}/{country}/token-log --//
 
 // GET
-pub async fn get_token_access_log(url: Url) -> anyhow::Result<()> {
-    todo!()
+pub async fn get_token_access_log(
+    url: Url,
+    token: &str,
+    id: &str,
+    country: &str,
+) -> anyhow::Result<TokenAccess> {
+    let request_url = url.join(&format!("api/game/{id}/{country}/token-log"))?;
+
+    let token_access = CLIENT
+        .post(request_url)
+        .bearer_auth(token)
+        .send()
+        .await?
+        .error_for_status()?
+        .json()
+        .await?;
+
+    Ok(token_access)
 }
