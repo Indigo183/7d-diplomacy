@@ -132,7 +132,7 @@ class GameResource @Inject constructor(
         @Context uriInfo: UriInfo
     ): Response { // not atomised! not safe! very much not enterprise grade!
         val claims: Map<String, Any> = try {
-            tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
+            tokenParser.parseSignedClaims(token.substringAfter("Bearer ")).payload
         } catch (_: Exception) {
             throw UnauthenticatedException("token couldn't be verified")
         }
@@ -147,7 +147,7 @@ class GameResource @Inject constructor(
         @HeaderParam("Authorization") token: String
     ): OrdersResource {
         val claims: Map<String, Any> = try {
-            tokenParser.parseSignedClaims(token.substringAfter("BEARER ")).payload
+            tokenParser.parseSignedClaims(token.substringAfter("Bearer ")).payload
         } catch (_: Exception) {
             throw UnauthenticatedException("token couldn't be verified")
         }
