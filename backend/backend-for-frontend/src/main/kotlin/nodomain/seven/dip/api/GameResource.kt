@@ -109,7 +109,10 @@ class GameResource @Inject constructor(
         val signedUpCountry = signUps.find(country)
             ?: signUps.signUp(country)
                 .also { gameDAO.saveSignUps(id, signUps) }
-        orderDao.with(id).createIfNotExists(signedUpCountry.name)
+        orderDao.with(id).also {
+            it.createIfNotExists(signedUpCountry.name)
+            it.save(signedUpCountry.name, OrderWriteUp(listOf()))
+        }
         val token = Jwts.builder()
             .claim("gameId", id)
             .claim("country", signedUpCountry)
