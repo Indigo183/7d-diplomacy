@@ -289,7 +289,7 @@ pub async fn get_token_access_log(
     let request_url = url.join(&format!("api/game/{id}/{country}/token-log"))?;
 
     let token_access = CLIENT
-        .post(request_url)
+        .get(request_url)
         .bearer_auth(token)
         .send()
         .await?
