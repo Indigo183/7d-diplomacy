@@ -10,12 +10,35 @@ const NAVBAR_CSS: Asset = asset!("/assets/styling/navbar.css");
 /// routes will be rendered under the outlet inside this component
 #[component]
 pub fn Navbar() -> Element {
+
+    let navigator = use_navigator();
+
+    // so navbar is re-rendered each time a page is moved - necessary to grey out "back" button at correct times
+    let _route = use_route::<Route>();
+
     rsx! {
         document::Link { rel: "stylesheet", href: NAVBAR_CSS }
 
         div { id: "navbar",
-            Link { to: Route::Home {}, "Home" }
-            Link { to: Route::Blog { id: 1 }, "Blog" }
+             // back button
+            if navigator.can_go_back() {
+                button {
+                    onclick: move |_event| {
+                        navigator.go_back()
+                    },
+                    disabled: !navigator.can_go_back(),
+                    aria_label: "Go back",
+                    title: "Go back",
+                    "←"
+                }
+            }
+
+
+            // wrapped so the pair centres as a single grid item - see navbar.css
+            div { id: "navbar-links",
+                Link { to: Route::Home {}, "Home" }
+                Link { to: Route::Blog { id: 1 }, "Blog" }
+            }
         }
 
         // The `Outlet` component is used to render the next component inside the layout. In this case, it will render either

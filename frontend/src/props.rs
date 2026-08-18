@@ -56,7 +56,7 @@ impl GameHeaderProps {
 
 /// The descriptive title properties of a [`GameInstance`], bundled into a single header struct to
 /// be passed into the title of [`components::ResumeGameList`](crate::components::ResumeGameList).
-///
+
 /// This struct requires that the parameters are owned (or cloned).
 #[derive(Debug, PartialEq, Eq, Clone, Props)]
 pub struct ResumeGameListTitleProps {
