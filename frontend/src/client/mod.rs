@@ -266,7 +266,7 @@ pub async fn get_ready(url: Url, token: &str, id: &str, country: &str) -> anyhow
     let request_url = url.join(&format!("api/game/{id}/{country}/ready"))?;
 
     let ready = CLIENT
-        .post(request_url)
+        .get(request_url)
         .bearer_auth(token)
         .send()
         .await?
