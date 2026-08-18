@@ -132,6 +132,22 @@ class GameResourceTest {
             statusCode(403)
         }
     }
+
+    @Test
+    fun emptyOrderSerTest() {
+        val gameId = "empty-order-set-test"
+
+        val token = setupTestGame(gameId, startGame = false)
+
+        Given {
+            header("Authorization", "Bearer ${token.cato}")
+        } When {
+            get("api/game/$gameId/cato")
+        } Then {
+            statusCode(200)
+            body(equalTo("[]"))
+        }
+    }
 }
 
 data class TestGameTokenSet(val gm: String, val cato: String, val pompey: String)
