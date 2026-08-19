@@ -5,6 +5,7 @@ mod models;
 
 use crate::client::models::*;
 use reqwest;
+use reqwest::header::CONTENT_TYPE;
 use reqwest::{Client, Url};
 use serde::ser::SerializeStruct;
 use serde::{Serialize, Serializer};
@@ -183,6 +184,7 @@ pub async fn post_text_orders(
     let orders = CLIENT
         .post(request_url)
         .bearer_auth(token)
+        .header(CONTENT_TYPE, "text/plain")
         .body(orders)
         .send()
         .await?
@@ -206,7 +208,7 @@ pub async fn post_json_orders(
     let orders = CLIENT
         .post(request_url)
         .bearer_auth(token)
-        .body(serde_json::to_string(&orders)?)
+        .json(&orders)
         .send()
         .await?
         .error_for_status()?
