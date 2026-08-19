@@ -1,18 +1,27 @@
+use anyhow::{Ok, Result, anyhow};
+use std::sync::LazyLock;
 use std::{
+    env,
     fs::{self, File},
     path::PathBuf,
 };
 
-use anyhow::{Ok, Result, anyhow};
-
 use crate::models::GameCache;
 
+/// The path to the directory that all 7D-related data is stored.
+pub const STORAGE_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    env::home_dir()
+        .expect("couldn't find home directory")
+        .join(".7dip")
+});
+
 /// The path to the directory to search for caches.
-pub const JOINED_GAMES_PATH: &str = "~/.7dip/joined-games/";
+pub const JOINED_GAMES_PATH: LazyLock<PathBuf> =
+    LazyLock::new(|| STORAGE_PATH.join("joined-games"));
 
 /// Generates the expected path of the cache for a given game, as specified by id and string
 pub fn get_cache_path(id: &str) -> PathBuf {
-    PathBuf::from(JOINED_GAMES_PATH.to_owned() + id + ".json")
+    JOINED_GAMES_PATH.join(format!("{id}.json"))
 }
 
 /// Updates the cache for a game
@@ -32,7 +41,7 @@ pub fn load_cached_game(id: &str) -> Result<GameCache> {
 /// Returns a list of game ids and players currently cached.
 pub fn get_cached_games() -> Result<Vec<(String, String)>> {
     let mut cached_games = vec![];
-    for entry in fs::read_dir(JOINED_GAMES_PATH)? {
+    for entry in fs::read_dir(JOINED_GAMES_PATH.clone())? {
         let path = entry?.path();
         if path.extension().ok_or(anyhow!(
             "File in cached games directory had no extension ({}).",
