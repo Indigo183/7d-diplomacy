@@ -2,6 +2,7 @@ use crate::client::models::utils::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum Inputtable {
     Order(Order),
     // Adjustment(Adjustment),
@@ -31,19 +32,23 @@ pub enum Action {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Moves {
-    to: Location,
+    pub to: Location,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Supports {
-    order: SupportableOrder,
+    pub order: SupportableOrder,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(transparent)]
 pub struct Convoys {
-    order: MoveOrder,
+    pub order: MoveOrder,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "order_type")]
 pub enum Order {
     HoldOrder,
     MoveOrder(MoveOrder),
@@ -52,6 +57,7 @@ pub enum Order {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(tag = "order_type")]
 pub enum SupportableOrder {
     HoldOrder,
     MoveOrder(MoveOrder),
@@ -59,19 +65,22 @@ pub enum SupportableOrder {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct MoveOrder {
-    piece: Piece,
-    moves: Moves,
-    flare: Option<TemporalFlare>,
+    pub piece: Piece,
+    #[serde(rename = "action")]
+    pub moves: Moves,
+    pub flare: Option<TemporalFlare>,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SupportOrder {
-    piece: Piece,
-    supports: Supports,
+    pub piece: Piece,
+    #[serde(rename = "action")]
+    pub supports: Supports,
 }
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ConvoyOrder {
-    piece: Piece,
-    convoys: Convoys,
+    pub piece: Piece,
+    #[serde(rename = "action")]
+    pub convoys: Convoys,
 }
 
 // trait Inputtable<'a>: Debug + Clone + PartialEq + Eq + Serialize + Deserialize<'a> {
@@ -127,52 +136,4 @@ pub struct ConvoyOrder {
 //     pub piece: Piece,
 //     #[serde(deserialize_with = "deserialize_support_action")]
 //     pub action: Order,
-// }
-
-// fn deserialize_move_action<'de, D>(deserializer: D) -> Result<Location, D::Error>
-// where
-//     D: Deserializer<'de>,
-// {
-//     #[derive(Deserialize)]
-//     #[serde(untagged)]
-//     enum WireAction {
-//         Direct(Location),
-//         Wrapped { to: Location },
-//     }
-//
-//     Ok(match WireAction::deserialize(deserializer)? {
-//         WireAction::Direct(location) | WireAction::Wrapped { to: location } => location,
-//     })
-// }
-//
-// fn deserialize_support_action<'de, D>(deserializer: D) -> Result<Order, D::Error>
-// where
-//     D: Deserializer<'de>,
-// {
-//     #[derive(Deserialize)]
-//     #[serde(untagged)]
-//     enum WireAction {
-//         Direct(Order),
-//         Wrapped { order: Order },
-//     }
-//
-//     Ok(match WireAction::deserialize(deserializer)? {
-//         WireAction::Direct(order) | WireAction::Wrapped { order } => order,
-//     })
-// }
-//
-// fn deserialize_convoy_action<'de, D>(deserializer: D) -> Result<MoveOrder, D::Error>
-// where
-//     D: Deserializer<'de>,
-// {
-//     #[derive(Deserialize)]
-//     #[serde(untagged)]
-//     enum WireAction {
-//         Direct(MoveOrder),
-//         Wrapped { r#move: MoveOrder },
-//     }
-//
-//     Ok(match WireAction::deserialize(deserializer)? {
-//         WireAction::Direct(order) | WireAction::Wrapped { r#move: order } => order,
-//     })
 // }
