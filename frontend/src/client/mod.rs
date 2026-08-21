@@ -62,6 +62,28 @@ impl Serialize for GMAction {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum GMActionResponse {
+    String(String),
+    Game(Game),
+}
+
+impl GMActionResponse {
+    pub fn game(self) -> Option<Game> {
+        match self {
+            Self::Game(game) => Some(game),
+            _ => None,
+        }
+    }
+
+    pub fn string(self) -> Option<String> {
+        match self {
+            Self::String(string) => Some(string),
+            _ => None,
+        }
+    }
+}
+
 // GENERAL FORMAT
 //
 // Each request must first be sent and awaited, and any errors bubbled up. The response must then be
@@ -111,18 +133,21 @@ pub async fn gm_action(
     token: &str,
     id: &str,
     action: GMAction,
-) -> anyhow::Result<String> {
+) -> anyhow::Result<GMActionResponse> {
     let request_url = url.join("api/game/")?.join(id)?;
 
-    let response = CLIENT
+    let raw_response = CLIENT
         .patch(request_url)
         .bearer_auth(token)
         .query(&action)
         .send()
         .await?
-        .error_for_status()?
-        .text()
-        .await?;
+        .error_for_status()?;
+
+    let response = match action {
+        GMAction::Adjudicate => GMActionResponse::Game(raw_response.json().await?),
+        GMAction::SetProperty(_) => GMActionResponse::String(raw_response.text().await?),
+    };
 
     Ok(response)
 }
