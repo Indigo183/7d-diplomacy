@@ -41,7 +41,7 @@ pub struct Board {
 pub struct Game {
     pub turn: i32,
     pub required_retreats: Vec<RequiredRetreat>,
-    pub timeplanes: Vec<HashMap<String, Board>>, // TODO: String -> ComplexNumber
+    pub timeplanes: Vec<HashMap<ComplexNumber, Board>>,
     pub limbo: Vec<Board>,
     pub game_state: GameState,
     pub moves: Vec<MoveOrder>,
