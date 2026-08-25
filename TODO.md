@@ -6,14 +6,14 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 
 - [ ] Dynamically hide the window title bar based on whether or not you're a tiling window manager user (stinky)
 - [ ] Make it not cooked on web
-- [ ] ADD A GODVERDOMME BACK BUTTON TO THIS INTERFACE PLEASE
+- [x] ADD A GODVERDOMME BACK BUTTON TO THIS INTERFACE PLEASE
 - [ ] Get some consistent styling done
     - [ ] Make some nice components to share between places
 
 ### Landing Page
 - [x] Join New Game button
 - [x] Host New Game Button
-- [ ] List of games
+- [x] List of games
     - [x] Resume button in lieu of temp. 
     - [ ] Automatically add joined games to the list
     - [ ] Way of removing games from the list
@@ -29,9 +29,7 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [x] Text field for web address
 - [ ] Country selection field (*post-connect*)
     - [ ] Ability to join random unclaimed country
-    - [ ] Password protection for players
-        - [ ] *Password per player/per country*
-    - [ ] *GMs can see and set passwords*
+    - [ ] Store player token (display last ten characters for recovery)
 - [ ] Spectator account
 - [ ] GM account
 
@@ -47,6 +45,11 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 - [ ] Ghost board
 - [ ] Hover provinces for full province name and abbreviation tooltip
 - [ ] Hover orders for order tooltip
+- [ ] Have a symbol to show that a unit ordered to hold
+    - [ ] *Have a separate symbol for units that were given default orders because they did not submit orders*
+    - [ ] *Have a separate symbol for units that entered invalid orders*
+    - [ ] *Toggle to display/hide invalid orders to avoid arrow clutter but still support gunboat*
+        - [ ] *Per-game default, local default preference, per-instance setting?*
 
 ### Player List
 - [ ] List of all the powers
@@ -86,6 +89,6 @@ Note: Ideas that have not been discussed and confirmed to be wanted features sho
 ## Backend
 
 - [ ] Integrate some of Ludo's order logger code to generate order logs?
-- [ ] Add passwords for joining countries
-- [ ] *Add order stack for each player*
+- [x] Add tokens for joining/authenticating as countries
+- [ ] *Add order stack for each player (potentially frontend)*
 
