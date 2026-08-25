@@ -42,7 +42,7 @@ pub const BASE_MAP: LazyLock<Game> = LazyLock::new(|| Game {
     turn: 1,
     required_retreats: Vec::new(),
     timeplanes: vec![HashMap::from([(
-        "0".to_string(),
+        "0+0i".to_string(),
         Board {
             board_index: ORIGIN_BOARD_INDEX,
             parent: None,
