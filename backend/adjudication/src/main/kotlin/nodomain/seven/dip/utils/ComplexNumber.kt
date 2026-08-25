@@ -1,8 +1,8 @@
 package nodomain.seven.dip.utils
 
-import kotlin.math.absoluteValue
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.io.Serializable
+import kotlin.math.absoluteValue
 
 // Used in ComplexNumber shorthand notation, e.g. `1 + 2*i`
 val i = ComplexNumber(0, 1)
@@ -25,13 +25,13 @@ data class ComplexNumber(val real: Int, val imaginary: Int): Serializable {
     @JsonIgnore
     fun isEven(): Boolean = (real + imaginary) % 2 == 0
 
-    override fun toString(): String {
-        if (imaginary == 0) return "$real"
+    override fun toString(): String { // TODO: old, please translate to Rust
+//        if (imaginary == 0) return "$real"
         val op = if (imaginary < 0) '-' else '+'
         return when (val positiveImaginary = imaginary.absoluteValue) {
-            0       -> "$real"
-            1       -> "$real $op i"
-            else    -> "$real $op ${positiveImaginary}i"
+//            0       -> "$real"
+//            1       -> "$real $op i"
+            else    -> "$real$op${positiveImaginary}i"
         }
     }
 }
