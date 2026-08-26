@@ -23,6 +23,7 @@ pub enum Inputtable {
 // pub struct Convoys { order: MoveOrder }
 // impl Action<'_> for Convoys { }
 
+#[expect(unused)]
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum Action {
     Holds,
@@ -50,10 +51,10 @@ pub struct Convoys {
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "order_type")]
 pub enum Order {
-    HoldOrder,
-    MoveOrder(MoveOrder),
-    SupportOrder(SupportOrder),
-    ConvoyOrder(ConvoyOrder),
+    Hold,
+    Move(MoveOrder),
+    Support(SupportOrder),
+    Convoy(ConvoyOrder),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

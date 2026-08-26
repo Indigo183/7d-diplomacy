@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test;
 
-mod models;
+pub mod models;
 
 use crate::client::models::*;
 use reqwest;
@@ -65,11 +65,11 @@ impl Serialize for GMAction {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GMActionResponse {
     String(String),
-    Game(Game),
+    Game(GameState),
 }
 
 impl GMActionResponse {
-    pub fn game(self) -> Option<Game> {
+    pub fn game(self) -> Option<GameState> {
         match self {
             Self::Game(game) => Some(game),
             _ => None,
@@ -180,7 +180,7 @@ pub async fn get_player_token(
 }
 
 // GET
-pub async fn get_game(url: Url, id: &str) -> anyhow::Result<Game> {
+pub async fn get_game(url: Url, id: &str) -> anyhow::Result<GameState> {
     let request_url = url.join("api/game/")?.join(id)?;
 
     let game = CLIENT

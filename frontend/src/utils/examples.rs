@@ -13,7 +13,7 @@ pub const HEADER_PROPS: LazyLock<Vec<GameHeaderProps>> = LazyLock::new(|| {
             turn: Turn {
                 number: 1,
                 year: "1901".to_string(),
-                phase: Phase::Spring,
+                phase: Season::Spring,
                 is_retreats: false,
             },
             status: Status::Ready,
@@ -34,7 +34,7 @@ pub const HEADER_PROPS: LazyLock<Vec<GameHeaderProps>> = LazyLock::new(|| {
             turn: Turn {
                 number: 2,
                 year: "1901".to_string(),
-                phase: Phase::Fall,
+                phase: Season::Fall,
                 is_retreats: false,
             },
             status: Status::Locked,
@@ -55,7 +55,7 @@ pub const HEADER_PROPS: LazyLock<Vec<GameHeaderProps>> = LazyLock::new(|| {
             turn: Turn {
                 number: 7,
                 year: "32 BCE".to_string(),
-                phase: Phase::Spring,
+                phase: Season::Spring,
                 is_retreats: false,
             },
             status: Status::Unsubmitted,
@@ -76,7 +76,7 @@ pub const HEADER_PROPS: LazyLock<Vec<GameHeaderProps>> = LazyLock::new(|| {
             turn: Turn {
                 number: 5,
                 year: "2014".to_string(),
-                phase: Phase::Fall,
+                phase: Season::Fall,
                 is_retreats: false,
             },
             status: Status::Locked,
@@ -94,7 +94,7 @@ pub const HEADER_PROPS: LazyLock<Vec<GameHeaderProps>> = LazyLock::new(|| {
             turn: Turn {
                 number: 10,
                 year: "17776 CE".to_string(),
-                phase: Phase::Spring,
+                phase: Season::Spring,
                 is_retreats: false,
             },
             status: Status::Submitted,

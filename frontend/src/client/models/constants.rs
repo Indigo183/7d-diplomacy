@@ -3,13 +3,8 @@ use crate::client::models::*;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 
-pub const ORIGIN: ComplexNumber = ComplexNumber {
-    real: 0,
-    imaginary: 0,
-};
-
 pub const ORIGIN_BOARD_INDEX: BoardIndex = BoardIndex {
-    coordinate: ORIGIN,
+    coordinate: ComplexNumber::ZERO,
     timeplane: 0,
 };
 
@@ -38,11 +33,11 @@ pub const BASE_MAP_PIECES: LazyLock<HashMap<String, Vec<Piece>>> = LazyLock::new
     ])
 });
 
-pub const BASE_MAP: LazyLock<Game> = LazyLock::new(|| Game {
+pub const BASE_MAP: LazyLock<GameState> = LazyLock::new(|| GameState {
     turn: 1,
     required_retreats: Vec::new(),
     timeplanes: vec![HashMap::from([(
-        ORIGIN,
+        ComplexNumber::ZERO,
         Board {
             board_index: ORIGIN_BOARD_INDEX,
             parent: None,
@@ -57,7 +52,7 @@ pub const BASE_MAP: LazyLock<Game> = LazyLock::new(|| Game {
         },
     )])],
     limbo: Vec::new(),
-    game_state: GameState::Moves,
+    game_state: Phase::Moves,
     moves: Vec::new(),
     supports: Vec::new(),
     convoys: Vec::new(),

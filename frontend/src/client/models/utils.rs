@@ -8,6 +8,13 @@ pub struct ComplexNumber {
     pub imaginary: i32,
 }
 
+impl ComplexNumber {
+    pub const ZERO: Self = Self {
+        real: 0,
+        imaginary: 0,
+    };
+}
+
 impl FromStr for ComplexNumber {
     type Err = String;
 

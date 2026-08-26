@@ -2,6 +2,8 @@ use anyhow::{Error, Result, anyhow};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 
+use crate::client::models::{GameState, Inputtable};
+
 /// The type of time travel used by a game.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Serialize, Deserialize)]
 pub enum TimeTravelType {
@@ -250,20 +252,23 @@ impl Player {
 
 /// The variant data for a specific map, parsed from JSON.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub struct VariantMap {
+pub struct Variant {
     /// The variant's name (not including time travel details).
     pub name: String,
     /// The variant's map data. - TODO: NOT IMPLEMENTED
     map: (),
+    /// The game's time travel details (if any).
+    time_travel_details: TimeTravelDetails,
     /// The variant's player list.
     pub player_list: Vec<Player>,
 }
 
-impl Default for VariantMap {
+impl Default for Variant {
     fn default() -> Self {
         Self {
             name: String::from("Romans"),
             map: (),
+            time_travel_details: TimeTravelDetails::default(),
             player_list: vec![
                 Player::new(String::from("Cato"), RGBA::try_from("#265BA5").unwrap()),
                 Player::new(String::from("Pompey"), RGBA::try_from("#972530").unwrap()),
@@ -282,11 +287,7 @@ pub struct GameConfig {
     /// A link to the game hosted on a potentially external server.
     pub link: String,
     /// The game's variant data.
-    pub variant: VariantMap,
-    /// The game's time travel details (if any).
-    pub time_travel_details: TimeTravelDetails,
-    /// The game's adjacency settings.
-    pub adjacencies: Adjacencies,
+    pub variant: Variant,
     /// Whether the game will adjudicate itself automatically at the specified deadline.
     pub auto_adjudicate: bool,
 }
@@ -298,9 +299,7 @@ impl GameConfig {
             name: String::new(),
             id: String::new(),
             link: String::from("http://localhost:9090/"),
-            variant: VariantMap::default(),
-            time_travel_details: TimeTravelDetails::default(),
-            adjacencies: Adjacencies::default(),
+            variant: Variant::default(),
             auto_adjudicate: false,
         }
     }
@@ -315,11 +314,7 @@ pub struct GameConfigBuilder {
     /// A link to the game hosted on a potentially external server.
     link: String,
     /// The game's variant data.
-    variant: VariantMap,
-    /// The game's time travel details.
-    time_travel_details: TimeTravelDetails,
-    /// The game's adjacency settings.
-    adjacencies: Adjacencies,
+    variant: Variant,
     /// Whether the game will adjudicate itself automatically at the specified deadline.
     auto_adjudicate: bool,
 }
@@ -341,34 +336,36 @@ impl GameConfigBuilder {
         }
     }
     /// The game's variant data.
-    pub fn with_variant(self, variant: VariantMap) -> Self {
+    pub fn with_variant(self, variant: Variant) -> Self {
         Self { variant, ..self }
     }
     /// The game's time travel details.
     pub fn with_time_travel(self, time_travel: TimeTravel) -> Self {
         Self {
-            time_travel_details: TimeTravelDetails::new(Some(time_travel)),
+            variant: Variant {
+                time_travel_details: TimeTravelDetails::new(Some(time_travel)),
+                ..self.variant
+            },
             ..self
         }
     }
     /// The game's time travel details (if any).
     pub fn with_option_time_travel(self, option_time_travel: Option<TimeTravel>) -> Self {
         Self {
-            time_travel_details: TimeTravelDetails::new(option_time_travel),
+            variant: Variant {
+                time_travel_details: TimeTravelDetails::new(option_time_travel),
+                ..self.variant
+            },
             ..self
         }
     }
     /// The game's time travel details (if any).
     pub fn with_time_travel_details(self, time_travel_details: TimeTravelDetails) -> Self {
         Self {
-            time_travel_details,
-            ..self
-        }
-    }
-    /// The game's adjacency settings.
-    pub fn with_adjacencies(self, adjacencies: Adjacencies) -> Self {
-        Self {
-            adjacencies,
+            variant: Variant {
+                time_travel_details,
+                ..self.variant
+            },
             ..self
         }
     }
@@ -386,30 +383,20 @@ impl GameConfigBuilder {
             id: self.id,
             link: self.link,
             variant: self.variant,
-            time_travel_details: self.time_travel_details,
-            adjacencies: self.adjacencies,
             auto_adjudicate: self.auto_adjudicate,
         }
     }
 }
 
-/// The publicly available game state, including orders and their resulting boards.
-#[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub struct GameState {
-    // orders: Vec<Order>,
-    // boards: Vec<Board>,
-    x: (),
-}
-
 /// The current phase of the game.
 #[derive(Debug, PartialEq, Eq, Clone, Serialize, Deserialize)]
-pub enum Phase {
+pub enum Season {
     Spring,
     Fall,
     Winter,
 }
 
-impl Display for Phase {
+impl Display for Season {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -431,7 +418,7 @@ pub struct Turn {
     /// The year of the game with any additional formatting (e.g. "224 BCE")
     pub year: String,
     /// The current phase of the game.
-    pub phase: Phase,
+    pub phase: Season,
     /// Whether the game is currently in retreats.
     pub is_retreats: bool,
 }
@@ -465,13 +452,17 @@ pub struct Game {
 pub struct PlayerSpecifics {
     pub player: Player,
     pub status: Status,
-    // order_drafts: Vec<OrderSet>, // for example
+    order_drafts: Vec<Inputtable>,
 }
 
 impl PlayerSpecifics {
     /// Constructs a new instance of [`PlayerSpecifics`].
     pub fn new(player: Player, status: Status) -> PlayerSpecifics {
-        Self { player, status }
+        Self {
+            player,
+            status,
+            order_drafts: Vec::new(),
+        }
     }
 
     /// [`PlayerSpecifics`] may not implement [`Default`], as it requires a [`Player`] to be
@@ -482,6 +473,7 @@ impl PlayerSpecifics {
         Self {
             player,
             status: Status::default(),
+            order_drafts: Vec::new(),
         }
     }
 }
@@ -495,11 +487,11 @@ pub struct GameCache {
 }
 
 impl GameCache {
-    // pub fn get_player_specifics(&self, player_name: String) -> Option<&PlayerSpecifics> {
-    //     self.player_specifics
-    //         .iter()
-    //         .find(|&&x| x.player.name == player_name)
-    // }
+    pub fn get_player_specifics(&self, player_name: String) -> Option<&PlayerSpecifics> {
+        self.player_specifics
+            .iter()
+            .find(|x| &x.player.name == &player_name)
+    }
 }
 
 impl From<Game> for GameCache {
