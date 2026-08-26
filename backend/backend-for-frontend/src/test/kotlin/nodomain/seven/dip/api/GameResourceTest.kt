@@ -7,82 +7,21 @@ import io.restassured.module.kotlin.extensions.Extract
 import io.restassured.module.kotlin.extensions.Given
 import io.restassured.module.kotlin.extensions.When
 import io.restassured.module.kotlin.extensions.Then
-import nodomain.seven.dip.utils.filePath
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.AfterAll
-import java.nio.file.Files
-import java.util.Comparator.reverseOrder
-import kotlin.test.assertTrue
 
 @QuarkusTest
 class GameResourceTest {
-    companion object{
-        @JvmStatic
-        @BeforeAll
-        fun setFilePath() {
-            filePath = filePath.resolve("test")
-        }
 
-        @JvmStatic
-        @AfterAll
-        fun cleanTestFolder() {
-            assertTrue(filePath.endsWith("test"))
-            if (Files.exists(filePath)) {
-                Files.walk(filePath).use {
-                    it.sorted(reverseOrder()).forEach(Files::delete)
-                }
-            }
-        }
-    }
 
     @Test
     fun happyPathSingleTurnRomans() {
         val gameId = "happy-path-game-test"
 
-        val gmToken = Given {
-            queryParam("id", gameId)
-        } When {
-            post("api/game")
-        } Then {
-            statusCode(201)
-        } Extract {
-            body().asString()
-        }
-
-        val catoToken = Given {
-            queryParam("country", "cato")
-        } When {
-            post("api/game/$gameId")
-        } Then {
-            statusCode(200)
-        } Extract {
-            body().asString()
-        }
-
-        val pompeyToken = Given {
-            queryParam("country", "pompey")
-        } When {
-            post("api/game/$gameId")
-        } Then {
-            statusCode(200)
-        } Extract {
-            body().asString()
-        }
+        val token = setupTestGame(gameId, startGame = true)
 
         Given {
-            header("Authorisation", "BEARER $gmToken")
-            queryParam("action", "set-property")
-            queryParam("property", "started")
-        } When {
-            patch("api/game/$gameId")
-        } Then {
-            statusCode(200)
-        }
-
-        Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "Bearer ${token.cato}")
             contentType(ContentType.TEXT)
             body(GameResourceTest::class.java.getResource("/cato-test-orders.txt")!!.readText())
         } When {
@@ -92,7 +31,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "Bearer ${token.cato}")
             queryParam("ready", true)
         } When {
             post("api/game/$gameId/cato/ready")
@@ -101,7 +40,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $pompeyToken")
+            header("Authorization", "Bearer ${token.pompey}")
             contentType(ContentType.JSON)
             body(GameResourceTest::class.java.getResource("/pompey-test-orders.json")!!.readText())
         } When {
@@ -111,7 +50,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $pompeyToken")
+            header("Authorization", "Bearer ${token.pompey}")
             queryParam("ready", true)
         } When {
             post("api/game/$gameId/pompey/ready")
@@ -120,7 +59,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "Bearer ${token.cato}")
         } When {
             get("api/game/$gameId/cato/ready")
         } Then {
@@ -129,7 +68,7 @@ class GameResourceTest {
         }
 
         println(Given {
-            header("Authorisation", "BEARER $gmToken")
+            header("Authorization", "Bearer ${token.gm}")
         } When {
             patch("api/game/$gameId")
         } Then {
@@ -144,25 +83,7 @@ class GameResourceTest {
     fun tokenAccessTest() {
         val gameId = "token-access-log-test"
 
-        val gmToken = Given {
-            queryParam("id", gameId)
-        } When {
-            post("api/game")
-        } Then {
-            statusCode(201)
-        } Extract {
-            body().asString()
-        }
-
-        val catoToken = Given {
-            queryParam("country", "cato")
-        } When {
-            post("api/game/$gameId")
-        } Then {
-            statusCode(200)
-        } Extract {
-            body().asString()
-        }
+        val token = setupTestGame(gameId, startGame = false)
 
         Given {
             queryParam("country", "cato")
@@ -170,21 +91,21 @@ class GameResourceTest {
             post("api/game/$gameId")
         } Then {
             statusCode(200)
-            body(equalTo(catoToken))
+            body(equalTo(token.cato))
         }
 
         Given {
             queryParam("country", "cato")
-            queryParam("recovery-key", catoToken.substring(catoToken.length - 10))
+            queryParam("recovery-key", token.cato.substring(token.cato.length - 10))
         } When {
             post("api/game/$gameId")
         } Then {
             statusCode(200)
-            body(equalTo(catoToken))
+            body(equalTo(token.cato))
         }
 
         Given {
-            header("Authorisation", "BEARER $catoToken")
+            header("Authorization", "Bearer ${token.cato}")
         } When {
             get("api/game/$gameId/cato/token-log")
         } Then {
@@ -194,7 +115,7 @@ class GameResourceTest {
         }
 
         Given {
-            header("Authorisation", "BEARER $gmToken")
+            header("Authorization", "Bearer ${token.gm}")
             queryParam("action", "set-property")
             queryParam("property", "started")
         } When {
@@ -211,4 +132,68 @@ class GameResourceTest {
             statusCode(403)
         }
     }
+
+    @Test
+    fun emptyOrderSerTest() {
+        val gameId = "empty-order-set-test"
+
+        val token = setupTestGame(gameId, startGame = false)
+
+        Given {
+            header("Authorization", "Bearer ${token.cato}")
+        } When {
+            get("api/game/$gameId/cato")
+        } Then {
+            statusCode(200)
+            body(equalTo("[]"))
+        }
+    }
+}
+
+data class TestGameTokenSet(val gm: String, val cato: String, val pompey: String)
+
+fun setupTestGame(gameId: String, startGame: Boolean = true): TestGameTokenSet {
+    val gmToken = Given {
+        queryParam("id", gameId)
+    } When {
+        post("api/game")
+    } Then {
+        statusCode(201)
+    } Extract {
+        body().asString()
+    }
+
+    val catoToken = Given {
+        queryParam("country", "cato")
+    } When {
+        post("api/game/$gameId")
+    } Then {
+        statusCode(200)
+    } Extract {
+        body().asString()
+    }
+
+    val pompeyToken = Given {
+        queryParam("country", "pompey")
+    } When {
+        post("api/game/$gameId")
+    } Then {
+        statusCode(200)
+    } Extract {
+        body().asString()
+    }
+
+    if (startGame) {
+        Given {
+            header("Authorization", "Bearer $gmToken")
+            queryParam("action", "set-property")
+            queryParam("property", "started")
+        } When {
+            patch("api/game/$gameId")
+        } Then {
+            statusCode(200)
+        }
+    }
+
+    return TestGameTokenSet(gmToken, catoToken, pompeyToken)
 }

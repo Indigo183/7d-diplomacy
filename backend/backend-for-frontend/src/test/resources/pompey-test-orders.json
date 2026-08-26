@@ -2,13 +2,15 @@
   {
     "piece": {
       "unit_type": "Army",
-      "province": "POM",
-      "board_index": {
-        "coordinate": {
-          "real": 0,
-          "imaginary": 0
-        },
-        "timeplane": 0
+      "location": {
+        "province": "POM",
+        "board_index": {
+          "coordinate": {
+            "real": 0,
+            "imaginary": 0
+          },
+          "timeplane": 0
+        }
       }
     },
     "order_type": "MoveOrder",

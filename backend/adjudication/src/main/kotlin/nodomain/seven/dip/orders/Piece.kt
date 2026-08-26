@@ -41,15 +41,13 @@ sealed interface Piece: Serializable {
 // Support square bracket notation for creating a `Location` out of its components
 operator fun BoardIndex.get(province: Province): Location = Location(province, this)
 
-@JvmInline
-value class Army(override val location: Location): Piece {
+data class Army(override val location: Location): Piece {
     override fun toString(): String = "${location.boardIndex} A ${location.province}"
     override fun asLocal(): String = "A ${location.province}"
 }
 infix fun BoardIndex.A(province: Province): Army = Army(Location(province, this))
 
-@JvmInline
-value class Fleet(override val location: Location): Piece {
+data class Fleet(override val location: Location): Piece {
     override fun toString(): String = "${location.boardIndex} F ${location.province}"
     override fun asLocal(): String = "F ${location.province}"
 }

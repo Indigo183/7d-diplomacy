@@ -7,6 +7,7 @@ import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.JsonProperty
 import nodomain.seven.dip.adjudication.AdjudicationResult
 import java.io.Serializable
 
@@ -166,15 +167,22 @@ class Board(
     var boardIndex: BoardIndex,
     val parent: BoardIndex? = null, // null represents the origin board
 
-    val originalPieces: Map<Piece, Player>,
+    @JsonIgnore val originalPieces: Map<Piece, Player>,
     val centres: MutableMap<Province, Player> = originalPieces.mapKeys {
         (piece, _) -> piece.location.province
     }.toMutableMap()
 ): Serializable {
-    var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
+    @JsonIgnore var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
     val children = mutableListOf<BoardIndex>()
     var isActive = true
         private set
+
+    //Jackson friendly versions of pieces and original pieces
+    val piecesForJson: Map<Player, List<Piece>>
+        @JsonProperty("pieces") get() = pieces.entries.groupBy({ it.value }, { it.key })
+
+    val originalPiecesForJson: Map<Player, List<Piece>>
+        @JsonProperty("original_pieces") get() = originalPieces.entries.groupBy({ it.value }, { it.key })
 
     // Sets `isActive` to false (very useful comment)
     fun kill() {

@@ -1,12 +1,8 @@
-package nodomain.seven.dip.api
+package nodomain.seven.dip.game
 
-import nodomain.seven.dip.orders.Inputtable
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
 import java.io.Serializable
-
-@JvmInline
-value class OrderWriteUp(val orders: List<Inputtable>): Serializable
 
 data class SignUps(
     val players: MutableMap<Player, Boolean> = mutableMapOf(),

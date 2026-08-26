@@ -17,6 +17,7 @@ fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<
             .map{ it.toPair() }
         }.toMap()
 }
+
 // Adjudicate board in a single direction
 fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResults: List<MoveResult>): Board? {
     println("killing board at ${board.boardIndex}")
