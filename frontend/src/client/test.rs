@@ -123,7 +123,7 @@ pub async fn full_game_test() {
     .expect("returned orders should be non-empty");
     assert_eq!(
         cato_order,
-        Inputtable::Order(Order::MoveOrder(MoveOrder {
+        Inputtable::Order(Order::Move(MoveOrder {
             piece: Piece {
                 location: Location {
                     province: CAT.clone(),
@@ -142,7 +142,7 @@ pub async fn full_game_test() {
     );
 
     // Make sure that direct order input works
-    let pompey_order_input = Inputtable::Order(Order::MoveOrder(MoveOrder {
+    let pompey_order_input = Inputtable::Order(Order::Move(MoveOrder {
         piece: Piece {
             location: Location {
                 province: POM.clone(),

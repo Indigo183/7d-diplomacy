@@ -25,7 +25,7 @@ impl<'a> From<GameInstance<'a>> for GameHeaderProps {
             turn: value.game.turn.clone(),
             status: value.player_specifics.status,
             map_name: value.game.config.variant.name.clone(),
-            time_travel: value.game.config.time_travel_details,
+            time_travel: value.game.config.variant.time_travel_details.clone(),
             auto_adjudicate: value.game.config.auto_adjudicate,
             server_address: value.game.config.link.clone(),
         }

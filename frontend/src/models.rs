@@ -258,7 +258,7 @@ pub struct Variant {
     /// The variant's map data. - TODO: NOT IMPLEMENTED
     map: (),
     /// The game's time travel details (if any).
-    time_travel_details: TimeTravelDetails,
+    pub(crate) time_travel_details: TimeTravelDetails,
     /// The variant's player list.
     pub player_list: Vec<Player>,
 }
