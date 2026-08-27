@@ -1,5 +1,7 @@
 use serde::de::Error;
 use serde::{Deserialize, Deserializer, Serialize};
+use std::f32::consts::PI;
+use std::ops::{Add, AddAssign, Sub, SubAssign};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
@@ -13,6 +15,67 @@ impl ComplexNumber {
         real: 0,
         imaginary: 0,
     };
+
+    pub fn modulus(&self) -> f32 {
+
+        (self.real as f32).hypot(self.imaginary as f32)
+    }
+    
+    pub fn argument(&self) -> f32 {
+        (self.real as f32).atan2(self.imaginary as f32)
+    }
+}
+
+impl PartialOrd for ComplexNumber {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.modulus().partial_cmp(&other.modulus()) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        (self.argument() + PI).partial_cmp(&(other.argument() + PI))
+    }
+}
+
+impl Ord for ComplexNumber {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl Add for ComplexNumber {
+    type Output = Self;
+
+    fn add(self, rhs: Self) -> Self::Output {
+        ComplexNumber {
+            real: self.real + rhs.real,
+            imaginary: self.imaginary + rhs.imaginary,
+        }
+    }
+}
+
+impl Sub for ComplexNumber {
+    type Output = Self;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        ComplexNumber {
+            real: self.real - rhs.real,
+            imaginary: self.imaginary - rhs.imaginary,
+        }
+    }
+}
+
+impl AddAssign for ComplexNumber {
+    fn add_assign(&mut self, rhs: Self) {
+        self.real += rhs.real;
+        self.imaginary += rhs.imaginary;
+    }
+}
+
+impl SubAssign for ComplexNumber {
+    fn sub_assign(&mut self, rhs: Self) {
+        self.real -= rhs.real;
+        self.imaginary -= rhs.imaginary;
+    }
 }
 
 impl FromStr for ComplexNumber {
