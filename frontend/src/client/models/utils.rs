@@ -17,10 +17,9 @@ impl ComplexNumber {
     };
 
     pub fn modulus(&self) -> f32 {
-
         (self.real as f32).hypot(self.imaginary as f32)
     }
-    
+
     pub fn argument(&self) -> f32 {
         (self.real as f32).atan2(self.imaginary as f32)
     }

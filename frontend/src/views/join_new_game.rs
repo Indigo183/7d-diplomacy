@@ -62,12 +62,19 @@ pub fn JoinNewGame() -> Element {
                         }
                     }
                     div {
-                        if let Some(time_travel) = game_config.read().as_ref().unwrap().variant.time_travel_details.time_travel() {
+                        if let Some(time_travel) = game_config
+                            .read()
+                            .as_ref()
+                            .unwrap()
+                            .variant
+                            .time_travel_details
+                            .time_travel()
+                        {
                             div { class: "left-col", "Adjacencies" }
-                            div { class: "right-col", 
+                            div { class: "right-col",
                                 { format!("{}", time_travel.adjacencies) }
                             }
-                        } 
+                        }
                     }
                 }
             }
