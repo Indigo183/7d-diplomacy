@@ -17,6 +17,7 @@ anyhow = "1.0.103"
 serde = { version = "1.0.228", features = ["derive"] }
 # API stuff
 reqwest = { version = "0.13.4", features = ["json", "query"] }
+gdk-sys = "0.18.2"
 
 [features]
 default = ["desktop"]

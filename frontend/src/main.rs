@@ -17,6 +17,10 @@ const TAILWIND_CSS: Asset =
 
 #[cfg(feature = "desktop")]
 fn main() {
+    unsafe {
+        gdk_sys::gdk_set_allowed_backends(std::ffi::CString::new("x11").unwrap().as_ptr());
+    }
+
     LaunchBuilder::new()
         .with_cfg(
             Config::default().with_menu(None).with_window(
