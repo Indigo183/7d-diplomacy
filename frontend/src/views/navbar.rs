@@ -12,7 +12,7 @@ pub fn Navbar() -> Element {
     let _route = use_route::<Route>();
 
     rsx! {
-        div { class: "flex relative justify-center",
+        div { class: "flex relative z-1 justify-center",
              // Back button
             if navigator.can_go_back() {
                 button { class: "absolute left-0 hover:cursor-pointer",
