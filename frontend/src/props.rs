@@ -77,3 +77,32 @@ pub struct ResumeGameListBodyProps {
     pub auto_adjudicate: bool,
     pub server_address: String,
 }
+
+/// The method of displaying boards on the map.
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+pub enum MapDisplayMode {
+    TopDown {
+        timeplane: u8,
+        /// How many timelines to display below the viewed one, with fading opacity.
+        display_below: u8,
+    },
+
+    // SideOn {
+    //     along_real_axis: bool,
+    // },
+    //
+    Isometric {
+        timeplane: u8,
+        display_above: u8,
+        display_below: u8,
+    },
+}
+
+impl Default for MapDisplayMode {
+    fn default() -> Self {
+        Self::TopDown {
+            timeplane: 0,
+            display_below: 0,
+        }
+    }
+}

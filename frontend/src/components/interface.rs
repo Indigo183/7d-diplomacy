@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use dioxus::{html::geometry::PixelsRect, prelude::*};
 
-const MAP_SVG: Asset = asset!("/assets/header.svg");
+use crate::{components::MapBuilder, props::MapDisplayMode};
 
 #[derive(Clone, Copy, Debug)]
 struct ViewBox {
@@ -38,8 +38,9 @@ pub fn Interface() -> Element {
     // cached mouse location
     let mut mouse_location = use_signal(|| (0.0_f64, 0.0_f64));
     let mut is_dragging = use_signal(|| false);
-
-    let mut radius = use_signal(|| 50);
+    // map display mode
+    #[allow(unused_mut)]
+    let mut map_display_mode = use_signal(MapDisplayMode::default);
 
     rsx! {
         div {
@@ -138,41 +139,7 @@ pub fn Interface() -> Element {
                     is_dragging.set(false);
                 },
 
-                // temporary test SVG stuff
-                rect {
-                    x: "0",
-                    y: "0",
-                    width: "1000",
-                    height: "1000",
-                    fill: "#111827",
-                }
-
-                circle {
-                    cx: "500",
-                    cy: "500",
-                    r: "200",
-                    fill: "#3b82f6",
-                }
-
-                circle {
-                    cx: "250",
-                    cy: "250",
-                    r: "{radius}",
-                    fill: "#ef4444",
-                    onclick: move |_| {
-                        radius.set(radius() + 5)
-                    }
-                }
-
-                circle {
-                    cx: "750",
-                    cy: "750",
-                    r: "{radius * 2}",
-                    fill: "#22c55e",
-                    onclick: move |_| {
-                        radius.set(radius() - 5)
-                    }
-                }
+                MapBuilder { display_mode: map_display_mode() }
             }
         }
     }
