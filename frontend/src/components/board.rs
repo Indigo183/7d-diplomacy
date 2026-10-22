@@ -1,109 +1,74 @@
-use anyhow::Result;
-use dioxus::{html::g::dangerous_inner_html, prelude::*};
-use roxmltree::Document;
+use dioxus::prelude::*;
+use xmltree::{Element as XMLElement, XMLNode};
 
-fn provinces<'a>(svg: &'a roxmltree::Document) -> Result<roxmltree::Children<'a, 'a>> {
-    Ok(svg
-        .root_element()
-        .children()
-        .find(|node| node.attribute("label") == Some("Region Colors"))
-        .expect("help")
-        .children())
-}
-
-fn serialise_node_internal(node: roxmltree::Node) -> String {
-    let mut output = String::new();
-
-    match node.node_type() {
-        roxmltree::NodeType::Element => {
-            output.push('<');
-            output.push_str(node.tag_name().name());
-
-            for attr in node.attributes() {
-                output.push(' ');
-                output.push_str(attr.name());
-                output.push_str("=\"");
-                output.push_str(attr.value());
-                output.push('"');
+#[component]
+fn Layer(layer: XMLElement) -> Element {
+    match layer.attributes.get("label").map(AsRef::as_ref) {
+        Some("Region Colors") => {
+            rsx! {
+                for province in layer.children.iter().filter_map(XMLNode::as_element) {
+                    path {
+                        transform: [
+                            layer.attributes.get("transform"),
+                            province.attributes.get("transform"),
+                        ]
+                        .into_iter()
+                        .flatten()
+                        .cloned()
+                        .collect::<Vec<_>>()
+                        .join(" "),
+                        style: province.attributes.get("style"),
+                        class: match province.attributes.get("transform") { // TODO: document properly and clean up
+                            None => Some("hover:!fill-green-300"),
+                            _ => None,
+                        },
+                        onclick: {
+                            let province = province.clone();
+                            move |_event| {
+                                let mut buf = Vec::new();
+                                province.write(&mut buf).unwrap();
+                                println!("{}", String::from_utf8(buf).unwrap())
+                            }
+                        },
+                        d: province.attributes.get("d"),
+                    }
+                }
             }
-
-            let mut children = node.children().peekable();
-
-            if children.peek().is_none() {
-                output.push_str("/>");
-                return output;
-            }
-
-            output.push('>');
-
-            for child in children {
-                output.push_str(&serialise_node_internal(child));
-            }
-
-            output.push_str("</");
-            output.push_str(node.tag_name().name());
-            output.push('>');
         }
 
-        roxmltree::NodeType::Text => {
-            output.push_str(node.text().unwrap_or(""));
+        Some(_) => {
+            let mut buf = Vec::new();
+            layer.write(&mut buf)?;
+
+            rsx! {
+                g {
+                    pointer_events: "none",
+                    dangerous_inner_html: Some(String::from_utf8(buf)?),
+                }
+            }
         }
 
-        roxmltree::NodeType::Comment => {
-            output.push_str("<!--");
-            output.push_str(node.text().unwrap_or(""));
-            output.push_str("-->");
-        }
-
-        _ => {}
+        _ => rsx!(),
     }
-
-    output
-}
-
-fn serialise_node(node: roxmltree::Node) -> String {
-    String::from("<svg>") + &serialise_node_internal(node) + "</svg>"
 }
 
 #[component]
 pub fn Board() -> Element {
-    let svg_raw = std::fs::read_to_string("assets/classic.svg")?;
-    // let svg_raw = std::fs::read_to_string("assets/imperial-diplomacy-2-5.svg")?;
-    let svg = Document::parse(&svg_raw)?;
-    let root = svg.root_element();
-    let view_box = root
-        .attribute("viewBox")
-        .map(String::from)
-        .unwrap_or(format!(
-            "0 0 {} {}",
-            root.attribute("width").unwrap(),
-            root.attribute("height").unwrap(),
-        ));
-    let provinces = provinces(&svg)?;
+    // let svg_raw = std::fs::read_to_string("assets/classic.svg")?;
+    let svg_raw = std::fs::read_to_string("assets/imperial-diplomacy-2-5.svg")?;
+
+    // TODO: edit svg before rendering
+    let mut xml = XMLElement::parse(svg_raw.as_bytes())?;
+    let attributes = &xml.attributes;
 
     rsx! {
         svg {
-            width: "100%",
-            height: "100%",
-            view_box: view_box,
-            preserve_aspect_ratio: "xMidYMid slice",
-            // dangerous_inner_html: svg_raw,
+            width: attributes.get("width"),
+            height: attributes.get("height"),
+            spacing: attributes.get("space"),
 
-            for child in svg.root_element().children().filter(|n|
-                    n.attribute("label") != Some("Region Colors") && n.attribute("label") != Some("Sea Adjacencies") && n.attribute("label") != Some("Island Adjacencies")
-                ) {
-                g {
-                    dangerous_inner_html: serialise_node(child)
-                }
-            }
-
-            for (i, province) in provinces.into_iter().enumerate() {
-                path {
-                    style: &province.attribute("style"),
-                    class: "hover:!fill-green-300",
-                    onclick: move |_event| println!("{i}"),
-                    d: &province.attribute("d"),
-                }
+            for layer in xml.children.iter().filter_map(XMLNode::as_element) {
+                Layer { layer: layer.clone() }
             }
         }
     }
