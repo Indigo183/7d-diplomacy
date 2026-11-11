@@ -27,23 +27,18 @@ pub fn MapBuilder(display_mode: MapDisplayMode) -> Element {
         .parse::<f64>()?;
     let padding = width.min(height) * PADDING_FACTOR;
 
+    let positions = [(0, 0), (0, 1), (1, 0)];
+
     rsx! {
         div {
             class: "relative",
-            div {
-                class: "absolute",
-                style: translation(width, height, padding, 0, 0),
-                Board { }
-            }
-            div {
-                class: "absolute",
-                style: translation(width, height, padding, 1, 0),
-                Board { }
-            }
-            div {
-                class: "absolute",
-                style: translation(width, height, padding, 0, 1),
-                Board { }
+
+            for (x, y) in positions {
+                div {
+                    class: "absolute",
+                    style: translation(width, height, padding, x, y),
+                    Board { }
+                }
             }
         }
     }
