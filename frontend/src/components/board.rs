@@ -90,15 +90,16 @@ fn Layer(layer: XMLElement, config: MapConfig) -> Element {
             }
         },
 
+        // Some("Units")
+        // | Some("Army Locations")
+        // | Some("Army Locations (Retreats)")
+        // | Some("Fleet Locations")
+        // | Some("Fleet Locations (Retreats)") => rsx!(),
         Some("Titles") => rsx!(),
 
         Some(_) => {
             let mut buf = Vec::new();
             layer.write(&mut buf)?;
-            if layer.attributes.get("label").map(AsRef::as_ref) == Some("Background") {
-                println!("hi");
-                println!("{:?}", String::from_utf8(buf.clone()));
-            }
 
             rsx! {
                 g {
@@ -119,7 +120,7 @@ pub fn Board() -> Element {
     let config: MapConfig = toml::from_str(&std::fs::read_to_string(
         "assets/imperial-diplomacy-2-5/config.toml",
     )?)?;
-    dbg!(&config);
+    // dbg!(&config);
 
     // TODO: edit svg before rendering
     let mut xml = XMLElement::parse(svg_raw.as_bytes())?;
