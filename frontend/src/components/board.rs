@@ -3,22 +3,9 @@
 // TODO: fix NPO5 "hitbox" covering entirety of NPO
 
 use dioxus::prelude::*;
-use serde::Deserialize;
 use xmltree::{Element as XMLElement, XMLNode};
 
-#[derive(Debug, Clone, PartialEq, Deserialize)]
-struct MapConfig {
-    pub impassibles: Option<Vec<String>>,
-    pub coasts: Option<toml::Table>,
-}
-
-impl MapConfig {
-    fn is_region(&self, name: Option<&String>) -> bool {
-        self.impassibles
-            .as_ref() // ownership, am I right?
-            .is_none_or(|impassibles| name.is_some_and(|name| !impassibles.contains(name)))
-    }
-}
+use crate::models::MapConfig;
 
 #[component]
 fn Layer(layer: XMLElement, config: MapConfig) -> Element {
@@ -90,11 +77,6 @@ fn Layer(layer: XMLElement, config: MapConfig) -> Element {
             }
         },
 
-        // Some("Units")
-        // | Some("Army Locations")
-        // | Some("Army Locations (Retreats)")
-        // | Some("Fleet Locations")
-        // | Some("Fleet Locations (Retreats)") => rsx!(),
         Some("Titles") => rsx!(),
 
         Some(_) => {
@@ -114,22 +96,14 @@ fn Layer(layer: XMLElement, config: MapConfig) -> Element {
 }
 
 #[component]
-pub fn Board() -> Element {
-    // let svg_raw = std::fs::read_to_string("assets/classic.svg")?;
-    let svg_raw = std::fs::read_to_string("assets/imperial-diplomacy-2-5/map.svg")?;
-    let config: MapConfig = toml::from_str(&std::fs::read_to_string(
-        "assets/imperial-diplomacy-2-5/config.toml",
-    )?)?;
-    // dbg!(&config);
-
-    // TODO: edit svg before rendering
-    let mut xml = XMLElement::parse(svg_raw.as_bytes())?;
+pub fn Board(mut xml: XMLElement, config: MapConfig) -> Element {
     let attributes = &xml.attributes;
 
     rsx! {
         svg {
             width: attributes.get("width"),
             height: attributes.get("height"),
+            view_box: attributes.get("viewBox"),
             spacing: attributes.get("space"),
 
             for layer in xml.children.iter().filter_map(XMLNode::as_element) {

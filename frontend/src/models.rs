@@ -571,3 +571,19 @@ impl<'a> GameInstance<'a> {
 // TODO: Store variants under a common trait such that functions can take a generic argument of type
 //       T::Province or T::Order (for example). This could involve parsing an enum from a file, or
 //       creating a wrapper type around a `Vec<_>` that can behave similarly to an enum.
+
+// TODO: PUT SOMEWHERE SENSIBLE
+/// Stores the config details provided by a variant's config.toml file.
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+pub struct MapConfig {
+    pub impassibles: Option<Vec<String>>,
+    pub coasts: Option<toml::Table>,
+}
+
+impl MapConfig {
+    pub fn is_region(&self, name: Option<&String>) -> bool {
+        self.impassibles
+            .as_ref() // ownership, am I right?
+            .is_none_or(|impassibles| name.is_some_and(|name| !impassibles.contains(name)))
+    }
+}

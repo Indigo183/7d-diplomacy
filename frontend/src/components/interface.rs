@@ -4,6 +4,8 @@ use dioxus::{html::geometry::PixelsRect, prelude::*};
 
 use crate::{components::MapBuilder, props::MapDisplayMode};
 
+const VARIANT: &'static str = "classic";
+
 #[derive(Debug, Clone, Copy)]
 struct Transform {
     x: f64,
@@ -123,7 +125,7 @@ pub fn Interface() -> Element {
                     is_dragging.set(false);
                 },
 
-                MapBuilder { display_mode: map_display_mode() }
+                MapBuilder { display_mode: map_display_mode(), variant: VARIANT }
             }
         }
     }
