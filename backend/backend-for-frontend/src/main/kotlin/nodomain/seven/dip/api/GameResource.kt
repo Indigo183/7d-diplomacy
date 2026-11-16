@@ -34,6 +34,8 @@ import nodomain.seven.dip.utils.exceptions.ConflictException
 import nodomain.seven.dip.utils.exceptions.ForbiddenException
 import nodomain.seven.dip.utils.exceptions.UnauthenticatedException
 import nodomain.seven.dip.utils.exceptions.UnprocessableEntryException
+import nodomain.seven.dip.variant.VariantHash
+import nodomain.seven.dip.variant.VariantRegister
 import org.eclipse.microprofile.openapi.annotations.Operation
 import org.jboss.resteasy.reactive.ResponseStatus
 import javax.crypto.SecretKey
@@ -47,7 +49,12 @@ fun requireValidGameId(id: String) {
 
 @Path("game")
 @Produces(MediaType.APPLICATION_JSON)
-class GamesResource @Inject constructor(val gameResource: GameResource, val key: SecretKey, val gameDAO: GameDAO) {
+class GamesResource @Inject constructor(
+    val gameResource: GameResource,
+    val key: SecretKey,
+    val gameDAO: GameDAO,
+    val variantRegister: VariantRegister
+) {
     @Path("{id}")
     fun game(@PathParam("id") id: String) = gameResource.with(id)
 
@@ -57,13 +64,16 @@ class GamesResource @Inject constructor(val gameResource: GameResource, val key:
     @POST
     @ResponseStatus(201)
     @Produces(MediaType.TEXT_PLAIN)
-    fun createGame(@QueryParam("id") id: String): String {
+    fun createGame(@QueryParam("id") id: String, @QueryParam("variant") variant: String = "classic"): String {
         requireValidGameId(id)
         if (gameDAO.existingGame(id))
             throw ConflictException("game with this id already exists")
+        if (!variantRegister.includedVariants.containsKey(variant)
+            && !variantRegister.includeRuntimeMaps().containsKey(variant))
+            throw UnprocessableEntryException("$variant is not supported by this server")
         // in future this endpoint should also permit the creation of games using a different setup from romans
         val game = Game()
-        val signUps = SignUps(countries = enumEntries<RomanPlayers>())
+        val signUps = SignUps(countries = enumEntries<RomanPlayers>(), variant = variant)
         gameDAO.createAndSave(id, game, signUps)
         return Jwts.builder()
             .claim("gameId", id)
@@ -82,7 +92,8 @@ class GameResource @Inject constructor(
     val gameDAO: GameDAO,
     val gmActions: GMActions,
     val orderDao: OrderDao,
-    val tokenAccessDAO: TokenAccessDAO
+    val tokenAccessDAO: TokenAccessDAO,
+    val variantRegister: VariantRegister
 ) {
     lateinit var id: String
     fun with(id: String): GameResource {
@@ -94,6 +105,14 @@ class GameResource @Inject constructor(
 
     @GET
     fun getGame() = gameDAO.load(id)
+
+    @GET
+    @Path("/variant")
+    fun getVariantHashes(): VariantHash = try {
+        variantRegister.includedVariants[gameDAO.loadSignUps(id).variant]!!
+    } catch (_: Exception) {
+        throw NotFoundException("variant could not be determined or does not exist")
+    }
 
     @POST
     @Produces(MediaType.TEXT_PLAIN)
