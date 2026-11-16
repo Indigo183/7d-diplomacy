@@ -1,7 +1,6 @@
 package nodomain.seven.dip.variant
 
 import io.github.classgraph.ClassGraph
-import io.quarkus.security.Authenticated
 import io.quarkus.vertx.web.Route
 import io.vertx.ext.web.RoutingContext
 import io.vertx.ext.web.handler.FileSystemAccess
@@ -12,7 +11,6 @@ import jakarta.ws.rs.GET
 import jakarta.ws.rs.PUT
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
-import org.eclipse.microprofile.config.inject.ConfigProperty
 import java.security.MessageDigest
 import kotlin.io.path.Path
 import kotlin.io.path.readBytes
@@ -55,21 +53,20 @@ class VariantRegister {
 }
 
 @jakarta.ws.rs.Path("/variants")
-class StaticFilesHashResource @Inject constructor(val variantRegister: VariantRegister) {
+class VariantsResource @Inject constructor(val variantRegister: VariantRegister) {
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    fun allPrecomputedFileHashes(): Map<String, VariantHash> = variantRegister.includedVariants
+    fun allPrecomputedVariantFileHashes(): Map<String, VariantHash> = variantRegister.includedVariants
 
     @Produces(MediaType.APPLICATION_JSON)
     @PUT
-    fun recomputeFileHashes(): Map<String, VariantHash> = variantRegister.includeRuntimeMaps()
+    fun recomputeVariantFileHashes(): Map<String, VariantHash> = variantRegister.includeRuntimeMaps()
 }
 
 @ApplicationScoped
-class StaticAuthenticatedDeclarativeRoute {
+class AccessRuntimeMaps {
     @Route(path = "/maps/*", methods = [Route.HttpMethod.GET])
-    @Authenticated
-    fun secureStatic(rc: RoutingContext?) {
+    fun handleMapRequests(rc: RoutingContext?) {
         StaticHandler.create(FileSystemAccess.RELATIVE, "extra_maps/").handle(rc)
     }
 }
