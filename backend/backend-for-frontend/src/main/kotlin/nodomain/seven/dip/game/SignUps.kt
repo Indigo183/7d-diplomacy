@@ -7,6 +7,7 @@ import java.io.Serializable
 data class SignUps(
     val players: MutableMap<Player, Boolean> = mutableMapOf(),
     val countries: List<Player>,
+    val variant: String,
     val properties: MutableSet<GameProperty> = mutableSetOf()
 ): Serializable {
     fun signUp(country: String): Player {

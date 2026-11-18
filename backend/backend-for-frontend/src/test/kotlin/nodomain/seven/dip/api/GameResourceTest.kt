@@ -155,6 +155,7 @@ data class TestGameTokenSet(val gm: String, val cato: String, val pompey: String
 fun setupTestGame(gameId: String, startGame: Boolean = true): TestGameTokenSet {
     val gmToken = Given {
         queryParam("id", gameId)
+        queryParam("variant", "romans")
     } When {
         post("api/game")
     } Then {
