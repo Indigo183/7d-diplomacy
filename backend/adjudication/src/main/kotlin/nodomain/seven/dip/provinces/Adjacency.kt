@@ -2,16 +2,16 @@ package nodomain.seven.dip.provinces
 
 import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.utils.BoardIndex
-import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.Spot
 import nodomain.seven.dip.utils.c
 import nodomain.seven.dip.utils.i
 import kotlin.math.abs
 
-fun Province.equalTo(other: Province): Adjacency = Adjacency {equals(other)}
+fun ProvincialSpot.equalTo(other: ProvincialSpot): Adjacency = Adjacency {equals(other)}
 
-enum class AdjacencyType(val isAdjacentOnForeignBoard: Province.(Piece) -> Boolean) {
-    LOOSE({isAdjacentFor(it) || equals(it.location.province)}),
-    STRICT({equals(it.location.province)});
+enum class AdjacencyType(val isAdjacentOnForeignBoard: ProvincialSpot.(Piece) -> Boolean) {
+    LOOSE({isAdjacentFor(it) || equals(it.spot.provincialSpot)}),
+    STRICT({equals(it.spot.provincialSpot)});
 }
 
 fun interface Adjacency {
@@ -37,12 +37,12 @@ fun BoardIndex.isAdjacentTo(other: BoardIndex): Boolean {
     } else false
 }
 
-fun Location.isAdjacentTo(other: Piece, adjacencyType: AdjacencyType = AdjacencyType.LOOSE): Boolean {
+fun Spot.isAdjacentTo(other: Piece, adjacencyType: AdjacencyType = AdjacencyType.LOOSE): Boolean {
     return when {
-        boardIndex == other.location.boardIndex -> // adjacency is local
-            province isAdjacentFor other
-        boardIndex.isAdjacentTo(other.location.boardIndex) ->
-            province.(adjacencyType.isAdjacentOnForeignBoard)(other)
+        boardIndex == other.spot.boardIndex -> // adjacency is local
+            provincialSpot isAdjacentFor other
+        boardIndex.isAdjacentTo(other.spot.boardIndex) ->
+            provincialSpot.(adjacencyType.isAdjacentOnForeignBoard)(other)
         else -> return false
     }
 }

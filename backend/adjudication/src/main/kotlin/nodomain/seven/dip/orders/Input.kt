@@ -18,8 +18,8 @@ private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean 
     order.from.boardIndex.timeplane ?: return false // 5
     val board = getBoard(order.from.boardIndex) ?: return false // 1 (partly)
     if (!board.isActive) return false // 6
-    if(! (player?.equals(board.pieces[order.from]) // 2
-            ?: (board.pieces[order.from] !== null))) return false // 1
+    if(! (player?.equals(board.pieces[order.from.province]?.player) // 2
+            ?: (board.pieces[order.from.province] !== null))) return false // 1
     val destination = when(order) {
         is MoveOrder -> {
             order.action.to.boardIndex.timeplane ?: return false // 5
@@ -34,7 +34,7 @@ private fun Game.isValidForMoves(order: Order, player: Player? = null): Boolean 
         }
         is SupportOrder -> {
             order.action.order.from.boardIndex.timeplane ?: return false // 5
-            order.action.order.piece.location
+            order.action.order.piece.spot
         }
         is ConvoyOrder -> throw Unit as Throwable // TODO: actually implement fleets
         is HoldOrder -> return true // hold orders do not have a destination, thus 4 is trivial
@@ -58,8 +58,8 @@ private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null)
                 && (order !is MoveOrder || disallowed != order.action.to)
     }) return false // 2
     return (order !is MoveOrder || (
-        order.piece.location.boardIndex == order.action.to.boardIndex
-            && (order.action.to.province isAdjacentFor order.piece)
+        order.piece.spot.boardIndex == order.action.to.boardIndex
+            && (order.action.to.provincialSpot isAdjacentFor order.piece)
     )) // 3
 }
 
@@ -75,21 +75,21 @@ private fun Game.isValidForRetreats(order: RetreatOrder, player: Player? = null)
  * 9. if building a fleet, the centre is a coast
  */
 private fun Game.isValidForBuilds(order: BuildOrder, player: Player? = null): Boolean {
-    val location = order.piece.location
+    val location = order.piece.spot
     location.boardIndex.timeplane ?: return false // 2
     if (!location.boardIndex.coordinate.isEven()) return false // 3
     val board = getBoard(location.boardIndex) ?: return false // 1
     if (!board.isActive) return false // 4
-    val player = player ?: board.pieces[location] ?: board.centres[location.province] ?: return false
+    val player = player ?: board.pieces[location.province]?.player ?: board.centres[location.province] ?: return false
     val count = board.countBuilds(player)
     return when {
         count > 0 -> order is Build // 5
                 && player == board.centres[location.province] // 6
                 && player.homeCentres.contains(location.province) // 7
-                && board.pieces[location] === null // 8
-                && (order.piece !is Fleet || location.province is Coast) // 9
+                && board.pieces[location.province] === null // 8
+                && (order.piece !is Fleet || location.provincialSpot is Coast) // 9
         count < 0 -> order is Disband // 5
-                && player == board.pieces[location] // 6
+                && player == board.pieces[location.province]?.player // 6
         else -> false // 5
     }
 }

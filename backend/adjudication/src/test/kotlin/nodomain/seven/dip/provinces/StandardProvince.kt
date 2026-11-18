@@ -1,24 +1,26 @@
 package nodomain.seven.dip.provinces
 
+import nodomain.seven.dip.orders.A
 import nodomain.seven.dip.orders.Army
 import nodomain.seven.dip.orders.IncompatibleParserException
 import nodomain.seven.dip.orders.PartiallyParsed
+import nodomain.seven.dip.orders.Piece
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.provinces.StandardInLand.*
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardSea.*
-import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.Spot
 import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
 import kotlin.test.Test
 
 object A {
-    operator fun get(province: StandardProvince): Army = Army(Location(province, T(0.c, 0)))
+    operator fun get(province: StandardProvince): Army = Army(Spot(province, T(0.c, 0)))
 }
 
-sealed interface StandardProvince: Province{
+sealed interface StandardProvince: ProvincialSpot, Province {
     val adjacency: Set<StandardProvince>
-    override fun isAdjacent(other: Province): Boolean = other in adjacency
+    override fun isAdjacent(other: ProvincialSpot): Boolean = other in adjacency
     val nameWordCount: Int
 
     companion object: Provinces<StandardProvince> {
@@ -38,7 +40,7 @@ sealed interface StandardProvince: Province{
                 "norwe" to NWG,
                 "st" to STP,
                 "mid" to MAO,
-                "tyrrh" to TYR,
+                "tyrrh" to TYS,
             ).mapValues { (_, province) -> {TakeN(province.nameWordCount, province)} }
                 .plus(mapOf<String, () -> PartiallyParsed<StandardProvince>>(
                     "gulf" to { Defer({3}, 3) {valueOf(it.trim().substring(0, 3).uppercase())} },
@@ -52,12 +54,12 @@ sealed interface StandardProvince: Province{
     }
 }
 
-abstract class StandardCoastalPart(override val province: StandardCoast, val coast: String) : StandardProvince, CoastalPart {
+/*abstract class StandardCoastalPart(override val province: StandardCoast, val coast: String) : StandardProvince, CoastalPart {
     override val nameWordCount: Int get() = province.nameWordCount
     override val isSupplyCentre: Boolean get() = province.isSupplyCentre
     override val name: String get() = "${province.name} $coast"
     override fun hasInlandBorderWith(coast: Coast): Boolean = province.isAdjacent(coast) && !isAdjacent(coast)
-}
+}*/
 
 enum class StandardSea(override val nameWordCount: Int): Sea, StandardProvince {
     BAR(2) { override val adjacency: Set<StandardProvince> by lazy { setOf(STP, NWG, NWY) } },
@@ -81,19 +83,20 @@ enum class StandardSea(override val nameWordCount: Int): Sea, StandardProvince {
     BLA(2) { override val adjacency: Set<StandardProvince> by lazy { setOf(CON, BUL, RUM, SEV, ARM, ANK) } };
 
     override val isSupplyCentre: Boolean get() = false
+    override val province: StandardSea get() = this
 }
 
 enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardProvince {
     POR(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SPA, MAO) } },
     SPA(true) {
         override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, GAS, MAO, WES, LYO) }
-        val nc = object: StandardCoastalPart(province, "nc") {
+        /*val nc = object: StandardCoastalPart(province, "nc") {
             override val adjacency: Set<StandardProvince> by lazy { setOf(POR, GAS, MAO) }
         }
         val sc = object: StandardCoastalPart(province, "sc") {
             override val adjacency: Set<StandardProvince> by lazy { setOf(POR, MAR, MAO, WES, LYO) }
         }
-        override val coastalParts: List<CoastalPart> get() = listOf(nc, sc)
+        override val coastalParts: List<CoastalPart> get() = listOf(nc, sc)*/
     },
     BRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, PAR, GAS, MAO, ENG) } },
     BEL(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(PIC, BUR, RUH, HOL, ENG,  NTH) } },
@@ -105,26 +108,27 @@ enum class StandardCoast(override val isSupplyCentre: Boolean): Coast, StandardP
     NWY(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(SWE, FIN, STP, NTH, SKA, NWG, BAR) } },
     STP(true) {
         override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, FIN, LVN, MOS, BOT, BAR) }
-        override val nameWordCount: Int = 2
+        override val nameWordCount: Int get() = 2
+        /*override val nameWordCount: Int = 2
         val nc = object: StandardCoastalPart(province, "nc") {
             override val adjacency: Set<StandardProvince> by lazy { setOf(NWY, BAR) }
         }
         val sc = object: StandardCoastalPart(province, "sc") {
             override val adjacency: Set<StandardProvince> by lazy { setOf(FIN, LVN, BOT) }
         }
-        override val coastalParts: List<CoastalPart> get() = listOf(nc, sc)
+        override val coastalParts: List<CoastalPart> get() = listOf(nc, sc)*/
     },
     SEV(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(MOS, UKR, RUM, ARM, BLA) } },
     CON(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(ANK, SMY, BUL, BLA, AEG) } },
     BUL(true) {
         override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, SER, GRE, BLA, AEG) }
-        val ec = object: StandardCoastalPart(province, "nc") {
+        /*val ec = object: StandardCoastalPart(province, "nc") {
             override val adjacency: Set<StandardProvince> by lazy { setOf(CON, RUM, BLA) }
         }
         val sc = object: StandardCoastalPart(province, "sc") {
             override val adjacency: Set<StandardProvince> by lazy { setOf(CON, GRE, AEG) }
         }
-        override val coastalParts: List<CoastalPart> get() = listOf(ec, sc)
+        override val coastalParts: List<CoastalPart> get() = listOf(ec, sc)*/
     },
     RUM(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(GAL, UKR, SEV, BUL, SER, BUD, BLA) } },
     GRE(true) { override val adjacency: Set<StandardProvince> by lazy { setOf(BUL, SER, ALB, AEG, ION) } },
@@ -196,6 +200,7 @@ enum class StandardInLand(override val isSupplyCentre: Boolean): InLand, Standar
     TYR(false) { override val adjacency: Set<StandardProvince> by lazy { setOf(MUN, BOH, VIE, TRI, VEN, PIE) } };
 
     override val nameWordCount: Int = 1
+    override val province: StandardInLand get() = this
 }
 
 object StandardProvinceTest: WithAssertions {
@@ -226,5 +231,9 @@ enum class StandardPlayer(override val homeCentres: List<StandardProvince>): Pla
     Russia(listOf(STP, MOS, SEV, WAR)),
     Turkey(listOf(CON, ANK, SMY)),
     Germany(listOf(BER, MUN, KIE)),
-    England(listOf(LON, EDI, LVP))
+    England(listOf(LON, EDI, LVP));
+
+    override val startingUnits: List<Piece>
+        get() = homeCentres.map { T(0.c, 0) A it }
+
 }

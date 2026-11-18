@@ -5,7 +5,6 @@ import nodomain.seven.dip.game.Game
 import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.game.RequiredRetreat
 import nodomain.seven.dip.orders.Build
-import nodomain.seven.dip.orders.BuildOrder
 import nodomain.seven.dip.orders.ConvoyOrder
 import nodomain.seven.dip.orders.Disband
 import nodomain.seven.dip.orders.HoldOrder
@@ -16,7 +15,6 @@ import nodomain.seven.dip.orders.Moves
 import nodomain.seven.dip.orders.Order
 import nodomain.seven.dip.orders.Parser.FullNationalisedFormat.DATC
 import nodomain.seven.dip.orders.Piece
-import nodomain.seven.dip.orders.RetreatOrder
 import nodomain.seven.dip.orders.SupportOrder
 import nodomain.seven.dip.orders.Supports
 import nodomain.seven.dip.orders.T
@@ -26,10 +24,12 @@ import nodomain.seven.dip.orders.input
 import nodomain.seven.dip.orders.isValid
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.ProvincialSpot
 import nodomain.seven.dip.provinces.StandardPlayer
 import nodomain.seven.dip.provinces.StandardProvince
+import nodomain.seven.dip.provinces.having
 import nodomain.seven.dip.utils.BoardIndex
-import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.Spot
 import nodomain.seven.dip.utils.c
 import org.assertj.core.api.WithAssertions
 
@@ -100,19 +100,19 @@ interface WithAssertionsDATC: WithAssertions {
     val Game.pieces: Map<Province, Player>? get() =
         getBoard(BoardIndex((
             if (gameState == GameState.MOVES) turn - 1 else turn
-        ).c))?.pieces?.mapKeys { (piece, _) -> piece.location.province }
+        ).c))?.pieces?.mapValues { (_, ownedPiece) -> ownedPiece.player }
 
     fun Game.andAssertThatNothingMoved(): Game {
         assertThat(pieces).satisfiesAnyOf(
             {assertThat(it).isNull()},
-            {assertThat(it).isEqualTo(getBoard(T(0.c, 0))!!.pieces)}
+            {assertThat(it).isEqualTo(getBoard(T(0.c, 0))!!.pieces.mapValues { (_, ownedPiece) -> ownedPiece.player })}
         )
         return this
     }
 
-    val List<RequiredRetreat>.locations get() = map { it.piece.location }
+    val List<RequiredRetreat>.locations get() = map { it.piece.spot }
 
-    fun retreatsIn(vararg province: Province): Array<Location> {
-        return province.map { origin[it] }.toTypedArray()
+    fun retreatsIn(vararg provincialSpot: ProvincialSpot): Array<Spot> {
+        return provincialSpot.map { origin[it] }.toTypedArray()
     }
 }

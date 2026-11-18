@@ -3,16 +3,16 @@ package nodomain.seven.dip.adjudication
 import com.fasterxml.jackson.annotation.JsonIgnore
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
-import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.Spot
 import java.io.Serializable
 
-operator fun Map<Piece, Player>.get(location: Location): Player? {
-    return get(Army(location)) ?: get(Fleet(location))
+operator fun Map<Piece, Player>.get(spot: Spot): Player? {
+    return get(Army(spot)) ?: get(Fleet(spot))
 }
 
 sealed interface ComputableMoveResult: Serializable {
     val moveOrder: MoveOrder?
-    val location: Location get() = moveOrder!!.action.to
+    val spot: Spot get() = moveOrder!!.action.to
 
     fun ifCompatibleWith(moveOrder: MoveOrder): ComputableMoveResult? =
         if (this.moveOrder?.from == moveOrder.action.to) this else null
@@ -24,7 +24,7 @@ sealed interface MoveResult: ComputableMoveResult {
             { if (it is MoveOrder) DependantMove(this, it) else null }
     }
 }
-typealias PreResult = MutableMap<Location, ComputableMoveResult>
+typealias PreResult = MutableMap<Spot, ComputableMoveResult>
 
 data class DependantMove(override val moveOrder: MoveOrder, val dependsOn: MoveOrder): ComputableMoveResult
 @JvmInline
@@ -32,9 +32,9 @@ value class SuccessfulMove(override val moveOrder: MoveOrder): MoveResult {
     override fun toString(): String = "$moveOrder succeeds"
 }
 @JvmInline
-value class Bounce(override val location: Location): MoveResult {
+value class Bounce(override val spot: Spot): MoveResult {
     override val moveOrder: MoveOrder? get() = null
-    override fun toString(): String = "bounce in $location"
+    override fun toString(): String = "bounce in $spot"
 }
 
 data class AdjudicationResult(
@@ -132,7 +132,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgn
             .toMap(mutableMapOf())
     }
 
-    private fun strongestMove(destination: Location, orders: List<MoveAnalysis>): ComputableMoveResult? {
+    private fun strongestMove(destination: Spot, orders: List<MoveAnalysis>): ComputableMoveResult? {
         val topStrength = orders.maxOf { it.strength }
         if (orders.isNotEmpty() && topStrength == 0) return null
         val presumptiveMove = if (orders.count { it.strength == topStrength } == 1)
@@ -153,7 +153,7 @@ class Adjudicator(moves: List<MoveOrder>, supports: List<SupportOrder>, @JsonIgn
     private fun MoveOrder.dependOnDestination(): ComputableMoveResult = // this method assumes the destination to be occupied
         (MoveResult.dependentIfMoving)(byOrigin[action.to]?.order) ?: Bounce(action.to)
 
-    private fun holdStrength(destination: Location, against: MoveAnalysis): Int {
+    private fun holdStrength(destination: Spot, against: MoveAnalysis): Int {
         return when (val moveAtDestination = byOrigin[destination]) {
             null -> nonCutSupports.count { it.action.order is HoldOrder && it.action.order.from == destination } + 1
             else if (moveAtDestination.order.action.to == against.order.from) -> moveAtDestination.strength

@@ -1,7 +1,6 @@
 package nodomain.seven.dip.orders
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import nodomain.seven.dip.utils.*
 import java.io.Serializable
@@ -19,8 +18,8 @@ sealed interface Action: Serializable {
 sealed interface Inputtable: Serializable {
     val piece: Piece
     @get:JsonIgnore
-    val from: Location
-        get() = piece.location
+    val from: Spot
+        get() = piece.spot
     @JsonIgnore
     fun isLocal(): Boolean = true
 }
@@ -58,9 +57,9 @@ class HoldOrder(piece: Piece): Order(piece, " ") {
 }
 
 @JvmInline
-value class Moves(val to: Location): Action {
+value class Moves(val to: Spot): Action {
     override fun toString(): String = "$to"
-    override fun asLocal(): String = "${to.province}"
+    override fun asLocal(): String = "${to.provincialSpot}"
 }
 class MoveOrder(piece: Piece, override val action: Moves, override var flare: TemporalFlare? = null): RetreatOrder, Order(piece, " - ") {
     infix fun i(timeFlare: Int): MoveOrder {

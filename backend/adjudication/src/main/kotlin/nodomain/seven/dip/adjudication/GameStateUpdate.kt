@@ -3,8 +3,10 @@ package nodomain.seven.dip.adjudication
 import nodomain.seven.dip.game.*
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.orders.TemporalFlare
+import nodomain.seven.dip.provinces.Owned
 import nodomain.seven.dip.provinces.Player
 import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.having
 import nodomain.seven.dip.utils.*
 import kotlin.math.absoluteValue
 
@@ -12,7 +14,7 @@ fun Game.getAllPieces(player: Player? = null, onlyActive: Boolean = false): Map<
     return timeplanes.asSequence()
         .flatMap { it.boards() }
         .filter { !onlyActive || it.isActive }
-        .flatMap{ board -> board.pieces.asSequence()
+        .flatMap{ board -> board.pieces.values.asSequence()
             .filter{ (_, owner) -> player === null || owner == player }
             .map{ it.toPair() }
         }.toMap()
@@ -25,7 +27,7 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     // Do nothing if nothing relevant happened
     if (moveResults.isEmpty()) return null
 
-    val pieces: MutableMap<Piece, Player> = board.pieces.toMutableMap()
+    val pieces: MutableMap<Piece, Player> = board.pieces.values.associate { it.toPair() }.toMutableMap()
     val centres: MutableMap<Province, Player> = board.centres.toMutableMap()
     // Location now needed instead of province due to possibility of fleets
     val boardIndex = board.boardIndex
@@ -44,9 +46,8 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
             requiredRetreats += RequiredRetreat(entry.first, move.moveOrder.flare!!, entry.second, move.moveOrder.from)
 
         // Map of pieces now requires knowledge of Army/Fleet status
-        val (movingPiece, owner) = getBoard(move.moveOrder.piece.location.boardIndex)
-            ?.pieces
-            ?.getEntry(move.moveOrder.from)
+        val (movingPiece, owner) = getBoard(move.moveOrder.piece.spot.boardIndex)
+            ?.pieces[move.moveOrder.from.province]
             ?: throw IllegalStateException("order not properly validated")
         pieces[movingPiece moveTo move.moveOrder.action.to] = owner
     }
@@ -59,7 +60,7 @@ fun Game.adjudicateMovesBoard(board: Board, direction: TemporalFlare, moveResult
     val newChild = Board(
         BoardIndex(boardIndex.coordinate + direction.direction, iter),
         boardIndex,
-        pieces,
+        pieces.entries.associate { it.key.spot.province to Owned(it.key, it.value) },
         centres,
     )
     // For nice syntax
@@ -115,7 +116,7 @@ fun Game.adjudicateMoves() {
                 }.sumOf {
                     adjudicators[it.flare]!!.nonCutSupports.filter { support ->
                         support.action.order == it
-                                && !adjudicators[it.flare]!!.dislodgements.any { it.action.to == support.piece.location }
+                                && !adjudicators[it.flare]!!.dislodgements.any { it.action.to == support.piece.spot }
                     }.size + 1
                 }
             )
@@ -143,7 +144,7 @@ fun Game.adjudicateMoves() {
 fun Game.adjudicateRetreats() {
     // TODO: make sure retreats aren't readjudicated
     // To check for bounces of retreats
-    val retreatDestinations: MutableMap<Location, Boolean> = mutableMapOf()
+    val retreatDestinations: MutableMap<Spot, Boolean> = mutableMapOf()
 
     // Retreats take place on the parent board
     for (retreatDestination in adjustments.filterIsInstance<MoveOrder>().map { it.action.to }) {
@@ -154,19 +155,19 @@ fun Game.adjudicateRetreats() {
     for (retreat in adjustments.filterIsInstance<MoveOrder>().filter {
         retreatDestinations[it.action.to] ?: false
     }) {
-        val board = getBoard(retreat.piece.location.boardIndex)!!
+        val board = getBoard(retreat.piece.spot.boardIndex)!!
         val latestChild = getBoard(board.children.last {
             it.coordinate - board.boardIndex.coordinate == retreat.flare!!.direction
         })!!
         // Can be assumed due to retreat filtering
-        val retreat = locationsOfAdjustments[retreat.piece.location]!! as MoveOrder
+        val retreat = locationsOfAdjustments[retreat.piece.spot]!! as MoveOrder
         // Check for any move to retreat destination, successful or not
         // Also check latestChild for any piece already there
-        if (adjudicators[retreat.flare!!]!!.moveResults.none { it.location == retreat.action.to }
-            && latestChild.pieces[retreat.action.to] === null)
-            latestChild.pieces[retreat.piece moveTo retreat.action.to] = requiredRetreats.find {
-                it.piece.location == retreat.from
-            }!!.player
+        if (adjudicators[retreat.flare!!]!!.moveResults.none { it.spot == retreat.action.to }
+            && latestChild.pieces[retreat.action.to.province] === null)
+            latestChild.pieces[retreat.action.to.province] = requiredRetreats.find {
+                it.piece.spot == retreat.from
+            }!!.player.having(retreat.piece moveTo retreat.action.to)
     }
 
     requiredRetreats.clear()
@@ -175,9 +176,9 @@ fun Game.adjudicateRetreats() {
     // Update ownership of centres
     for (board in timeplanes.flatMap { it.boards() }) if (board.isActive && board.boardIndex.coordinate.isEven()) {
         for (piece in board.pieces) {
-            val province = piece.key.location.province
-            if (board.centres[province] != piece.value && province.isSupplyCentre)
-                board.centres[province] = piece.value
+            val province = piece.key
+            if (board.centres[province] != piece.value.player && province.isSupplyCentre)
+                board.centres[province] = piece.value.player
         }
     }
     // TODO: calculate builds
@@ -195,13 +196,13 @@ fun Game.adjudicateBuildsBoard(board: Board, adjustments: Map<Player, List<Adjus
         var validAdjustments = when {
             count > 0 -> adjustments.filterIsInstance<BuildOrder>().filter {
                 it is Build
-                        && player == board.centres[it.piece.location.province]
-                        && board.pieces[it.piece.location] === null
+                        && player == board.centres[it.piece.spot.province]
+                        && board.pieces[it.piece.spot.province] === null
             }
 
             count < 0 -> adjustments.filterIsInstance<BuildOrder>().filter {
                 it is Disband
-                        && player == board.pieces[it.piece.location]
+                        && player == board.pieces[it.piece.spot.province]?.player
             }
 
             else -> continue // no valid adjustments for this player
@@ -214,11 +215,11 @@ fun Game.adjudicateBuildsBoard(board: Board, adjustments: Map<Player, List<Adjus
             validAdjustments += board.pieces.asSequence()
                 .filter { it.value == player }
                 .take(count-validAdjustments.size)
-                .map { Disband(it.key) }
+                .map { Disband(it.value.component1()) }
 
         for (order in validAdjustments) when (order) {
-            is Build -> board.pieces[order.piece] = board.centres[order.piece.location.province]!!
-            is Disband -> board.pieces.remove(order.piece.location.province)
+            is Build -> board.pieces[order.piece.spot.province] = board.centres[order.piece.spot.province]!!.having(order.piece)
+            is Disband -> board.pieces.remove(order.piece.spot.province)
         }
     }
 }
@@ -228,10 +229,10 @@ fun Game.adjudicateBuilds() {
     for (board in boards) {
         adjudicateBuildsBoard(
             board,
-            adjustments.filter { it.piece.location.boardIndex == board.boardIndex }.groupBy { when (it) {
-                is Build -> board.centres[it.piece.location.province]
+            adjustments.filter { it.piece.spot.boardIndex == board.boardIndex }.groupBy { when (it) {
+                is Build -> board.centres[it.piece.spot.province]
                     ?: throw IllegalStateException("centre not owned so cannot be built on")
-                is Disband -> board.pieces[it.piece.location]
+                is Disband -> board.pieces[it.piece.spot.province]?.player
                     ?: throw IllegalStateException("no unit found to disband")
                 else -> throw IllegalStateException("adjustments contained wrong type (retreat vs build)")
             } }

@@ -5,7 +5,7 @@ import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
 import kotlin.test.Test
 
-//6.I. TEST CASES, CIVIL DISORDER AND DISBANDS
+//6.J. TEST CASES, CIVIL DISORDER AND DISBANDS
 object TestJ: WithAssertionsDATC {
     @Test
     fun `6_J_1 TEST CASE, TOO MANY DISBAND ORDERS`() {

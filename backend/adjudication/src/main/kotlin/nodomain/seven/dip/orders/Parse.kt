@@ -2,12 +2,14 @@ package nodomain.seven.dip.orders
 
 import nodomain.seven.dip.game.GameState
 import nodomain.seven.dip.game.GameState.*
+import nodomain.seven.dip.provinces.Owned
 import nodomain.seven.dip.provinces.Player
-import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.ProvincialSpot
 import nodomain.seven.dip.provinces.Provinces
+import nodomain.seven.dip.provinces.having
 import nodomain.seven.dip.utils.BoardIndex
 import nodomain.seven.dip.utils.ComplexNumber
-import nodomain.seven.dip.utils.Location
+import nodomain.seven.dip.utils.Spot
 import nodomain.seven.dip.utils.c
 import java.util.LinkedList
 import java.util.Queue
@@ -15,14 +17,14 @@ import java.util.Queue
 inline fun <reified Pl, reified Pr> getParser(
     crossinline playerTrim: String.() -> String = String::trim,
     crossinline provinceTrim: String.() -> String = String::trim
-): Parser where Pl: Player, Pl : Enum<Pl>, Pr : Province, Pr : Enum<Pr> =
+): Parser where Pl: Player, Pl : Enum<Pl>, Pr : ProvincialSpot, Pr : Enum<Pr> =
     Parser(
         { PartiallyParsed { enumValueOf<Pl>(it.playerTrim()) }},
         { PartiallyParsed { enumValueOf<Pr>(it.provinceTrim()) }}
     )
 
 inline fun <reified Pl> getParser(
-    provinces: Provinces<out Province>,
+    provinces: Provinces<out ProvincialSpot>,
     crossinline playerTrim: String.() -> String = String::trim,
 ): Parser where Pl: Player, Pl : Enum<Pl> =
     Parser(
@@ -36,7 +38,7 @@ class IncompatibleParserException() : RuntimeException()
 interface Notation {
     fun asBoardIndex(string: String): BoardIndex
 
-    fun asUnitType(string: String): (Location) ->  Piece
+    fun asUnitType(string: String): (Spot) ->  Piece
 
     fun asAction(string: String): Char
 
@@ -44,9 +46,6 @@ interface Notation {
 
     fun asBuildAction(string: String): (Piece) -> BuildOrder
 }
-
-data class Owned<out T>(val order: T, val player: Player)
-fun <T> Player.having(order: T) = Owned<T>(order, this)
 
 fun interface PartiallyParsed<out R> {
     fun isComplete(): Boolean = true
@@ -64,7 +63,7 @@ private fun <R> Queue<String>.take(asR: (String) -> PartiallyParsed<R>): R {
 
 class Parser(
     val asPlayer: (String) -> PartiallyParsed<Player>,
-    val asProvince: (String) -> PartiallyParsed<Province>,
+    val asProvincialSpot: (String) -> PartiallyParsed<ProvincialSpot>,
     val notation: Notation = DefaultNotation
 ){
     enum class Format(val getFormatter: Parser.() -> ParsingHelper<Order>): (Parser) -> ParsingHelper<Order> {
@@ -167,13 +166,13 @@ class Parser(
     private inner class Verbose: Formatted<Order> {
         override fun parseOrderInPieces(queue: Queue<String>): Order {
             return queue.withFirst(notation::asBoardIndex)
-                .combiningNext(notation::asUnitType) { unitType, board -> { province: Province -> unitType(Location(province, board))}}
-                .combiningManyNext(asProvince) { province, board  -> board(province)}
+                .combiningNext(notation::asUnitType) { unitType, board -> { provincialSpot: ProvincialSpot -> unitType(Spot(provincialSpot, board))}}
+                .combiningManyNext(asProvincialSpot) { province, board  -> board(province)}
                 .combiningInto(notation::asAction, 'H') { action, piece -> when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue) }
                     'M', '-' -> piece M queue.withFirst(notation::asBoardIndex)
-                        .combiningManyInto(asProvince, combiner = ::Location) i notation.asTemporalFlare(queue.remove())
+                        .combiningManyInto(asProvincialSpot, combiner = ::Spot) i notation.asTemporalFlare(queue.remove())
                     else -> throw IllegalStateException()
                 } }
         }
@@ -183,8 +182,8 @@ class Parser(
         override fun parseOrderInPieces(queue: Queue<String>): BuildOrder {
             return queue.withFirst(notation::asBoardIndex)
                 .combiningNext(notation::asBuildAction) { action , board -> Pair(action, board)}
-                .combiningNext(notation::asUnitType) { unitType, (action, board) -> { province: Province -> action(unitType(Location(province, board)))}}
-                .combiningManyInto(asProvince) {province, action -> (action(province))}
+                .combiningNext(notation::asUnitType) { unitType, (action, board) -> { provincialSpot: ProvincialSpot -> action(unitType(Spot(provincialSpot, board)))}}
+                .combiningManyInto(asProvincialSpot) { province, action -> (action(province))}
         }
     }
 
@@ -206,11 +205,11 @@ class Parser(
     private inner class OrderDATC: DATC<Order>() {
         override fun parseUnownedOrderInPieces(queue: Queue<String>): Order {
             return queue.withFirst(notation::asUnitType)
-                .combiningManyNext(asProvince) { province, unitType -> unitType(Location(province, origin))}
+                .combiningManyNext(asProvincialSpot) { province, unitType -> unitType(Spot(province, origin))}
                 .combiningInto(notation::asAction, 'H') {action, piece -> when(action) {
                     'H' -> piece.holds
                     'S' -> piece S { parseOrderInPieces(queue).order }
-                    '-' -> piece M queue.take(asProvince) i 0
+                    '-' -> piece M queue.take(asProvincialSpot) i 0
                     else -> throw IllegalStateException()} }
         }
     }
@@ -218,8 +217,8 @@ class Parser(
     private inner class BuildDATC: DATC<BuildOrder>() {
         override fun parseUnownedOrderInPieces(queue: Queue<String>): BuildOrder {
             return queue.withFirst(notation::asBuildAction)
-                .combiningNext(notation::asUnitType) { unitType, action -> { province: Province -> action(unitType(Location(province, T(1.c, 0))))}}
-                .combiningManyInto(asProvince) {province, action -> (action(province))}
+                .combiningNext(notation::asUnitType) { unitType, action -> { provincialSpot: ProvincialSpot -> action(unitType(Spot(provincialSpot, T(1.c, 0))))}}
+                .combiningManyInto(asProvincialSpot) { province, action -> (action(province))}
         }
     }
 
@@ -291,7 +290,7 @@ object DefaultNotation: Notation {
             ), string.substringAfter('T').trim().toInt())
     }
 
-    override fun asUnitType(string: String): (Location) -> Piece = when (string.first()) {
+    override fun asUnitType(string: String): (Spot) -> Piece = when (string.first()) {
         'A' -> ::Army
         'F' -> ::Fleet
         else -> throw IncompatibleParserException()

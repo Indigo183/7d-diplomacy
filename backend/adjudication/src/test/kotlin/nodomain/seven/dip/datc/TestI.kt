@@ -4,6 +4,7 @@ import nodomain.seven.dip.game.GameState.*
 import nodomain.seven.dip.orders.T
 import nodomain.seven.dip.provinces.StandardCoast.*
 import nodomain.seven.dip.provinces.StandardInLand.*
+import nodomain.seven.dip.provinces.having
 import nodomain.seven.dip.utils.c
 import kotlin.test.Test
 
@@ -90,7 +91,9 @@ object TestI: WithAssertionsDATC {
 
         assertThat(game.getBoard(T(2.c, 0))!!).matches {
             // Move original pieces to new board to compare piece lists
-            it.pieces == it.originalPieces.mapKeys { (piece, _) -> piece moveTo piece.location + 1.c }
+            it.pieces == it.originalPieces.mapValues { (_, ownedPiece) ->
+                ownedPiece.player.having(ownedPiece.component1() moveTo ownedPiece.component1().spot + 1.c)
+            }
         }
     }
 

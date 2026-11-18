@@ -14,63 +14,57 @@ import kotlin.enums.enumEntries
     defaultImpl = Romans::class
 )
 @JsonSubTypes(JsonSubTypes.Type(Romans::class))
-interface Province: Serializable {
-    infix fun isAdjacent(other: Province): Boolean
+interface ProvincialSpot: Serializable {
+    infix fun isAdjacent(other: ProvincialSpot): Boolean
 
     infix fun isAdjacentFor(other: Piece): Boolean {
         return when (other) {
-            is Army -> other.location.province.isAdjacentForArmies(this)
-            is Fleet -> other.location.province.isAdjacentForFleets(this)
+            is Army -> other.spot.provincialSpot.isAdjacentForArmies(this)
+            is Fleet -> other.spot.provincialSpot.isAdjacentForFleets(this)
         }
     }
 
-    infix fun isAdjacentForFleets(other: Province): Boolean {
+    infix fun isAdjacentForFleets(other: ProvincialSpot): Boolean {
         return when (other) {
             is InLand -> false
             else -> isAdjacent(other)
         }
     }
 
-    infix fun isAdjacentForArmies(other: Province): Boolean {
+    infix fun isAdjacentForArmies(other: ProvincialSpot): Boolean {
         return when (other) {
             is Sea -> false
             else -> isAdjacent(other)
         }
     }
 
-    val province: Province get() = this
-    val isSupplyCentre: Boolean;
+    val province: Province
     val name: String
 }
 
-interface InLand: Province {
-    override fun isAdjacentForFleets(other: Province): Boolean = false
+interface Province {
+    val name: String
+    val isSupplyCentre: Boolean;
 }
 
-interface Coast: Province {
+interface InLand: ProvincialSpot {
+    override fun isAdjacentForFleets(other: ProvincialSpot): Boolean = false
+}
+
+interface Coast: ProvincialSpot {
     fun hasInlandBorderWith(coast: Coast): Boolean
 
-    override fun isAdjacentForFleets(other: Province): Boolean {
+    override fun isAdjacentForFleets(other: ProvincialSpot): Boolean {
         if (other is Coast && hasInlandBorderWith(other)) return false
         return super.isAdjacentForFleets(other)
     }
-
-    fun hasCoastalParts() = coastalParts == null
-
-    val coastalParts: List<CoastalPart>? get() = null
 }
 
-interface CoastalPart: Coast {
-    override val province: Coast
-
-    override val coastalParts: List<CoastalPart>? get() = province.coastalParts
+interface Sea: ProvincialSpot {
+    override fun isAdjacentForArmies(other: ProvincialSpot): Boolean = false
 }
 
-interface Sea: Province {
-    override fun isAdjacentForArmies(other: Province): Boolean = false
-}
-
-interface Provinces<T: Province> {
+interface Provinces<T: ProvincialSpot> {
     val entries: List<T>
 
     fun valueOf(string: String): T =
@@ -92,9 +86,15 @@ interface Provinces<T: Province> {
 
 interface Player: Serializable {
 	val homeCentres: List<Province>;
+    val startingUnits: List<Piece>
 
     val name: String;
 }
 
+data class Owned<out T>(val order: T, val player: Player) {
+    fun toPair() : Pair<T, Player> = order to player
+}
+fun <T> Player.having(order: T) = Owned<T>(order, this)
+
 inline fun <reified T> setup(): Map<Piece, Player> where T : Player, T : Enum<T> =
-    enumEntries<T>().asSequence().flatMap { player -> player.homeCentres.map { T(0.c, 0) A it to player } }.toMap()
+    enumEntries<T>().asSequence().flatMap { player -> player.startingUnits.map { it to player } }.toMap()

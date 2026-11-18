@@ -284,7 +284,7 @@ object TestD: WithAssertionsDATC {
 
     @Test
     fun `6_D_24 TEST CASE, IMPOSSIBLE ARMY MOVE CANNOT BE SUPPORTED`() {
-        """
+        val result = """
         |France:
         |A Marseilles - Gulf of Lyon
         |F Spain(sc) Supports A Marseilles - Gulf of Lyon
@@ -295,7 +295,12 @@ object TestD: WithAssertionsDATC {
         |Turkey:
         |F Tyrrhenian Sea Supports F Western Mediterranean - Gulf of Lyon
         |F Western Mediterranean - Gulf of Lyon
-        |""".parse().adjudicateAsDATC(expectAllOrderToBeValid = false).andAssertThatNothingMoved()
+        |""".parse().adjudicateAsDATC(expectAllOrderToBeValid = false)
+
+        assertThat(result.pieces)
+            .containsEntry(LYO, Turkey)
+
+        assertThat(result.requiredRetreats.locations).contains(*retreatsIn(LYO))
     }
 
     @Test

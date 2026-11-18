@@ -1,6 +1,7 @@
 package nodomain.seven.dip.utils
 
 import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.ProvincialSpot
 import java.io.Serializable
 
 // Location of a board
@@ -13,6 +14,14 @@ data class BoardIndex(val coordinate: ComplexNumber, var timeplane: Int? = 0): S
 }
 
 // Location of a unit/province
+data class Spot(val provincialSpot: ProvincialSpot, val boardIndex: BoardIndex): Serializable {
+    operator fun plus(other: ComplexNumber): Spot = Spot(provincialSpot, boardIndex + other)
+    operator fun minus(other: ComplexNumber): Spot = Spot(provincialSpot, boardIndex - other)
+    override fun toString(): String = "$boardIndex $provincialSpot"
+
+    val province get() = provincialSpot.province
+}
+
 data class Location(val province: Province, val boardIndex: BoardIndex): Serializable {
     operator fun plus(other: ComplexNumber): Location = Location(province, boardIndex + other)
     operator fun minus(other: ComplexNumber): Location = Location(province, boardIndex - other)

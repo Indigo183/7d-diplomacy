@@ -2,38 +2,41 @@ package nodomain.seven.dip.game
 
 import nodomain.seven.dip.orders.*
 import nodomain.seven.dip.provinces.Player
-import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.ProvincialSpot
 import nodomain.seven.dip.provinces.RomanPlayers
 import nodomain.seven.dip.provinces.setup
 import nodomain.seven.dip.utils.*
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import nodomain.seven.dip.adjudication.AdjudicationResult
+import nodomain.seven.dip.provinces.Owned
+import nodomain.seven.dip.provinces.Province
+import nodomain.seven.dip.provinces.having
 import java.io.Serializable
 
-fun MutableMap<Piece, Player>.remove(province: Province) {
-    keys.filter { it.location.province == province}.forEach { remove(it) }
+fun MutableMap<Piece, Player>.remove(provincialSpot: ProvincialSpot) {
+    keys.filter { it.spot.provincialSpot == provincialSpot}.forEach { remove(it) }
 }
 
-fun MutableMap<Piece, Player>.remove(location: Location) {
-    remove(keys.find { it.location == location})
+fun MutableMap<Piece, Player>.remove(spot: Spot) {
+    remove(keys.find { it.spot == spot})
 }
 
-operator fun Map<Piece, Player>.get(location: Location): Player? {
-    return get(Army(location)) ?: get(Fleet(location))
+operator fun Map<Piece, Player>.get(spot: Spot): Player? {
+    return get(Army(spot)) ?: get(Fleet(spot))
 }
 
 fun Map<Piece, Player>.getEntry(piece: Piece): Pair<Piece, Player>? {
     return piece to (get(piece) ?: return null)
 }
-fun Map<Piece, Player>.getEntry(location: Location) =
-    getEntry(Army(location)) ?: getEntry(Fleet(location))
+fun Map<Piece, Player>.getEntry(spot: Spot) =
+    getEntry(Army(spot)) ?: getEntry(Fleet(spot))
 
 data class RequiredRetreat(
     val piece: Piece,
     val temporalFlare: TemporalFlare,
     val player: Player,
-    val disallowed: Location)
+    val disallowed: Spot)
 
 enum class GameState {
     MOVES,
@@ -51,7 +54,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
         private set
 
     // All orders, past and present
-    private val orders: MutableMap<Location, Order> = mutableMapOf()
+    private val orders: MutableMap<Spot, Order> = mutableMapOf()
     val moves: List<MoveOrder>
         get() = orders.values.filterIsInstance<MoveOrder>()
     val supports: List<SupportOrder>
@@ -68,14 +71,14 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
 
     // All inputted retreats/builds
     @JsonIgnore
-    val locationsOfAdjustments: MutableMap<Location, Adjustment> = mutableMapOf() // Stores both retreats and builds
+    val locationsOfAdjustments: MutableMap<Spot, Adjustment> = mutableMapOf() // Stores both retreats and builds
     @get:JsonIgnore
     val adjustments: Collection<Adjustment>
         get() = locationsOfAdjustments.values
 
     fun clearAdjustments() = locationsOfAdjustments.clear()
     fun addAdjustments(newAdjustments: List<Adjustment>) {
-        for (adjustment in newAdjustments) locationsOfAdjustments[adjustment.piece.location] = adjustment
+        for (adjustment in newAdjustments) locationsOfAdjustments[adjustment.piece.spot] = adjustment
     }
 
     // For future optimisation of adjudication
@@ -85,8 +88,10 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
     // Interior mutability
     private val _timeplanes: MutableList<Timeplane> = mutableListOf( // Stored bottom-up
         mutableMapOf(
-            0.c to Board(BoardIndex(0.c), originalPieces = setup.toMutableMap())
-        ))
+            0.c to Board(BoardIndex(0.c), originalPieces = setup.entries.associate {
+                it.key.spot.province to Owned(it.key, it.value)
+            }))
+        )
     private val _limbo: MutableSet<Board> = mutableSetOf() // Set of all boards currently in Limbo
 
     // Public immutable interface
@@ -118,7 +123,7 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
         // }
 
         for (order in newOrders) {
-            val location = order.piece.location
+            val location = order.piece.spot
             if (orders[location] !== null) println("WARN: overwriting order in $location")
             orders[location] = order
         }
@@ -136,8 +141,8 @@ class Game(setup: Map<Piece, Player> = setup<RomanPlayers>()): Serializable {
             while (getBoard(BoardIndex(child.boardIndex.coordinate, iter)) !== null) iter++
             child.boardIndex.timeplane = iter
             // Map each piece to the new location of the child board
-            child.pieces = child.pieces.mapKeys {
-                (piece, _) -> piece moveTo Location(piece.location.province, child.boardIndex)
+            child.pieces = child.pieces.mapValues {
+                (_, ownedPiece) -> ownedPiece.player.having(ownedPiece.component1() moveTo Spot(ownedPiece.component1().spot.provincialSpot, child.boardIndex))
             }.toMutableMap()
             // Create new timeplane if necessary
             while (timeplanes.getOrNull(child.boardIndex.timeplane!!) === null)
@@ -167,22 +172,22 @@ class Board(
     var boardIndex: BoardIndex,
     val parent: BoardIndex? = null, // null represents the origin board
 
-    @JsonIgnore val originalPieces: Map<Piece, Player>,
-    val centres: MutableMap<Province, Player> = originalPieces.mapKeys {
-        (piece, _) -> piece.location.province
+    @JsonIgnore val originalPieces: Map<Province, Owned<Piece>>,
+    val centres: MutableMap<Province, Player> = originalPieces.mapValues {
+        (_, piece) -> piece.player
     }.toMutableMap()
 ): Serializable {
-    @JsonIgnore var pieces: MutableMap<Piece, Player> = originalPieces.toMutableMap()
+    @JsonIgnore var pieces: MutableMap<Province, Owned<Piece>> = originalPieces.toMutableMap()
     val children = mutableListOf<BoardIndex>()
     var isActive = true
         private set
 
     //Jackson friendly versions of pieces and original pieces
     val piecesForJson: Map<Player, List<Piece>>
-        @JsonProperty("pieces") get() = pieces.entries.groupBy({ it.value }, { it.key })
+        @JsonProperty("pieces") get() = pieces.values.groupBy({ it.player }, { it.component1() })
 
     val originalPiecesForJson: Map<Player, List<Piece>>
-        @JsonProperty("original_pieces") get() = originalPieces.entries.groupBy({ it.value }, { it.key })
+        @JsonProperty("original_pieces") get() = originalPieces.values.groupBy({ it.player }, { it.component1() })
 
     // Sets `isActive` to false (very useful comment)
     fun kill() {
@@ -198,7 +203,7 @@ class Board(
 
     // Returns the number of builds a player has on a board
     fun countBuilds(player: Player) =
-        centres.values.filter { it === player }.size - pieces.values.filter { it === player }.size
+        centres.values.filter { it === player }.size - pieces.values.filter { it.player === player }.size
 
     override fun toString(): String {
         return """
