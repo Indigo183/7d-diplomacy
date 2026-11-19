@@ -3,7 +3,6 @@ package nodomain.seven.dip.provinces
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import nodomain.seven.dip.orders.*
-import nodomain.seven.dip.utils.*
 import java.io.Serializable
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -42,7 +41,7 @@ interface ProvincialSpot: Serializable {
     val name: String
 }
 
-interface Province {
+interface Province: Serializable {
     val name: String
     val isSupplyCentre: Boolean;
 }
@@ -91,7 +90,7 @@ interface Player: Serializable {
     val name: String;
 }
 
-data class Owned<out T>(val order: T, val player: Player) {
+data class Owned<out T>(val order: T, val player: Player): Serializable {
     fun toPair() : Pair<T, Player> = order to player
 }
 fun <T> Player.having(order: T) = Owned<T>(order, this)

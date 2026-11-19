@@ -2,8 +2,8 @@
   {
     "piece": {
       "unit_type": "Army",
-      "location": {
-        "province": "POM",
+      "spot": {
+        "provincial_spot": "POM",
         "board_index": {
           "coordinate": {
             "real": 0,
@@ -15,13 +15,7 @@
     },
     "order_type": "MoveOrder",
     "action": {
-      "province": "BRU",
-      "board_index": {
-        "coordinate": {
-          "real": 0,
-          "imaginary": 0
-        },
-        "timeplane": 0
+      "provincial_spot"
       }
     },
     "flare": "RIGHT"
