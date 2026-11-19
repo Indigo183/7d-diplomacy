@@ -15,7 +15,13 @@
     },
     "order_type": "MoveOrder",
     "action": {
-      "provincial_spot"
+      "provincial_spot": "BRU",
+      "board_index": {
+        "coordinate": {
+          "real": 0,
+          "imaginary": 0
+        },
+        "timeplane": 0
       }
     },
     "flare": "RIGHT"
