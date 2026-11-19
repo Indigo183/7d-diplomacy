@@ -24,8 +24,11 @@ sealed interface StandardProvince: ProvincialSpot, Province {
     val nameWordCount: Int
 
     companion object: Provinces<StandardProvince> {
-        override val entries: List<StandardProvince> =
-            sequenceOf(StandardSea.entries, StandardInLand.entries, StandardCoast.entries).flatten().toList()
+        override val entries: List<StandardProvince> by lazy {
+            sequenceOf(StandardSea.entries, StandardInLand.entries, StandardCoast.entries)
+                .flatten()
+                .toList()
+        }
 
         override fun trivialPartialParser(string: String): PartiallyParsed<StandardProvince> {
             val province = valueOf(string.trim().substring(0, 3).uppercase())
