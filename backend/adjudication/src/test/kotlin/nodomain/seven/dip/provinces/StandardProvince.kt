@@ -35,7 +35,7 @@ sealed interface StandardProvince: ProvincialSpot, Province {
             return TakeN(province.nameWordCount, province)
         }
 
-        override val nonTrivialNames: Map<String, () -> PartiallyParsed<StandardProvince>> =
+        override val nonTrivialNames: Map<String, () -> PartiallyParsed<StandardProvince>> by lazy {
             mapOf<String, StandardProvince>(
                 "live" to LVP,
                 "livo" to LVN,
@@ -54,6 +54,7 @@ sealed interface StandardProvince: ProvincialSpot, Province {
                         else -> throw IncompatibleParserException()
                     } } })
                 )
+        }
     }
 }
 
