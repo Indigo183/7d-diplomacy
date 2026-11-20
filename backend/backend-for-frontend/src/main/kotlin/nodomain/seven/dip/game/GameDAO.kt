@@ -24,7 +24,7 @@ class GameDAO @Inject constructor(filePathService: FilePathService): FileDAO<Str
     private val signUpDAO = SignUpDAO()
 
     override fun getPath(identifier: String): Path =
-        gameDataPath.resolve(identifier).resolve("gameObject.ser")
+        gameDataPath.resolve(identifier.lowercase()).resolve("gameObject.ser")
 
     fun loadSignUps(name: String): SignUps = signUpDAO.load(name)
 
@@ -50,7 +50,7 @@ class GameDAO @Inject constructor(filePathService: FilePathService): FileDAO<Str
 
     inner class SignUpDAO: FileDAO<String, SignUps>() {
         override fun getPath(identifier: String): Path =
-            gameDataPath.resolve(identifier).resolve("signUps.ser")
+            gameDataPath.resolve(identifier.lowercase()).resolve("signUps.ser")
     }
 }
 

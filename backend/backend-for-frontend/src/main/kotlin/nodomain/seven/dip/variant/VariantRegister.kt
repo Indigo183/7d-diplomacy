@@ -7,6 +7,7 @@ import io.vertx.ext.web.handler.FileSystemAccess
 import io.vertx.ext.web.handler.StaticHandler
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import jakarta.inject.Singleton
 import jakarta.ws.rs.GET
 import jakarta.ws.rs.PUT
 import jakarta.ws.rs.Produces
@@ -20,7 +21,7 @@ import kotlin.io.path.walk
 
 data class VariantHash(val id: String, val hashes: MutableMap<String, String> = mutableMapOf())
 
-@ApplicationScoped
+@Singleton
 class VariantRegister {
     val runtimeMapsDirectory = Path("extra_maps")
     val includedVariants = mutableMapOf<String, VariantHash>()
@@ -65,8 +66,10 @@ class VariantsResource @Inject constructor(val variantRegister: VariantRegister)
 
 @ApplicationScoped
 class AccessRuntimeMaps {
+    val handler: StaticHandler = StaticHandler.create(FileSystemAccess.RELATIVE, "extra_maps/").setDirectoryListing(true)
+
     @Route(path = "/maps/*", methods = [Route.HttpMethod.GET])
     fun handleMapRequests(rc: RoutingContext?) {
-        StaticHandler.create(FileSystemAccess.RELATIVE, "extra_maps/").handle(rc)
+        handler.handle(rc)
     }
 }

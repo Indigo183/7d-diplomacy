@@ -27,7 +27,7 @@ class OrderDao @Inject constructor(
     }
 
     override fun getPath(identifier: String): Path =
-        orderFilePath.resolve(identifier).resolve("currentOrders.ser")
+        orderFilePath.resolve(identifier.lowercase()).resolve("currentOrders.ser")
 
     override fun onCreation(identifier: String, creationPath: Path) {
         tokenAccessDAO.createIfNotExists(identifier)
@@ -50,7 +50,7 @@ class TokenAccessDAO @Inject constructor(val filePathService: FilePathService): 
     }
 
     override fun getPath(identifier: String): Path =
-        orderFilePath.resolve(identifier).resolve("tokenLog.ser")
+        orderFilePath.resolve(identifier.lowercase()).resolve("tokenLog.ser")
 
     @OptIn(ExperimentalTime::class)
     fun logCreateToken(country: String) {
